@@ -7,9 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splashscreen.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#186F65"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,6 +21,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config" : {
+        "googleMaps": {
+          "apiKey" : "AIzaSyDxIzM2XbOGOzpAHls3Yw_Dn65NJuHi6GQ"
+        }
       }
     },
     "web": {
