@@ -60,7 +60,7 @@ const ConfirmScreen = (props) => {
       } else {
         dispatch(setBookingRequestLoading(false))
         dispatch(setBooking(data))
-        navigation.navigate("HomeNav", {screen: "RequestNavigator"})
+        navigation.navigate("Home")
       }
     })
   }

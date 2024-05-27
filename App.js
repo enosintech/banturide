@@ -68,7 +68,7 @@ export default function App() {
         backgroundColor={"#186F65"}
         logoHeight={350}
         logoWidth={350}
-      >s
+      >
         <NavigationContainer>
             <StackNavigator handleLayout={onLayoutRootView} theme={theme} toggleDarkMode={() => {setDarkMode(!darkMode)}} />
             <StatusBar style={`${theme === "dark" ? "light" : "dark"}`}/>

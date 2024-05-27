@@ -65,7 +65,6 @@ const RequestScreen = (props) => {
     await fetch("https://banturide.onrender.com/bookride/search-driver", options)
     .then(response => response.json())
     .then(data => {
-      console.log("working")
       console.log(data)
     })
   }
@@ -89,17 +88,14 @@ const RequestScreen = (props) => {
       } else {
         setLoading(false)
         setModalVisible(false)
-        dispatch(setDestination(null))
-        dispatch(setOrigin(null))
-        dispatch(setPrice(null))
-        dispatch(setTravelTimeInformation(null))
-        dispatch(setTripDetails(null))
-        dispatch(setPassThrough(null))
-        dispatch(setBooking(null))
-        navigation.reset({
-          index: 0,
-          routes: [{name: "HomeNav"}]
-        })
+        // dispatch(setDestination(null))
+        // dispatch(setOrigin(null))
+        // dispatch(setPrice(null))
+        // dispatch(setTravelTimeInformation(null))
+        // dispatch(setTripDetails(null))
+        // dispatch(setPassThrough(null))
+        // dispatch(setBooking(null))
+        navigation.navigate("Home")
       }
     })
   } 
@@ -317,7 +313,9 @@ const RequestScreen = (props) => {
         </View>
         <View className={`w-full h-[40%] flex items-center justify-start`}>
           <View className={`w-[95%] h-[80%] rounded-t-[20px] rounded-b-[30px] mt-1 shadow-md border-[0.5px] flex items-center justify-center ${props.theme === "dark" ? "" : "bg-white border-gray-100"}`}>
-            <TouchableOpacity className={`w-[90%] h-[65%] bg-red-600 rounded-2xl flex items-center justify-center shadow-xl`} onPress={() => {setModalVisible(true)}}>
+            <TouchableOpacity className={`w-[90%] h-[65%] bg-red-600 rounded-2xl flex items-center justify-center shadow-xl`} onPress={() => {
+              navigation.navigate("Home")
+            }}>
                 <Text style={{fontFamily: "os-xb"}} className={`text-white text-lg`}>Cancel Request</Text>
             </TouchableOpacity>
           </View>
