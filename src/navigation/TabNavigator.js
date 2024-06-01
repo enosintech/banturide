@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, PixelRatio } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import HomeNavigator from "./HomeNavigator.js";
@@ -9,6 +9,11 @@ import ProfileNavigator from "./ProfileNavigator.js";
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = (props) => {
+
+    const fontScale = PixelRatio.getFontScale();
+
+    const getFontSize = size => size / fontScale;
+
     return (
         <Tab.Navigator initialRouteName="HomeNav"
             screenOptions={({}) => ({
@@ -35,7 +40,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`text-[10px] ${props.theme === "dark" ? "text-white" : "text-black"}`} style={{fontFamily: "os-reg"}}>Home</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Home</Text>
                     </View>
                 )
             }}>
@@ -50,7 +55,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`text-[10px] ${props.theme === "dark" ? "text-white" : "text-black"}`} style={{fontFamily: "os-reg"}}>Favorites</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Favorites</Text>
                     </View>
                 )
                  }}>
@@ -65,7 +70,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`text-[10px] ${props.theme === "dark" ? "text-white" : "text-black"}`} style={{fontFamily: "os-reg"}}>Profile</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Profile</Text>
                     </View>
                 )
                 }}>
@@ -79,13 +84,13 @@ export default TabNavigator;
 
 const styles = StyleSheet.create({
     shadow: {
-        shadowColor: "#7F5DF0",
+        shadowColor: "#000000",
         shadowOffset: {
-            width: 0,
-            height: 10
+        width: 0,
+        height: 7,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5
+        shadowOpacity:  0.21,
+        shadowRadius: 7.68,
+        elevation: 10
     }
 });

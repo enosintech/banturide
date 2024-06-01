@@ -6,11 +6,11 @@ import { useNavigation } from "@react-navigation/native";
 
 import { setItem } from "../../components/lib/asyncStorage";
 
-const { width } = Dimensions.get("window")
-
 const OnboardingScreen = (props) => {
     const navigation = useNavigation();
     const animation = useRef(null)
+
+    const { width } = Dimensions.get("window")
 
     useEffect(() => {
         animation.current?.play()
@@ -35,7 +35,7 @@ const OnboardingScreen = (props) => {
                     {
                         backgroundColor: "#186F65",
                         image: <View className="items-center justify-center">
-                                    <LottieView 
+                                    {/* <LottieView 
                                         ref={animation}
                                         source={require("../../../assets/animations/welcome.json")}  
                                         loop
@@ -45,7 +45,7 @@ const OnboardingScreen = (props) => {
                                             width: width*0.8,
                                             height: width*0.9,
                                         }}
-                                    />
+                                    /> */}
                                 </View>,
                         title: "Welcome to Bantu Ride",
                         subtitle: "A transport app for the people"
@@ -53,7 +53,7 @@ const OnboardingScreen = (props) => {
                     {
                         backgroundColor: "#22a394",
                         image: <View className="items-center justify-center">
-                                    <LottieView 
+                                    {/* <LottieView 
                                         ref={animation}
                                         source={require("../../../assets/animations/anywhere.json")} 
                                         autoPlay
@@ -63,7 +63,7 @@ const OnboardingScreen = (props) => {
                                             width: width*0.8,
                                             height: width*0.9,
                                         }}
-                                    />
+                                    /> */}
                                 </View>,
                         title: "Anywhere you are",
                         subtitle: "Find your way"
@@ -71,7 +71,7 @@ const OnboardingScreen = (props) => {
                     {
                         backgroundColor: "#78faeb",
                         image: <View className="items-center justify-center">
-                                    <LottieView 
+                                    {/* <LottieView 
                                         ref={animation}
                                         source={require("../../../assets/animations/anytime.json")} 
                                         autoPlay 
@@ -80,7 +80,7 @@ const OnboardingScreen = (props) => {
                                             width: width*0.8,
                                             height: width*0.9,
                                         }}
-                                    />
+                                    /> */}
                                 </View>,
                         title: "At anytime",
                         subtitle: "Even at midnight"
@@ -88,7 +88,7 @@ const OnboardingScreen = (props) => {
                     {
                         backgroundColor: "#fff",
                         image: <View className="items-center justify-center">
-                                    <LottieView
+                                    {/* <LottieView
                                         ref={animation} 
                                         source={require("../../../assets/animations/bookcar.json")} 
                                         autoPlay 
@@ -97,7 +97,7 @@ const OnboardingScreen = (props) => {
                                             width: width*0.4,
                                             height: width*0.55,
                                         }}
-                                    />
+                                    /> */}
                                 </View>,
                         title: "Book your ride",
                         subtitle: "And get to wherever"

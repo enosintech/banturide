@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { View, Text, Image } from 'react-native';
+import { useEffect, useRef  } from 'react'
+import { View, Text, PixelRatio } from 'react-native';
 import { useSelector } from 'react-redux';
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from 'react-native-maps-directions';
 import LottieView from "lottie-react-native";
-
-import { GOOGLE_API_KEY } from "@env";
 
 import { selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
 import { lightModeMapStyle, darkModeMapStyle } from '../../../assets/styles/MapStyles.js';
@@ -17,6 +15,10 @@ const Map = (props) => {
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
   const destination = useSelector(selectDestination); 
+
+  const fontScale = PixelRatio.getFontScale();
+
+  const getFontSize = size => size / fontScale;
 
   useEffect(() => {
 
@@ -63,7 +65,7 @@ const Map = (props) => {
               identifier="origin"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
-                <Text style={{fontFamily: "os-light"}} className={`text-black text-[12px]`}>1</Text>
+                <Text style={{fontSize: getFontSize(12)}} className={`text-black font-light tracking-tight`}>1</Text>
               </View>
             </Marker>
           )}
@@ -79,7 +81,7 @@ const Map = (props) => {
               identifier="stop"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-[#186f65] flex items-center justify-center`}>
-                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+                <Text style={{fontSize: getFontSize(12)}} className={`text-white font-light tracking-tight`}>2</Text>
               </View>
             </Marker>
           )}
@@ -95,7 +97,7 @@ const Map = (props) => {
                 identifier="destination"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-black border-black flex items-center justify-center`}>
-                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{passThrough ? 3 : 2}</Text>
+                <Text style={{fontSize: getFontSize(12)}} className={`text-white font-light tracking-tight`}>{passThrough ? 3 : 2}</Text>
               </View>
             </Marker>
         )}

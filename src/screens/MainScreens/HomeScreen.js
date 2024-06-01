@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import {Text, View, TouchableOpacity, Image } from "react-native";
+import {Text, View, TouchableOpacity, Image, PixelRatio } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -40,6 +40,10 @@ const HomeScreen = (props) => {
     const [ currentLocation, setCurrentLocation ] = useState(null)
     const [currentStreet, setCurrentStreet] = useState(null)
     const mapRef = useRef(null);
+
+    const fontScale = PixelRatio.getFontScale();
+
+    const getFontSize = size => size / fontScale;
 
     const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -108,19 +112,19 @@ const HomeScreen = (props) => {
                                     <Image 
                                         source={tripDetails?.image}
                                         style={{
-                                            width: 40,
-                                            height: 40,
+                                            width: getFontSize(40),
+                                            height: getFontSize(40),
                                             resizeMode: "contain",
                                         }}
                                     />
-                                    <Text style={{fontFamily: "os-b"}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-wide`}>{tripDetails?.title}</Text>
+                                    <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{tripDetails?.title}</Text>
                                 </View>
                                 <View className={`w-[80%] h-0 border-t ${props.theme === "dark" ? "" : "border-gray-200"}`}></View>
-                                <View className={`w-full h-1/2 flex items-center rounded-2xl`}>
+                                <View className={`w-full h-1/2 flex items-center rounded-[25px]`}>
                                     <View className={`w-full h-2/3 flex items-center justify-center`}>
                                         {price
                                         ?
-                                        <Text style={{fontFamily: "os-b"}} className={`${props.theme === "dark" ? "text-white" : "text-gray-700"} text-2xl`}>{price}</Text>                              
+                                        <Text style={{fontSize: getFontSize(24)}} className={`${props.theme === "dark" ? "text-white" : "text-gray-700"} font-bold tracking-tight`}>{price}</Text>                              
                                         :
                                         <PageLoader theme={props.theme} width="60%" height="70%"/>
                                         }
@@ -130,31 +134,31 @@ const HomeScreen = (props) => {
                                         ?
                                             travelTimeInformation  
                                             ?
-                                                <Text style={{fontFamily: "os-light"}} className={`text-[14px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
+                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
                                             :
                                                 <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                                         :
-                                            <Text style={{fontFamily: "os-b"}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>Chaffeur</Text>
+                                            <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>Chaffeur</Text>
                                         }
                                         {tripType === "normal"
                                         ?
                                             travelTimeInformation  
                                             ?
-                                                <Text style={{fontFamily: "os-light"}} className={`text-[14px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text)} Mins</Text>
+                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text)} Mins</Text>
                                             :
                                                 <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                                         :
-                                            <Text style={{fontFamily: "os-b"}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>Mode</Text>
+                                            <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>Mode</Text>
                                         }
                                     </View>
                                 </View>
                             </View>
-                            <View className={`h-full w-1/2 ${driver ? "bg-[#186f65]" : ""}  flex py-1 items-center justify-between rounded-[20px]`}>
-                                <View className={`relative ${driver ? "h-[50%]" : "h-[45%]"} w-full flex items-center justify-center overflow-hidden rounded-2xl`}>
+                            <View className={`h-full w-1/2 ${driver ? "bg-[#186f65]" : ""}  flex py-1 items-center justify-between rounded-[25px]`}>
+                                <View className={`relative ${driver ? "h-[50%]" : "h-[45%]"} w-full flex items-center justify-center overflow-hidden rounded-[25px]`}>
                                     {
                                         driver 
                                         ?
-                                        <View className={`w-full h-full rounded-[20px] ${onTheWay ? "bg-green-200" : "bg-[#186f65]"} absolute`}></View>
+                                        <View className={`w-full h-full rounded-[25px] ${onTheWay ? "bg-green-200" : "bg-[#186f65]"} absolute`}></View>
                                         :
                                         <LottieView 
                                             source={require("../../../assets/animations/findDriver.json")}
@@ -162,25 +166,25 @@ const HomeScreen = (props) => {
                                             autoPlay
                                             speed={1}
                                             style={{
-                                                width: 200,
-                                                height: 200,
+                                                width: getFontSize(200),
+                                                height: getFontSize(200),
                                                 position: "absolute"
                                             }}
                                         />
                                     }
-                                    <Text style={{fontFamily: "os-b"}} className={`${driver ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"}`}>{driver && !hasArrived ? "Driver is on the way" : driver && hasArrived ? "Driver has Arrived" : driver && onTheWay ? "You're on the way!" : !driver ? "Looking for drivers..." : ""}</Text>
+                                    <Text style={{fontSize: getFontSize(14)}} className={`${driver ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-bold tracking-tight`}>{driver && !hasArrived ? "Driver is on the way" : driver && hasArrived ? "Driver has Arrived" : driver && onTheWay ? "You're on the way!" : !driver ? "Looking for drivers..." : ""}</Text>
                                 </View>
                                 <View className={`h-[50%] ${driver ? "w-[95%]" : "w-full"} flex items-center relative rounded-t-[10px] rounded-b-[20px] justify-center bg-white shadow-md border-[0.5px] border-gray-100`}>
                                     <View className={`w-[90%]`}>
-                                        <Text style={{fontFamily: "os-b"}} className={`text-[10px] ${props.theme === "dark" && driver ? "text-gray-500" : "text-black"}`}>Origin</Text>
-                                        <Text style={{fontFamily: "os-light"}}  className={`${props.theme === "dark" ? "text-white" : "text-gray-500"} w-[90%] text-[9px]`}>{origin?.description.split(",")[0]}</Text>
+                                        <Text style={{fontSize: getFontSize(10)}} className={`${props.theme === "dark" && driver ? "text-gray-500" : "text-black"} font-bold tracking-tight`}>Origin</Text>
+                                        <Text style={{fontSize: getFontSize(9)}}  className={`${props.theme === "dark" ? "text-white" : "text-gray-500"} w-[90%] font-light tracking-tight`}>{origin?.description.split(",")[0]}</Text>
                                     </View>
                                     <View className={`w-[90%]`}>
-                                        <Text style={{fontFamily: "os-b"}} className={`text-[10px] ${props.theme === "dark" && driver ? "text-gray-500" : "text-black"}`}>Destination</Text>
-                                        <Text style={{fontFamily: "os-light"}} className={`${props.theme === "dark" ? "text-white" : "text-gray-500"} w-[90%] text-[9px]`}>{destination?.description.split(",")[0]}</Text>
+                                        <Text style={{fontSize: getFontSize(10)}} className={`${props.theme === "dark" && driver ? "text-gray-500" : "text-black"} font-bold tracking-tight`}>Destination</Text>
+                                        <Text style={{fontSize: getFontSize(9)}} className={`${props.theme === "dark" ? "text-white" : "text-gray-500"} w-[90%] font-light tracking-tight`}>{destination?.description.split(",")[0]}</Text>
                                     </View>
                                     <View className={`absolute right-2 bg-[#186f65] flex items-center justify-center px-1 py-1 rounded-[20px]`}>
-                                        <Text style={{fontFamily: "os-b"}} className="text-white text-[12px]">{passThrough ? "1 Stop" : "No Stop"}</Text>
+                                        <Text style={{fontSize: getFontSize(12)}} className="text-white font-semibold tracking-tight">{passThrough ? "1 Stop" : "No Stop"}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -190,25 +194,25 @@ const HomeScreen = (props) => {
             :
                 <View className="absolute h-[18%] w-full bottom-[12%] flex items-center">
                     <View className={`h-full w-[95%] rounded  p-3 flex items-center justify-evenly`}>
-                        <View className={`w-[98%]  h-[45%] ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-2xl shadow-2xl `}>
+                        <View className={`w-[98%]  h-[45%] ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-[25px] shadow-2xl `}>
                             {origin && destination 
                             ? 
-                            <TouchableOpacity className={`w-full h-full bg-[#186f65] rounded-2xl items-center justify-center`} onPress={() => {
+                            <TouchableOpacity className={`w-full h-full bg-[#186f65] rounded-[25px] items-center justify-center`} onPress={() => {
                                 navigation.navigate("BookNavigator")
                             }}>
-                                <Text style={{fontFamily: "os-sb"}} className={`text-lg text-white`}>Continue Booking</Text>
+                                <Text style={{fontSize: getFontSize(18)}} className={`text-white font-semibold tracking-tight`}>Continue Booking</Text>
                             </TouchableOpacity>
                             :
-                            <TouchableOpacity className={`w-full h-full ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-2xl flex-row pl-2 items-center`} onPress={() => {
+                            <TouchableOpacity className={`w-full h-full ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-[25px] flex-row pl-2 items-center`} onPress={() => {
                                 navigation.navigate("Search")
                             }}>
-                                <Ionicons name="search" size={25} color="gray"/>
-                                <Text style={{fontFamily: "os-sb"}} className={`${props.theme === "dark" ? "text-gray-500" : "text-gray-300"} ml-2 text-xl`}>{toggle === "ride" ? "Where to?" : toggle === "delivery" ? "Pick Up?" : "Welcome to Bantu Ride"}</Text>
+                                <Ionicons name="search" size={getFontSize(25)} color="gray"/>
+                                <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-gray-500" : "text-gray-300"} ml-2 font-semibold tracking-tight`}>{toggle === "ride" ? "Where to?" : toggle === "delivery" ? "Pick Up?" : "Welcome to Bantu Ride"}</Text>
                             </TouchableOpacity>
                             }
                         </View>
         
-                        <View className="w-[98%] h-[45%] flex-row bg-white rounded-2xl shadow-2xl">
+                        <View className="w-[98%] h-[45%] flex-row bg-white rounded-[25px] shadow-2xl">
                             { origin && destination 
                             ?
                                 <TouchableOpacity className={`w-full h-full ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-2xl items-center justify-center`} onPress={() => {
@@ -217,21 +221,21 @@ const HomeScreen = (props) => {
                                     dispatch(setDestination(null))
                                     navigation.navigate("Search")
                                 }}>
-                                    <Text style={{fontFamily: "os-sb"}} className={`text-lg text-black`}>Make New Booking</Text>
+                                    <Text style={{fontSize: getFontSize(18)}} className={`text-black font-semibold tracking-tight`}>Make New Booking</Text>
                                 </TouchableOpacity>
                             :
                             <>
-                                <TouchableOpacity className={`w-[50%] h-[100%] ${toggle === "ride" ? "bg-[#186F65]" : "bg-white" } items-center justify-center rounded-2xl`} onPress={() => {
+                                <TouchableOpacity className={`w-[50%] h-[100%] ${toggle === "ride" ? "bg-[#186F65]" : "bg-white" } items-center justify-center rounded-[25px]`} onPress={() => {
                                     dispatch(setToggle("ride"))
                                     dispatch(setTripType("normal"))
                                 }}>
-                                    <Text style={{fontFamily: "os-sb"}} className={`text-[18px] ${toggle === "ride" ? "text-white" : "text-black"}`}>Ride</Text>
+                                    <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "ride" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Ride</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity className={`w-[50%] h-[100%] ${toggle === "delivery" ? "bg-[#186F65]" : "bg-white" } items-center justify-center  rounded-2xl `} onPress={() => {
+                                <TouchableOpacity className={`w-[50%] h-[100%] ${toggle === "delivery" ? "bg-[#186F65]" : "bg-white" } items-center justify-center  rounded-[25px] `} onPress={() => {
                                     dispatch(setToggle("delivery"))
                                     dispatch(setTripType("normal"))
                                 }}>
-                                    <Text style={{fontFamily:"os-sb"}} className={`text-[18px] ${toggle === "delivery" ? "text-white" : "text-black"}`}>Delivery</Text>
+                                    <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "delivery" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Delivery</Text>
                                 </TouchableOpacity>
                             </>
                             }
@@ -243,20 +247,20 @@ const HomeScreen = (props) => {
             <TouchableOpacity className={`absolute top-[7%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
                 navigation.navigate("Notifications")
             }}>
-                <Ionicons name="notifications" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <Ionicons name="notifications" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
             <TouchableOpacity className={`absolute bottom-[30%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrent()} disabled={!props.initialRegion}>
-                <MaterialIcons name="my-location" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <MaterialIcons name="my-location" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
             <TouchableOpacity className={`absolute bottom-[30%] left-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } h-[40px] w-[40px] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
-                <MaterialCommunityIcons name="arrow-expand" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <MaterialCommunityIcons name="arrow-expand" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
-            <View className="absolute top-[10%] w-full">
-                <Text style={{fontFamily: "os-light"}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"}`}>You are currently on</Text>
-                <Text style={{fontFamily: "os-xb"}} className={`mx-auto text-lg tracking-wide uppercase ${props.theme === "dark" ? "text-white" : "text-black"}`}>{currentStreet ? currentStreet : "Searching..."}</Text>
+            <View className="absolute top-[8%] w-full">
+                <Text style={{fontSize: getFontSize(18)}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>You are currently on</Text>
+                <Text style={{fontSize: getFontSize(20)}} className={`mx-auto text-lg tracking-wide uppercase ${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{currentStreet ? currentStreet : "Searching..."}</Text>
             </View>
         </View> 
     )
