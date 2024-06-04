@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import {Text, View, SafeAreaView, TouchableOpacity, Image, TextInput, PixelRatio, Modal } from "react-native";
+import { Text, View, SafeAreaView, TouchableOpacity, Image, TextInput, PixelRatio, Modal } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -75,26 +75,12 @@ const EditProfile = (props) => {
             <View className={`w-full h-[50%] mt-0.5 flex`}>
                 <TouchableOpacity onPress={() => {
                     navigation.navigate("changeName");
-                }} className={`w-full h-1/4 flex flex-row items-center justify-between px-7`}>
+                }} className={`w-full h-1/4 flex flex-row items-center justify-between px-5`}>
                     <View className={`flex h-full justify-center gap-y-2`}>
                         <Text style={{fontSize: getFontSize(22)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Name</Text>
                         <Text style={{fontSize: getFontSize(16)}} className={`tracking-tight font-light ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.user?.firstname + " " + userInfo?.user?.lastname}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>       
-                </TouchableOpacity>
-                <TouchableOpacity className={`w-full h-1/4 flex flex-row items-center justify-between px-7`}>
-                    <View className={`flex h-full justify-center gap-y-2`}>
-                        <Text style={{fontSize: getFontSize(22)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Email</Text>
-                        <Text style={{fontSize: getFontSize(16)}} className={`tracking-tight font-light ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.user?.email}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>       
-                </TouchableOpacity>
-                <TouchableOpacity className={`w-full h-1/4 flex flex-row items-center justify-between px-7`}>
-                    <View className={`flex h-full justify-center gap-y-2`}>
-                        <Text style={{fontSize: getFontSize(22)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Phone Number</Text>
-                        <Text style={{fontSize: getFontSize(16)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight font-light`}>{userInfo.user.phoneNo ? userInfo.user.phoneNo : "Add Phone Number"}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>       
+                    <Ionicons name="chevron-forward" size={getFontSize(28)} color={props.theme === "dark" ? "white" : "black"}/>       
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

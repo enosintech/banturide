@@ -16,6 +16,15 @@ const initialState = {
     hasArrived: false,
     onTheWay: false,
     bookingRequestLoading: false,
+    favAddressUpdated: false,
+    favoriteHomeAddress: {
+        description: "",
+        location: "",
+    },
+    favoriteWorkAddress: {
+        description: "",
+        location: "",
+    },
 }
 
 export const navSlice = createSlice({
@@ -67,10 +76,19 @@ export const navSlice = createSlice({
         setBookingRequestLoading: (state, action) => {
             state.bookingRequestLoading = action.payload;
         },
+        setFavAddressUpdated: (state, action) => {
+            state.favAddressUpdated = action.payload;
+        },
+        setFavoriteHomeAddress: (state, action) => {
+            state.favoriteHomeAddress = action.payload;
+        },
+        setFavoriteWorkAddress: (state, action) => {
+            state.favoriteWorkAddress = action.payload;
+        },
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -87,5 +105,8 @@ export const selectSchoolPickup = (state) => state.nav.schoolPickup;
 export const selectOnTheWay = (state) => state.nav.onTheWay;
 export const selectHasArrived = (state) => state.nav.hasArrived;
 export const selectBookingRequestLoading = (state) => state.nav.bookingRequestLoading;
+export const selectFavAddressUpdated = (state) => state.nav.favAddressUpdated;
+export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddress;
+export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
 
 export default navSlice.reducer;

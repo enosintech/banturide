@@ -1,12 +1,17 @@
-import {Text, View, TouchableOpacity } from "react-native";
+import {Text, View, TouchableOpacity, PixelRatio } from "react-native";
 
 const OldNotification = (props) => {
+
+    const fontScale = PixelRatio.getFontScale();
+
+    const getFontSize = size => size / fontScale;
     return(
-        <TouchableOpacity className={`bg-white shadow-2xl w-full h-[100px] justify-center px-3`}>
-            <View className={`flex-col justify-center`}>
-                <Text style={{fontFamily: "os-xb"}} className={`text-[17px]`}>{props.title}</Text>
-                <Text style={{fontFamily: "os-reg"}} className={`text-[15px]`}>{props.content}</Text>
-                <Text style={{fontFamily: "os-light"}} className={`text-[13px]`}>{props.time}</Text>
+        <TouchableOpacity className={`bg-white h-[100px] justify-center shadow-md w-[95%] mt-2 rounded-[25px] px-3`}>
+            <View className={`flex-col justify-center gap-y-1`}>
+                <Text style={{fontSize: getFontSize(17)}} className={`font-extrabold tracking-tight`}>{props.title}</Text>
+                <Text style={{fontSize: getFontSize(15)}} className={`tracking-tight`}>{props.content}</Text>
+                <Text style={{fontSize: getFontSize(13)}} className={`font-extralight tracking-tight
+                `}>{props.time}</Text>
             </View>
         </TouchableOpacity>
     )

@@ -1,21 +1,77 @@
 import {Text, View, SafeAreaView, ScrollView, TouchableOpacity, PixelRatio } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 
+import { selectFavAddressUpdated, setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectUserInfo } from "../../../slices/authSlice";
+
 const FavouriteScreen = (props) => {
+
+    const userInfo = useSelector( selectUserInfo );
+
     const navigation = useNavigation();
+    const routes = useRoute();
+    const dispatch = useDispatch();
+
+    const { saveMessage } = routes.params ? routes.params : "No Message";
 
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
 
+    const favAddressUpdated = useSelector(selectFavAddressUpdated);
+    
+    const getFavoritesForm = {
+        userId: userInfo?.user?._id
+    }
+
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type" : "application/json",
+        },
+        body: JSON.stringify(getFavoritesForm)
+    }
+
+    useEffect(() => {
+        setTimeout(() => {
+            dispatch(setFavAddressUpdated(false))
+        }, 5000)
+    }, [favAddressUpdated])
+
+    useEffect(() => {
+        console.log("fetching")
+
+        fetch("https://banturide.onrender.com/favorites/get-favorites", options)
+        .then(response => response.json())
+        .then(data => {
+            if(data.success === false) {
+                console.log("failed")
+                console.log(data.message)
+            } else {
+                console.log("success")
+                console.log(data)
+            }
+        })
+
+    }, [])
+
     return(
-        <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`w-full h-full ${props.theme === "dark" ? "bg-[#222831]" : " bg-white"}`}>
+        <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`w-full h-full ${props.theme === "dark" ? "bg-[#222831]" : " bg-white"} relative`}>
             <ScreenTitle theme={props.theme} iconName="favorite" title="Favorites"/>
+            {favAddressUpdated &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-[65%] h-[90%] bg-black rounded-[10px] flex items-center justify-center`}>
+                        <Text style={{fontSize: getFontSize(14)}} className="text-white font-light tracking-tight">{saveMessage}</Text>
+                    </View>
+                </View>
+            }
             <View className={`w-full px-5 h-[6%]`}>
                 <Text style={{fontSize: getFontSize(15)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>Add your frequent destinations to easily access them when booking</Text>
             </View>

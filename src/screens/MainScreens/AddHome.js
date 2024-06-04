@@ -1,27 +1,91 @@
-import {Text, View, TouchableOpacity, PixelRatio } from "react-native";
+import {Text, View, TouchableOpacity, PixelRatio, Modal } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useRef, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
+import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
+import { selectUserInfo } from "../../../slices/authSlice";
+import ModalLoader from "../../components/atoms/ModalLoader";
+import { selectFavoriteHomeAddress, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
 
 const AddHome = (props) => {
+
+    const userInfo = useSelector(selectUserInfo);
+    const homeAddress = useSelector(selectFavoriteHomeAddress);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const homeAddressRef = useRef(null);
 
-    const [ homeAddress, setHomeAddress ] = useState({});
+    const [ loading, setLoading ] = useState(false);
+    const [ error, setError ] = useState("");
 
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
 
+    useEffect(() => {
+        homeAddressRef?.current.setAddressText(homeAddress.description)
+    }, [homeAddress])
+
+    const addHomeForm = {
+        userId: userInfo?.user?._id,
+        type: "home",
+        address: homeAddress?.description,
+        name: ""
+    }
+
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type" : "application/json",
+        },
+        body: JSON.stringify(addHomeForm)
+    }
+
+    const handleSaveHomeAddress = async () => {
+        setLoading(true)
+
+        await fetch("https://banturide.onrender.com/favorites/add-favorites", options)
+        .then( response => response.json())
+        .then( data => {
+            if(data.success === false){
+                setLoading(false)
+                setError(data.message)
+                setTimeout(() => {
+                    setError("")
+                }, 4000)
+            } else {
+                setLoading(false)
+                navigation.navigate("Favorite", {saveMessage: "Home Address Added Successfully"})
+                dispatch(setFavAddressUpdated(true))
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+
     return(
         <View className="flex-1 flex-col justify-end">
+             <Modal transparent={true} animationType="fade" visible={loading} onRequestClose={() => {
+                if(loading === true){
+                    return
+                } else {
+                    setLoading(false)
+                }
+             }}>
+                <View style={{backgroundColor: "rgba(0,0,0,0.6)"}} className={`w-full h-full flex items-center justify-center`}>
+                    <ModalLoader />
+                </View>
+             </Modal>
              <View className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-[30%] rounded-t-2xl shadow-2xl items-center`}>
                 <View className={`w-full h-[5%] border-b-[0.5px] border-solid ${props.theme === "light" ? "border-gray-100" : props.theme === "dark" ? "border-gray-900" : "border-gray-400"} rounded-t-2xl  items-center justify-center`}>
                     <ShortModalNavBar theme={props.theme}/>
@@ -54,24 +118,31 @@ const AddHome = (props) => {
                                 listView: {
                                     position : "absolute",
                                     zIndex: 100,
-                                    elevation: 100,
-                                    top: 60,
+                                    elevation: getFontSize(100),
+                                    top: getFontSize(60),
                                     backgroundColor: "white",
-                                    borderBottomLeftRadius: 20,
-                                    borderBottomRightRadius: 20,
-                                    height: 100    
-                                }
+                                    borderBottomLeftRadius: getFontSize(20),
+                                    borderBottomRightRadius: getFontSize(20),
+                                    height: getFontSize(100)    
+                                },
+                                loader: {
+                                    height: "100%",
+                                    width: "100%"
+                                },
                             }}
                             textInputProps={{
                                 placeholder: "Enter Home Address",
                                 placeholderTextColor: "gray"
                             }}
                             onPress={(data, details = null) => {
-                                setHomeAddress({
+                                dispatch(setFavoriteHomeAddress({
+                                    ...homeAddress,
                                     location: details.geometry.location,
                                     description: data.description
-                                })
+                                }))
                             }}
+                            listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                            listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}
                             query={{
                                 key: api,
                                 language: "en",
@@ -86,9 +157,7 @@ const AddHome = (props) => {
                     </View>
                 </View>
                 <View className={`w-[90%] h-[30%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-[#222831]" : "bg-white border-gray-200"} shadow border-[0.5px] justify-center items-center`}>
-                    <TouchableOpacity className="bg-[#186F65] shadow-lg w-[90%] h-[65%] rounded-[25px] flex justify-center items-center" onPress={() => {
-                        navigation.goBack()
-                    }}>
+                    <TouchableOpacity disabled={homeAddress.description === "" ? true : false} className={`bg-[#186F65] shadow-lg w-[90%] h-[65%] rounded-[25px] flex justify-center items-center ${homeAddress.description === "" ? "opacity-40" : "opacity-100"}`} onPress={handleSaveHomeAddress}>
                         <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Save</Text>
                     </TouchableOpacity>
                 </View>

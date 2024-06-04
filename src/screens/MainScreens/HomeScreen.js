@@ -244,7 +244,7 @@ const HomeScreen = (props) => {
                 </View>
             }
             
-            <TouchableOpacity className={`absolute top-[7%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+            <TouchableOpacity className={`absolute z-[9999] top-[7%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
                 navigation.navigate("Notifications")
             }}>
                 <Ionicons name="notifications" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
