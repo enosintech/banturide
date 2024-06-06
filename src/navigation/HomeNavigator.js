@@ -10,6 +10,7 @@ import RequestNavigator from "../navigation/RequestNavigator";
 const Stack = createNativeStackNavigator();
 
 const HomeNavigator = (props) => {
+    
     const [initialRegion, setInitialRegion ] = useState(null);
 
     return (
@@ -32,7 +33,7 @@ const HomeNavigator = (props) => {
             </Stack.Group>
             <Stack.Group screenOptions={{presentation: "modal", contentStyle: {
                 backgroundColor: "transparent",
-            } }}>
+            }}}>
                 <Stack.Screen name="Search" options={{headerShown: false }}>
                     {() => <SearchModal theme={props.theme} />}
                 </Stack.Screen>

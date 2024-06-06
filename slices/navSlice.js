@@ -16,6 +16,7 @@ const initialState = {
     hasArrived: false,
     onTheWay: false,
     bookingRequestLoading: false,
+    favAddressChanged: false,
     favAddressUpdated: false,
     favoriteHomeAddress: {
         description: "",
@@ -76,6 +77,9 @@ export const navSlice = createSlice({
         setBookingRequestLoading: (state, action) => {
             state.bookingRequestLoading = action.payload;
         },
+        setFavAddressChanged: (state, action) => {
+            state.favAddressChanged = action.payload;
+        },
         setFavAddressUpdated: (state, action) => {
             state.favAddressUpdated = action.payload;
         },
@@ -88,7 +92,7 @@ export const navSlice = createSlice({
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setFavoriteHomeAddress, setFavoriteWorkAddress } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -106,6 +110,7 @@ export const selectOnTheWay = (state) => state.nav.onTheWay;
 export const selectHasArrived = (state) => state.nav.hasArrived;
 export const selectBookingRequestLoading = (state) => state.nav.bookingRequestLoading;
 export const selectFavAddressUpdated = (state) => state.nav.favAddressUpdated;
+export const selectFavAddressChanged = (state) => state.nav.favAddressChanged;
 export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddress;
 export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
 

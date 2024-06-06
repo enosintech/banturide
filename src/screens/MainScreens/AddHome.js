@@ -10,12 +10,13 @@ import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import { selectUserInfo } from "../../../slices/authSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
-import { selectFavoriteHomeAddress, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
+import { selectFavAddressChanged, selectFavoriteHomeAddress, setFavAddressChanged, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
 
 const AddHome = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
     const homeAddress = useSelector(selectFavoriteHomeAddress);
+    const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
@@ -66,6 +67,7 @@ const AddHome = (props) => {
                 setLoading(false)
                 navigation.navigate("Favorite", {saveMessage: "Home Address Added Successfully"})
                 dispatch(setFavAddressUpdated(true))
+                dispatch(setFavAddressChanged(!favAddressChanged))
             }
         })
         .catch((err) => {

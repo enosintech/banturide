@@ -7,13 +7,14 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import { selectUserInfo } from "../../../slices/authSlice";
-import { setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
 
 const AddLocation = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
+    const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
@@ -60,6 +61,7 @@ const AddLocation = (props) => {
                 setLoading(false)
                 navigation.navigate("Favorite", {saveMessage: `${locationName} Address Added Successfully`})
                 dispatch(setFavAddressUpdated(true));
+                dispatch(setFavAddressChanged(!favAddressChanged))
             }
         })
         .catch((err) => {

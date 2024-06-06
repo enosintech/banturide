@@ -1,14 +1,14 @@
 import {Text, View, SafeAreaView, ScrollView, TouchableOpacity, PixelRatio } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 
-import { selectFavAddressUpdated, setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
 import { selectUserInfo } from "../../../slices/authSlice";
 
 const FavouriteScreen = (props) => {
@@ -25,18 +25,17 @@ const FavouriteScreen = (props) => {
 
     const getFontSize = size => size / fontScale;
 
+    const favAddressChanged = useSelector(selectFavAddressChanged);
     const favAddressUpdated = useSelector(selectFavAddressUpdated);
-    
-    const getFavoritesForm = {
-        userId: userInfo?.user?._id
-    }
+
+    const [ favoritesData, setFavoritesData ] = useState([]);
+    const [ loading, setLoading ] = useState(false); 
 
     const options = {
-        method: "POST",
+        method: "GET",
         headers: {
-            "Content-Type" : "application/json",
+            "Content-Type" : "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(getFavoritesForm)
     }
 
     useEffect(() => {
@@ -46,21 +45,24 @@ const FavouriteScreen = (props) => {
     }, [favAddressUpdated])
 
     useEffect(() => {
-        console.log("fetching")
+        setLoading(true)
 
-        fetch("https://banturide.onrender.com/favorites/get-favorites", options)
-        .then(response => response.json())
-        .then(data => {
-            if(data.success === false) {
-                console.log("failed")
-                console.log(data.message)
-            } else {
-                console.log("success")
-                console.log(data)
+        const fetchFavorites = async () => {
+            try {
+                const response = await fetch(`https://banturide.onrender.com/favorites/get-favorites/${userInfo?.user._id}`, options);
+
+                const result = await response.json();
+                setLoading(false)
+                setFavoritesData(result)
+            } catch (error) {
+                setLoading(false)
+                console.log(error)
             }
-        })
+        }
 
-    }, [])
+        fetchFavorites()
+
+    }, [favAddressChanged])
 
     return(
         <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`w-full h-full ${props.theme === "dark" ? "bg-[#222831]" : " bg-white"} relative`}>
@@ -116,17 +118,21 @@ const FavouriteScreen = (props) => {
                 </View>
                 <ScrollView className="w-full" contentContainerStyle={{
                     alignItems: "center",
-                    paddingTop: 5
+                    paddingTop: 5,
                 }}>
-                    <Favorite theme={props.theme} iconName="home-filled" name="Home" address="Avondale 37B, Eucalyptus Road, Lusaka, Zambia"/>
-                    <Favorite theme={props.theme} iconName="work" name="Work" address="Canada"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
-                    <Favorite theme={props.theme} name="Muna's House" address="House No 50, Station Road, Fairview, Monze, Zambia"/>
+                    {
+                        loading 
+                        ?
+                        <Text style={{fontSize: getFontSize(14)}} className={`mt-2 tracking-tight`}>Loading</Text>
+                        :
+                        favoritesData.length > 0
+                        ?
+                        favoritesData.map((fav, index) => (
+                            <Favorite key={fav._id} index={index} theme={props.theme} iconName={fav.type === "home" ? "home-filled" : fav.type === "work" ? "work" : ""} addName={fav.type === "home" ? "Home" : fav.type === "work" ? "Work" : fav.name} address={fav.address} {...fav} />
+                        ))
+                        :
+                        <Text style={{fontSize: getFontSize(14)}} className={`mt-2 tracking-tight`}>No Saved Addresses</Text>
+                    }
                 </ScrollView>
             </View>
         </SafeAreaView>

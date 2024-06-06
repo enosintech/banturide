@@ -1,8 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {Text, View, SafeAreaView, TouchableOpacity, ScrollView, PixelRatio } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import io from "socket.io-client";
 
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 import NewNotification from "../../components/atoms/NewNotification";
@@ -10,39 +9,12 @@ import OldNotification from "../../components/atoms/OldNotification";
 
 const NotificationsScreen = (props) => {
     const navigation = useNavigation();
-    const socket = io("https://banturide.onrender.com");
 
-    const [ isConnected, setIsConnected ] = useState(socket.connected);
     const [notifToggle, setNotifToggle] = useState("unread");
 
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
-
-    useEffect(() => {
-
-        socket.on("connect", () => {
-            setIsConnected("connected")
-        })
-
-        socket.on("notification", (data) => {
-            console.log("Notification received:", data);
-        })
-
-        socket.on("disconnect", () => {
-            setIsConnected("disconnected")
-        })
-
-        return () => {
-            socket.off("connect")
-            socket.off("notification")
-            socket.off("disconnect")
-        }
-    }, [])
-
-    useEffect(() => {
-        console.log(isConnected)
-    }, [isConnected])
 
     return(
         <SafeAreaView className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-full`}>

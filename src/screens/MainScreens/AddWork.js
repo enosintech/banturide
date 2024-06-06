@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUserInfo } from "../../../slices/authSlice";
-import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
@@ -15,6 +15,7 @@ const AddWork = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
     const workAddress = useSelector(selectFavoriteWorkAddress);
+    const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
@@ -65,6 +66,7 @@ const AddWork = (props) => {
                 setLoading(false)
                 navigation.navigate("Favorite", {saveMessage: "Work Address Added Successfully"})
                 dispatch(setFavAddressUpdated(true))
+                dispatch(setFavAddressChanged(!favAddressChanged))
             }
         })
         .catch((err) => {
