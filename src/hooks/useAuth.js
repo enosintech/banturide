@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { useDispatch, useSelector } from "react-redux";
 
 import { selectIsSignedIn, setUserInfo } from "../../slices/authSlice";
+import { selectProfileUpdated } from "../../slices/navSlice";
 
 export function useAuth () {
 
@@ -12,6 +13,7 @@ export function useAuth () {
   const [user, setUser] = useState("")
 
   const userIsSignedIn = useSelector(selectIsSignedIn);
+  const profileUpdated = useSelector(selectProfileUpdated);
 
   const getUserData = async () => {
     await SecureStore.getItemAsync("user").then((data) => {
@@ -23,8 +25,24 @@ export function useAuth () {
   }
 
   useEffect(() => {
-    dispatch(setUserInfo(userData))
-  }, [userData])
+    const fetchProfileInfo = async () => {
+        try{
+            const response = await fetch(`https://banturide.onrender.com/profile/profile/${userData?.user?._id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type" : "application/json"
+                }
+            })
+
+            const result = await response.json();
+            dispatch(setUserInfo(result))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    fetchProfileInfo()
+  }, [userData, profileUpdated])
 
   useEffect(() => {
       getUserData();

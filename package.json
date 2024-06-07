@@ -17,6 +17,7 @@
     "expo": "~49.0.13",
     "expo-firebase": "^0.0.0-alpha.0",
     "expo-font": "~11.4.0",
+    "expo-image-picker": "^15.0.5",
     "expo-location": "^16.3.0",
     "expo-secure-store": "~12.3.1",
     "expo-splash-screen": "~0.20.5",

@@ -34,7 +34,7 @@ const AddLocation = (props) => {
     const getFontSize = size => size / fontScale;
 
     const addLocationForm = {
-        userId: userInfo?.user?.id,
+        userId: userInfo?.id,
         type: "other",
         address: locationAddress?.description,
         name: locationName,

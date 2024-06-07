@@ -36,7 +36,7 @@ const AddWork = (props) => {
     }, [workAddress])
 
     const addWorkForm = {
-        userId: userInfo?.user?._id,
+        userId: userInfo?._id,
         type: "work",
         address: workAddress?.description,
         name: ""
@@ -70,6 +70,7 @@ const AddWork = (props) => {
             }
         })
         .catch((err) => {
+            setLoading(false)
             console.log(err)
         })
     }

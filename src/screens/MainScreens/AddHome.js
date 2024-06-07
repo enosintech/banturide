@@ -37,7 +37,7 @@ const AddHome = (props) => {
     }, [homeAddress])
 
     const addHomeForm = {
-        userId: userInfo?.user?._id,
+        userId: userInfo?._id,
         type: "home",
         address: homeAddress?.description,
         name: ""
@@ -71,6 +71,7 @@ const AddHome = (props) => {
             }
         })
         .catch((err) => {
+            setLoading(false)
             console.log(err)
         })
     }

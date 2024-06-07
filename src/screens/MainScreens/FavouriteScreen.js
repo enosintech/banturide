@@ -8,7 +8,7 @@ import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 
-import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated } from "../../../slices/navSlice";
 import { selectUserInfo } from "../../../slices/authSlice";
 
 const FavouriteScreen = (props) => {
@@ -30,6 +30,8 @@ const FavouriteScreen = (props) => {
 
     const [ favoritesData, setFavoritesData ] = useState([]);
     const [ loading, setLoading ] = useState(false); 
+    const [ homeAdded, setHomeAdded ] = useState(false);
+    const [ workAdded, setWorkAdded ] = useState(false);
 
     const options = {
         method: "GET",
@@ -49,7 +51,7 @@ const FavouriteScreen = (props) => {
 
         const fetchFavorites = async () => {
             try {
-                const response = await fetch(`https://banturide.onrender.com/favorites/get-favorites/${userInfo?.user._id}`, options);
+                const response = await fetch(`https://banturide.onrender.com/favorites/get-favorites/${userInfo?._id}`, options);
 
                 const result = await response.json();
                 setLoading(false)
@@ -63,6 +65,49 @@ const FavouriteScreen = (props) => {
         fetchFavorites()
 
     }, [favAddressChanged])
+
+    useEffect(() => {
+
+        const checkForHome = () => {
+
+            if(favoritesData.length < 1){
+                setHomeAdded(false)
+                return
+            }
+
+            for(let i = 0; i < favoritesData.length; i++){
+                if(Object.values(favoritesData[i]).includes("home")){
+                    setHomeAdded(true)
+                    return;
+                } else {
+                    setHomeAdded(false)
+                }
+            }
+
+        }
+
+        const checkForWork = () => {
+
+            if(favoritesData.length < 1){
+                setWorkAdded(false)
+                return
+            }
+
+            for(let i = 0; i < favoritesData.length; i++){
+                if(Object.values(favoritesData[i]).includes("work")){
+                    setWorkAdded(true)
+                    return;
+                } else {
+                    setWorkAdded(false)
+                }
+            }
+
+        }
+
+        checkForHome();
+        checkForWork();
+
+    }, [favoritesData])
 
     return(
         <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`w-full h-full ${props.theme === "dark" ? "bg-[#222831]" : " bg-white"} relative`}>
@@ -78,7 +123,7 @@ const FavouriteScreen = (props) => {
                 <Text style={{fontSize: getFontSize(15)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>Add your frequent destinations to easily access them when booking</Text>
             </View>
             <View className={`w-full border-b-[0.5px] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
-            <TouchableOpacity className={`h-[8%] w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
+            <TouchableOpacity disabled={homeAdded === false && loading === true ? true : homeAdded === false && loading === false ? false : true} className={`h-[8%] w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} ${homeAdded ? "opacity-30" : "opacity-100"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
                 navigation.navigate("addhome")
             }}>
                 <View className="flex-row items-center">
@@ -89,7 +134,7 @@ const FavouriteScreen = (props) => {
                     <MaterialIcons name="add" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity className={`h-[8%] w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
+            <TouchableOpacity disabled={workAdded === false && loading === true ? true : workAdded === false && loading === false ? false : true} className={`h-[8%] w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} ${workAdded ? "opacity-30" : "opacity-100"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
                 navigation.navigate("addwork")
             }}>
                 <View className="flex-row items-center">

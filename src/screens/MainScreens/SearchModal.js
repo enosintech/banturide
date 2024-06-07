@@ -79,7 +79,7 @@ const SearchModal = (props) => {
                     <ShortModalNavBar />
                 </View>
                 <View className={`h-[10%] w-full border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"} items-center justify-center`}>
-                    <Text style={{fontFamily: 'os-b'}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>{greeting + " " + userInfo?.user.firstname}</Text>
+                    <Text style={{fontFamily: 'os-b'}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>{greeting + " " + userInfo?.firstname}</Text>
                 </View>
                 <View className={`w-[84.8%] rounded-[20px] h-[11%] bg-white flex-row ${toggle !== "ride" ? "hidden" : "flex"}`}>
                     <TouchableOpacity className={`w-1/2 rounded-[20px] ${tripType !== "normal" ? "bg-white" : "bg-[#186f65]"} h-full flex items-center justify-center`} onPress={() => {

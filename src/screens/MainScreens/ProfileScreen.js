@@ -1,4 +1,4 @@
-import { Text, View, Image, TouchableOpacity, PixelRatio, Modal } from "react-native";
+import { Text, View, Image, TouchableOpacity, PixelRatio } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -7,12 +7,13 @@ import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUserInfo } from "../../../slices/authSlice";
+import { useEffect } from "react";
 
 const ProfileScreen = (props) => {
     const navigation = useNavigation();
 
     const [notificationToggle, setNotificationToggle] = useState(true);
-    const [callDriverToggle, setCallDriverToggle] = useState(true);
+    const [callDriverToggle, setCallDriverToggle] = useState(false);
 
     const userInfo = useSelector(selectUserInfo);
 
@@ -20,12 +21,61 @@ const ProfileScreen = (props) => {
 
     const getFontSize = size => size / fontScale;
 
-    const handleToggleNotifications = () => {
+    const handleToggleNotifications = async () => {
 
+        if(notificationToggle === true){
+            setNotificationToggle(false)
+        } else {
+            setNotificationToggle(true)
+        }
+
+        try {    
+            const response = await fetch("https://banturide.onrender.com/profile/toggle-notifications", {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify({
+                    userId: userInfo.user._id,
+                    value: !notificationToggle,
+                })
+            })
+    
+            const result = await response.json();
+    
+            console.log(result)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
-    const handleToggleDriverShouldCall = () => {
-        
+    const handleToggleDriverShouldCall = async () => {
+        if(callDriverToggle === true){
+            setCallDriverToggle(false)
+        } else {
+            setCallDriverToggle(true)
+        }
+
+        try {
+            console.log("driver toggled")
+
+            const response = await fetch("https://banturide.onrender.com/profile/toggle-driver-should-call", {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify({
+                    userId: userInfo.user._id,
+                    value: !callDriverToggle
+                })
+            })
+
+            const result = await response.json();
+
+            console.log(result)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return(
@@ -42,7 +92,7 @@ const ProfileScreen = (props) => {
                         <Image source={require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                     </View>
                     <View className="mt-2">
-                        <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}>{userInfo?.user.firstname + " " + userInfo?.user.lastname}</Text>
+                        <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>
                     </View>
                 </View>
             </View>
@@ -65,9 +115,7 @@ const ProfileScreen = (props) => {
                             <MaterialIcons name="notifications" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                             <Text style={{fontSize: getFontSize(15)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight ml-1`}> Notifications</Text>
                         </View>
-                        <TouchableOpacity onPress={() => {
-                            setNotificationToggle(!notificationToggle)
-                        }}>
+                        <TouchableOpacity onPress={handleToggleNotifications}>
                             <FontAwesome name={`${notificationToggle ? "toggle-on" : "toggle-off"}`} size={getFontSize(30)} color={`${ props.theme === "dark" ? "white" : "black"}`}/>
                         </TouchableOpacity>
                     </View>
@@ -76,9 +124,7 @@ const ProfileScreen = (props) => {
                             <Ionicons name="call" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                             <Text style={{fontSize: getFontSize(15)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight ml-1`}> Driver Should Call</Text>
                         </View>
-                        <TouchableOpacity onPress={() => {
-                            setCallDriverToggle(!callDriverToggle)
-                        }}>
+                        <TouchableOpacity onPress={handleToggleDriverShouldCall}>
                             <FontAwesome name={`${callDriverToggle ? "toggle-on" : "toggle-off"}`} size={getFontSize(30)} color={`${ props.theme === "dark" ? "white" : "black"}`}/>
                         </TouchableOpacity>
                     </View>
