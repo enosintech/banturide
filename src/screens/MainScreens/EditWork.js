@@ -1,6 +1,6 @@
 import {Text, View, TouchableOpacity, PixelRatio, Modal } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useEffect, useRef, useState } from "react";
 
@@ -13,15 +13,16 @@ import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
 const AddWork = (props) => {
 
-    const userInfo = useSelector(selectUserInfo);
+    const routes = useRoute();
+
+    const  { id } = routes.params;
+
     const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
-
-    const workAddressRef = useRef(null);
 
     const [ loading, setLoading ] = useState(false);
     const [ error, setError ] = useState("");
@@ -34,25 +35,23 @@ const AddWork = (props) => {
 
     const getFontSize = size => size / fontScale;
 
-    const addWorkForm = {
-        userId: userInfo?._id,
-        type: "work",
+    const editWorkForm = {
+        userId: id,
         address: workAddress?.description,
-        name: ""
     }
 
     const options = {
-        method: "POST",
+        method: "PUT",
         headers: {
             "Content-Type" : "application/json",
         },
-        body: JSON.stringify(addWorkForm)
+        body: JSON.stringify(editWorkForm)
     }
 
     const handleSaveWorkAddress = async () => {
         setLoading(true)
 
-        await fetch("https://banturide.onrender.com/favorites/add-favorites", options)
+        await fetch("https://banturide.onrender.com/favorites/update-favorites", options)
         .then( response => response.json())
         .then( data => {
             if(data.success === false){
@@ -63,7 +62,7 @@ const AddWork = (props) => {
                 }, 4000)
             } else {
                 setLoading(false)
-                navigation.navigate("Favorite", {saveMessage: "Work Address Added Successfully"})
+                navigation.navigate("Favorite", {saveMessage: "Work Address Editted Successfully"})
                 dispatch(setFavAddressUpdated(true))
                 dispatch(setFavAddressChanged(!favAddressChanged))
             }
@@ -95,7 +94,7 @@ const AddWork = (props) => {
                 </View>
                 <View className={`w-full h-[20%] px-3 items-center flex-row`}>
                     <MaterialIcons name="work" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                    <Text style={{fontSize: getFontSize(25)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}> Add Work</Text>
+                    <Text style={{fontSize: getFontSize(25)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}> Edit Work</Text>
                 </View>
                 <View className={`w-full h-[30%] items-center justify-center relative z-20`}>
                 <View className={`w-[90%] h-[75%] rounded-[25px] shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d]" : "bg-white border-gray-200"}`}>
@@ -129,7 +128,7 @@ const AddWork = (props) => {
                                 }
                             }}
                             textInputProps={{
-                                placeholder: "Enter Work Address",
+                                placeholder: "Enter New Work Address",
                                 placeholderTextColor: "gray"
                             }}
                             onPress={(data, details = null) => {
@@ -154,8 +153,13 @@ const AddWork = (props) => {
                         />
                     </View>
                 </View>
-                <View className={`w-[90%] h-[30%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-[#222831]" : "bg-white border-gray-200"} shadow border-[0.5px] justify-center items-center`}>
-                    <TouchableOpacity disabled={workAddress.description === "" ? true : false } onPress={handleSaveWorkAddress} className={`bg-[#186F65] shadow-lg w-[90%] h-[65%] rounded-[25px] flex justify-center items-center ${workAddress.description === "" ? "opacity-30" : "opacity-100"}`}>
+                <View className={`w-[90%] h-[30%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-[#222831]" : "bg-white border-gray-200"} shadow border-[0.5px] flex flex-row justify-evenly items-center`}>
+                    <TouchableOpacity className={`bg-red-700 shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center`} onPress={() => {
+                        navigation.goBack();
+                    }}>
+                        <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity disabled={workAddress.description === "" ? true : false } onPress={handleSaveWorkAddress} className={`bg-[#186F65] shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center ${workAddress.description === "" ? "opacity-30" : "opacity-100"}`}>
                         <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Save</Text>
                     </TouchableOpacity>
                 </View>

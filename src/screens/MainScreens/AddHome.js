@@ -10,12 +10,11 @@ import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import { selectUserInfo } from "../../../slices/authSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
-import { selectFavAddressChanged, selectFavoriteHomeAddress, setFavAddressChanged, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
+import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
 
 const AddHome = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
-    const homeAddress = useSelector(selectFavoriteHomeAddress);
     const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
@@ -27,14 +26,14 @@ const AddHome = (props) => {
 
     const [ loading, setLoading ] = useState(false);
     const [ error, setError ] = useState("");
+    const [ homeAddress, setHomeAddress ] = useState({
+        description: "",
+        location: "",
+    })
 
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
-
-    useEffect(() => {
-        homeAddressRef?.current.setAddressText(homeAddress.description)
-    }, [homeAddress])
 
     const addHomeForm = {
         userId: userInfo?._id,
@@ -100,7 +99,6 @@ const AddHome = (props) => {
                 <View className={`w-full h-[30%] items-center justify-center relative z-20`}>
                     <View className={`w-[90%] h-[75%] rounded-[25px] shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d]" : "bg-white border-gray-200"}`}>
                         <GooglePlacesAutocomplete 
-                            ref={homeAddressRef}
                             styles={{
                                 container: {
                                     width: "100%",
@@ -138,11 +136,11 @@ const AddHome = (props) => {
                                 placeholderTextColor: "gray"
                             }}
                             onPress={(data, details = null) => {
-                                dispatch(setFavoriteHomeAddress({
+                                setHomeAddress({
                                     ...homeAddress,
                                     location: details.geometry.location,
                                     description: data.description
-                                }))
+                                })
                             }}
                             listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
                             listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}

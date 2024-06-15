@@ -93,11 +93,17 @@ const Favorite = (props) => {
                 <View className="flex flex-row gap-x-1 -translate-y-2 -translate-x-1">
                     <TouchableOpacity onPress={() => {
                         if(props.iconName && props.iconName === "home-filled"){
-                            navigation.navigate("addhome")
+                            navigation.navigate("edithome", {
+                                id: props._id,
+                            })
                         } else if(props.iconName && props.iconName === "work"){
-                            navigation.navigate("addwork")
+                            navigation.navigate("editwork", {
+                                id: props._id
+                            })
                         } else {
-                            navigation.navigate("addlocation")
+                            navigation.navigate("editlocation", {
+                                id: props._id
+                            })
                         }
                     }}>
                         <MaterialCommunityIcons name="circle-edit-outline" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>

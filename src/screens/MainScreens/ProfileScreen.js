@@ -15,6 +15,12 @@ const ProfileScreen = (props) => {
     const [notificationToggle, setNotificationToggle] = useState(true);
     const [callDriverToggle, setCallDriverToggle] = useState(false);
 
+    const [ notificationAlert, setNotificationAlert ] = useState(false)
+    const [ notificationValue, setNotificationValue ] = useState(false)
+
+    const [ callDriverAlert, setCallDriverAlert ] = useState(false)
+    const [ callDriverValue, setCallDriverValue ] = useState(false);
+
     const userInfo = useSelector(selectUserInfo);
 
     const fontScale = PixelRatio.getFontScale();
@@ -36,14 +42,20 @@ const ProfileScreen = (props) => {
                     "Content-Type" : "application/json"
                 },
                 body: JSON.stringify({
-                    userId: userInfo.user._id,
+                    userId: userInfo._id,
                     value: !notificationToggle,
                 })
             })
     
-            const result = await response.json();
+            await response.json()
+            .then((data) => {
+                setNotificationAlert(!notificationAlert)
+                setNotificationValue(data.notificationsEnabled)
+            })
+            .catch((err) => {
+                throw err;
+            })
     
-            console.log(result)
         } catch (error) {
             console.log(error)
         }
@@ -57,7 +69,6 @@ const ProfileScreen = (props) => {
         }
 
         try {
-            console.log("driver toggled")
 
             const response = await fetch("https://banturide.onrender.com/profile/toggle-driver-should-call", {
                 method: "POST",
@@ -65,21 +76,54 @@ const ProfileScreen = (props) => {
                     "Content-Type" : "application/json"
                 },
                 body: JSON.stringify({
-                    userId: userInfo.user._id,
+                    userId: userInfo._id,
                     value: !callDriverToggle
                 })
             })
 
-            const result = await response.json();
-
-            console.log(result)
+            await response.json()
+            .then((data) => {
+                setCallDriverAlert(!callDriverAlert)
+                setCallDriverValue(data.driverShouldCall)
+            })
+            .catch((err) => {
+                throw err;
+            })
         } catch (error) {
             console.log(error)
         }
     }
 
+    useEffect(() => {
+        setTimeout(() => {
+            setNotificationAlert(false)
+        }, 4000)
+    }, [notificationAlert])
+
+    useEffect(() => {
+        setTimeout(() => {
+            setCallDriverAlert(false)
+        }, 4000)
+    }, [callDriverAlert])
+
     return(
-        <View className={`${props.theme === "dark" ? "bg-[#222831]" : ""} h-full w-full flex-1`}>
+        <View className={`${props.theme === "dark" ? "bg-[#222831]" : ""} h-full w-full flex-1 relative`}>
+            {notificationAlert &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-[50%] h-[80%] bg-black rounded-[10px] flex items-center justify-center`}>
+                        <Text style={{fontSize: getFontSize(16)}} className="text-white font-light tracking-tight">{notificationValue ? "Notifications Enabled" : "Notifications Disabled"}</Text>
+                    </View>
+                </View>
+            }
+
+            {callDriverAlert &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-[50%] h-[80%] bg-black rounded-[10px] flex items-center justify-center`}>
+                        <Text style={{fontSize: getFontSize(16)}} className="text-white font-light tracking-tight">{callDriverValue ? "Driver Call Enabled" : "Driver Call Disabled"}</Text>
+                    </View>
+                </View>
+            }
+
             <TouchableOpacity className={`absolute z-10 right-[3%] top-[8%] items-center justify-center`} onPress={() => {
                 navigation.navigate("BurgerMenu")
             }}>
@@ -89,7 +133,7 @@ const ProfileScreen = (props) => {
             <View className={`h-[28%] w-full absolute z-10 top-[15%] items-center`}>
                 <View className={`${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} h-full w-full flex items-center justify-center`}>
                     <View className={`rounded-full h-[50%] w-[30%] ${props.theme === "dark" ? "border-white" : "border-gray-100"} border-4 border-solid relative`}>
-                        <Image source={require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
+                        <Image source={userInfo.avatar ? { uri: userInfo.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                     </View>
                     <View className="mt-2">
                         <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>

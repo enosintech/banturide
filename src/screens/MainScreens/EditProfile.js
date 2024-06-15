@@ -47,11 +47,13 @@ const EditProfile = (props) => {
                     allowsEditing: true,
                     aspect: [1, 1],
                     quality: 1,
-                })
+                }).then((data) => {
+    
+                } )
             }
             
             if(!result.canceled){
-                await saveImage(result.assets[0].uri)
+                await saveImage(result.assets[0])
             }
 
         } catch(error) {
@@ -61,9 +63,30 @@ const EditProfile = (props) => {
     }
 
     const saveImage = async (imageParam) => {
-        try {
-            setImage(imageParam);
 
+        setImage(imageParam)
+
+        const formData = new FormData();
+        formData.append('userId', userInfo?._id);
+        formData.append('avatar', {
+            uri: imageParam.uri,
+            type: imageParam.type,
+            name: imageParam.fileName
+        })
+        
+        try {
+
+            const response = await fetch(`https://banturide.onrender.com/profile/profile/upload`, {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "multipart/form-data"
+                },
+                body: formData,
+            })
+
+            const responseData = await response.json();
+
+            console.log(responseData)
             setModalVisible(false);
         } catch (error) {
             throw error
@@ -121,7 +144,7 @@ const EditProfile = (props) => {
             <View className={`h-[30%] ${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} w-full items-center shadow`}>
                 <View className={` h-full w-[95%] rounded-2xl flex items-center justify-center`}>
                     <View className={`rounded-full relative h-[68%] w-[42%] ${props.theme === "dark" ? "border-white" : "border-gray-100"} border-4 border-solid shadow`}>
-                        <Image source={image ? {uri: image} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
+                        <Image source={userInfo ? { uri: userInfo.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                         <TouchableOpacity onPress={() => {
                             setModalVisible(true)
                         }} className={`w-14 h-14 rounded-full absolute bottom-0 right-0 shadow-sm border flex items-center justify-center ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"}`}>

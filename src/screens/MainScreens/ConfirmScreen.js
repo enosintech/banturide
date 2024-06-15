@@ -30,7 +30,7 @@ const ConfirmScreen = (props) => {
   const userInfo = useSelector(selectUserInfo);
 
   const requestForm = {
-    user: userInfo ? userInfo.user._id : "",
+    user: userInfo ? userInfo._id : "",
     price: parseFloat(price?.replace(/[K]/g, "")),
     hasThirdStop: passThrough ? true : false,
     thirdStopLatitude: passThrough ? passThrough.location.lat : "",

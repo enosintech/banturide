@@ -8,7 +8,7 @@ import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 
-import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated, setFavoriteWorkAddress } from "../../../slices/navSlice";
 import { selectUserInfo } from "../../../slices/authSlice";
 
 const FavouriteScreen = (props) => {
