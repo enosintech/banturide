@@ -15,21 +15,45 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "config" : {
+        "googleMapsApiKey" : "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
+      },
+      "supportsTablet": true,
+      "bundleIdentifier": "com.creatifgenus.BantuRide"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "config" : {
+      "config": {
         "googleMaps": {
-          "apiKey" : "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
+          "apiKey": "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
         }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b09f51e8-6961-4c74-9628-030fc2aee422"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "targetSdkVersion": 31,
+            "buildToolsVersion": "31.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "14.0"
+          }
+        }
+      ]
+    ]
   }
 }

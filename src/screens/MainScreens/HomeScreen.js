@@ -87,7 +87,7 @@ const HomeScreen = (props) => {
         if (currentLocation) {
             Geocoder.from(currentLocation.latitude, currentLocation.longitude)
         .then(json => {
-            const location = json.results[1].address_components[0].long_name
+            const location = json.results[1].address_components[0].long_name;
             setCurrentStreet(location);
         })
         .catch(error => console.warn(error))

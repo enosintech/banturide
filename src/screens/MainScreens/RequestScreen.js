@@ -36,6 +36,8 @@ const RequestScreen = (props) => {
   const toggle = useSelector(selectToggle);
   const booking = useSelector(selectBooking);
 
+  console.log(booking.booking._id);
+
   const currentLocation = {
     latitude: origin?.location.lat,
     longitude: origin?.location.lng,
@@ -61,12 +63,12 @@ const RequestScreen = (props) => {
     handleDriverSearch();
   }, [])
   
-  const handleDriverSearch = async () => {
-    await fetch("https://banturide.onrender.com/bookride/search-driver", options)
-    .then(response => response.json())
-    .then(data => {
-      console.log(data)
-    })
+  const handleDriverSearch = async (bookingId) => {
+    try{
+      const response = await fetch("")
+    } catch(err) {
+      console.error("Failed to find drivers: ", err)
+    }      
   }
 
   const handleChooseDriver = async () => {

@@ -5,7 +5,6 @@ import AnimatedSplash from "react-native-animated-splash-screen";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Provider } from "react-redux";
-import io from "socket.io-client";
 
 import { store } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
@@ -14,8 +13,6 @@ import { isLoaded } from 'expo-font';
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-
-  const socket = io("https://banturide.onrender.com");
 
   const [theme, setTheme] = useState("light");
   const [darkMode, setDarkMode] = useState(false);
@@ -27,19 +24,6 @@ export default function App() {
       setToLight()
     }
   }, [darkMode])
-
-  useEffect(() => {
-
-    socket.on("bookingRequestReceived", (data) => {
-        console.log("Notification received:", data);
-    })
-
-    return () => {
-        socket.off("connect")
-        socket.off("bookingRequestReceived")
-    }
-    
-  }, [])
 
   const [isLoaded] = useFonts({
     "os-italic" : require("./assets/fonts/OpenSans-Italic.ttf"),

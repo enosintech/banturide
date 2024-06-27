@@ -56,7 +56,7 @@ const ConfirmScreen = (props) => {
     .then(data => {
       if(data.success === false){
         dispatch(setBookingRequestLoading(false))
-        console.log(data.message)
+        console.log(data.error)
       } else {
         dispatch(setBookingRequestLoading(false))
         dispatch(setBooking(data))
