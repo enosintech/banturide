@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { View, Text, Dimensions, PixelRatio, TextInput, TouchableOpacity, Modal } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectUserInfo } from '../../../slices/authSlice';
+import { selectToken, selectUserInfo } from '../../../slices/authSlice';
 import { selectProfileUpdated, setProfileUpdated } from '../../../slices/navSlice';
 import ModalLoader from '../../components/atoms/ModalLoader';
 
@@ -14,6 +14,8 @@ const ChangeName = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
     const profileUpdated = useSelector(selectProfileUpdated)
+
+    const tokens = useSelector(selectToken);
 
     const [ loading, setLoading ] = useState(false);
     const [ firstName, setFirstName ] = useState(userInfo?.firstname);
@@ -30,13 +32,14 @@ const ChangeName = (props) => {
       try {
         setLoading(true)
 
-        const response = await fetch(`https://banturide.onrender.com/profile/profile/name`, {
+        const response = await fetch(`http://localhost:8080/profile/profile/name`, {
           method: "POST",
           headers: {
-            "Content-Type" : "application/json"
-          },
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokens?.idToken}`,
+            'x-refresh-token' : tokens?.refreshToken,
+        },
           body: JSON.stringify({
-            userId: userInfo._id,
             firstname: firstName,
             lastname: lastName,
           })

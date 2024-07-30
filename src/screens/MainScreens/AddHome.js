@@ -6,9 +6,11 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { ensureNoQuotes } from "../../../utils/removeQuotes";
+
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
 
@@ -21,6 +23,8 @@ const AddHome = (props) => {
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
+
+    const tokens = useSelector(selectToken)
 
     const homeAddressRef = useRef(null);
 
@@ -36,24 +40,23 @@ const AddHome = (props) => {
     const getFontSize = size => size / fontScale;
 
     const addHomeForm = {
-        userId: userInfo?._id,
         type: "home",
         address: homeAddress?.description,
-        name: ""
-    }
-
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type" : "application/json",
-        },
-        body: JSON.stringify(addHomeForm)
+        name: "Home"
     }
 
     const handleSaveHomeAddress = async () => {
         setLoading(true)
 
-        await fetch("https://banturide.onrender.com/favorites/add-favorites", options)
+        await fetch("http://localhost:8080/favorites/add-favorites", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: JSON.stringify(addHomeForm)
+        })
         .then( response => response.json())
         .then( data => {
             if(data.success === false){

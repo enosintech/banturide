@@ -20,7 +20,7 @@ const AuthNavigator = (props) => {
 
     const { user } = useAuth();
 
-    if(user === "signedin"){
+    if(user === true){
         return (
             <Stack.Navigator initialRouteName="Tab">
                 <Stack.Screen name="Tab" options={{headerShown: false}}>
@@ -28,7 +28,7 @@ const AuthNavigator = (props) => {
                 </Stack.Screen>
             </Stack.Navigator>
         )
-    } else if(user === "signedout") {
+    } else if(user === false) {
         return (
             <Stack.Navigator initialRouteName="Welcome">
                 <Stack.Screen name="Welcome" options={{headerShown: false}}>
@@ -59,7 +59,7 @@ const AuthNavigator = (props) => {
                 </Stack.Group>
             </Stack.Navigator>
         )
-    } else if(user === "") {
+    } else if(user === undefined) {
         return (
             <LoadingBlur loading={true} />
         )

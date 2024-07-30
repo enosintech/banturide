@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
@@ -31,27 +31,28 @@ const AddWork = (props) => {
         location: "",
     })
 
+    const tokens = useSelector(selectToken);
+
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
 
     const editWorkForm = {
-        userId: id,
         address: workAddress?.description,
-    }
-
-    const options = {
-        method: "PUT",
-        headers: {
-            "Content-Type" : "application/json",
-        },
-        body: JSON.stringify(editWorkForm)
     }
 
     const handleSaveWorkAddress = async () => {
         setLoading(true)
 
-        await fetch("https://banturide.onrender.com/favorites/update-favorites", options)
+        await fetch("http://localhost:8080/favorites/update-favorites", {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: JSON.stringify(editWorkForm)
+        })
         .then( response => response.json())
         .then( data => {
             if(data.success === false){

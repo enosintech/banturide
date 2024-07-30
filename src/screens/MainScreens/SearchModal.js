@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
-import {Text, View, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, TouchableOpacity, StyleSheet, Dimensions, Platform } from "react-native";
+import {Text, View, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, TouchableOpacity, StyleSheet, Dimensions, Platform, PixelRatio } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -33,6 +33,10 @@ const SearchModal = (props) => {
     const userInfo = useSelector(selectUserInfo);
 
     const height = Dimensions.get("window").height;
+
+    const fontScale = PixelRatio.getFontScale();
+
+    const getFontSize = size => size / fontScale;
 
     const navigation = useNavigation();
 
@@ -71,7 +75,7 @@ const SearchModal = (props) => {
         <KeyboardAvoidingView
             style={containerStyles.container}
             behavior={Platform.OS === "ios" ? "padding" : "height"} 
-            keyboardVerticalOffset={10}
+            keyboardVerticalOffset={getFontSize(10)}
         >
         <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
             <View style={{height: 0.7 * height}} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"} items-center rounded-t-2xl`}>
@@ -79,15 +83,15 @@ const SearchModal = (props) => {
                     <ShortModalNavBar />
                 </View>
                 <View className={`h-[10%] w-full border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"} items-center justify-center`}>
-                    <Text style={{fontFamily: 'os-b'}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>{greeting + " " + userInfo?.firstname}</Text>
+                    <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{greeting + " " + userInfo?.firstname}</Text>
                 </View>
-                <View className={`w-[84.8%] rounded-[20px] h-[11%] bg-white flex-row ${toggle !== "ride" ? "hidden" : "flex"}`}>
-                    <TouchableOpacity className={`w-1/2 rounded-[20px] ${tripType !== "normal" ? "bg-white" : "bg-[#186f65]"} h-full flex items-center justify-center`} onPress={() => {
+                <View className={`w-[84.8%] rounded-[40px] h-[11%] bg-white flex-row ${toggle !== "ride" ? "hidden" : "flex"}`}>
+                    <TouchableOpacity className={`w-1/2 rounded-[40px] ${tripType !== "normal" ? "bg-white" : "bg-[#186f65]"} h-full flex items-center justify-center`} onPress={() => {
                         dispatch(setTripType("normal"))
                     }}>
-                        <Text style={{fontFamily: "os-b"}} className={`text-[16px] ${tripType !== "normal" ? "text-black" :"text-white"}`}>Single Trip</Text>
+                        <Text style={{fontSize: getFontSize(16)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-black" :"text-white"}`}>Single Trip</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className={`w-1/2 rounded-[20px] ${tripType !== "normal" ? "bg-[#186f65]" : "bg-white"} h-full flex items-center justify-center`} onPress={() => {
+                    <TouchableOpacity className={`w-1/2 rounded-[40px] ${tripType !== "normal" ? "bg-[#186f65]" : "bg-white"} h-full flex items-center justify-center`} onPress={() => {
                         dispatch(setTripType("allday"))
                         dispatch(setOrigin(null))
                         dispatch(setPassThrough(null))
@@ -98,24 +102,24 @@ const SearchModal = (props) => {
                         setSelected(false)
                         setStopAdded(false)
                     }}>
-                        <Text style={{fontFamily: "os-b"}} className={`text-[16px] ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Booking</Text>
+                        <Text style={{fontSize: getFontSize(16)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Booking</Text>
                     </TouchableOpacity>
                 </View>
                 <View className={`w-[85%] h-[7%] mt-2 flex-row items-center justify-between ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} rounded-[14px] px-3 ${tripType !== "normal" || toggle !== "ride" ? "hidden" : "flex"}`}>
                         <View className={`flex-row items-center gap-x-2`}>
-                            <MaterialCommunityIcons name="bus-school" size={22} color={props.theme === "dark" ? "white" : "black"}/>
-                            <Text style={{fontFamily: "os-light"}} className={`${props.theme === "dark" ? "text-white" : "text-black"} text-[14px]`}>School Pick-up/ Drop-off</Text>
+                            <MaterialCommunityIcons name="bus-school" size={getFontSize(22)} color={props.theme === "dark" ? "white" : "black"}/>
+                            <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>School Pick-up/ Drop-off</Text>
                         </View>
                         <TouchableOpacity onPress={() => {
                             setSelected(!selected)
                         }}>
-                            <FontAwesome name={schoolPickup ? "toggle-on" : "toggle-off"} size={30} color={props.theme === "dark" ? "white" : "#186f65"}/>
+                            <FontAwesome name={schoolPickup ? "toggle-on" : "toggle-off"} size={getFontSize(30)} color={props.theme === "dark" ? "white" : "#186f65"}/>
                         </TouchableOpacity>
                 </View>
                 <View className={`w-[85%] h-fit mt-2 rounded-[20px] relative z-10 flex justify-between ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"}`}>
                     <View className={`flex-row items-center justify-center w-full h-[60px] shadow-2xl relative z-50`}>
                         <View className={`w-[15%] items-center h-full justify-center `}>
-                            <MaterialIcons name="trip-origin" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                            <MaterialIcons name="trip-origin" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`} />
                         </View>
                         <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-800" : "border-gray-300"}`}></View>
                         <GooglePlacesAutocomplete 
@@ -172,7 +176,7 @@ const SearchModal = (props) => {
                         <TouchableOpacity className={`rounded-full w-[25%] h-[90%] items-center justify-center shadow border ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`} onPress={() => {
                             setStopAdded(!stopAdded);
                         }}>
-                            <Text style={{fontFamily: "os-light"}} className={`text-[14px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Add Stop</Text>
+                            <Text style={{fontSize: getFontSize(14)}} className={`font-extralight tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Add Stop</Text>
                         </TouchableOpacity>
                     </View>
                     {
@@ -193,7 +197,7 @@ const SearchModal = (props) => {
                                     dispatch(setPassThrough(null));
                                     passThroughRef?.current.clear();
                                 }}> 
-                                    <Text style={{fontFamily: "os-light"}} className={`text-[10px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Remove Stop</Text>
+                                    <Text style={{fontSize: getFontSize(10)}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Remove Stop</Text>
                                 </TouchableOpacity>
                             </View>
                             <GooglePlacesAutocomplete 
@@ -309,21 +313,21 @@ const SearchModal = (props) => {
                         <TouchableOpacity key={item.id} className={`w-[31.5%] h-[97%] rounded-[20px] bg-white`}></TouchableOpacity>
                     ))}
                 </View>
-                <View className={`w-[85%] h-[18%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} ${tripType === "normal" ? "hidden" : "flex"} mt-2 rounded-[20px] `}>
+                <View className={`w-[85%] h-[18%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} ${tripType === "normal" ? "hidden" : "flex"} mt-2 rounded-[40px] `}>
 
                 </View>
-                <View className={`w-[85%] h-[25%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} mt-2 rounded-[20px] flex`}>
+                <View className={`w-[85%] h-[25%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} mt-2 rounded-[20px] rounded-b-[40px] flex`}>
                     <View className={`w-full h-1/2`}></View>
                     <View className={`w-full h-1/2 flex flex-row`}>
                         <TouchableOpacity className={`w-[18%] h-full flex items-center justify-center`}>
                             <Ionicons name="cash" size={30} color="#186f65" />
                         </TouchableOpacity>
                         <View className={`w-[82%] h-full flex items-center justify-center`}>
-                            <TouchableOpacity className={`w-[97%] h-[90%] rounded-[20px] shadow-2xl bg-[#186f65] ${!destination && tripType === "normal" || !origin && tripType !== "normal" ? "opacity-25" : destination && tripType === "normal" || origin && tripType !== "normal" ? "opacity-100" : ""} items-center justify-center`} disabled={tripType === "normal" ? !destination : !origin} onPress={() => {
+                            <TouchableOpacity className={`w-[97%] h-[90%] rounded-[40px] shadow-2xl bg-[#186f65] ${!destination && tripType === "normal" || !origin && tripType !== "normal" ? "opacity-25" : destination && tripType === "normal" || origin && tripType !== "normal" ? "opacity-100" : ""} items-center justify-center`} disabled={tripType === "normal" ? !destination : !origin} onPress={() => {
                                 navigation.goBack()
                                 navigation.navigate("BookNavigator")
                             }}>
-                                <Text style={{fontFamily: "os-sb"}} className={`text-xl text-white`}>{toggle === "ride" ? "Choose Ride" : "Specify Recipient"}</Text>
+                                <Text style={{fontSize: getFontSize(20)}} className={`font-semibold tracking-tight text-white`}>{toggle === "ride" ? "Choose Ride" : "Specify Recipient"}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

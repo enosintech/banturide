@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAzHOqEPAMatjwbRG2ofnDlRqNhC40nJQA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>413112601823</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.creatifgenus.BantuRide</string>
+	<key>PROJECT_ID</key>
+	<string>bantu-ride-f7cf6</string>
+	<key>STORAGE_BUCKET</key>
+	<string>bantu-ride-f7cf6.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:413112601823:ios:f7f51aa12fba9f9cc82d6a</string>
+</dict>
+</plist>

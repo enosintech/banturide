@@ -24,7 +24,7 @@ const SmallMap = (props) => {
         ref={props.expandMapRef} 
         className="flex-1"
         showsUserLocation
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         initialRegion={props.initialRegion}
         customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
       >

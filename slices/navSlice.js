@@ -27,6 +27,7 @@ const initialState = {
         description: "",
         location: "",
     },
+    wsClientId: null,
 }
 
 export const navSlice = createSlice({
@@ -93,10 +94,13 @@ export const navSlice = createSlice({
         setFavoriteWorkAddress: (state, action) => {
             state.favoriteWorkAddress = action.payload;
         },
+        setWsClientId: (state, action) => {
+            state.wsClientId = action.payload;
+        }
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -118,5 +122,6 @@ export const selectFavAddressChanged = (state) => state.nav.favAddressChanged;
 export const selectProfileUpdated = (state) => state.nav.profileUpdated;
 export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddress;
 export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
+export const selectWsClientId = (state) => state.nav.wsClientId;
 
 export default navSlice.reducer;

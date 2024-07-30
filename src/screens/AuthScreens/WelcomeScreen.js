@@ -21,8 +21,6 @@ const WelcomeScreen = (props) => {
 
     const getFontSize = size => size / fontScale;
 
-    console.log(insetTop, insetBottom, StatusBar.currentHeight)
-
     return(
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`${props.theme === "dark" ? "bg-[#222831]" : ""} h-full w-full flex-col justify-between items-center`} onLayout={props.handleLayout}>

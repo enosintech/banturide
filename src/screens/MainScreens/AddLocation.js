@@ -6,10 +6,12 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
+
+import { ensureNoQuotes } from "../../../utils/removeQuotes";
 
 const AddLocation = (props) => {
 
@@ -20,6 +22,7 @@ const AddLocation = (props) => {
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
+    const tokens = useSelector(selectToken);
 
     const [ locationName, setLocationName ] = useState("");
     const [ locationAddress, setLocationAddress ] = useState({
@@ -34,24 +37,23 @@ const AddLocation = (props) => {
     const getFontSize = size => size / fontScale;
 
     const addLocationForm = {
-        userId: userInfo?.id,
         type: "other",
         address: locationAddress?.description,
         name: locationName,
-    }
-
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type" : "application/json",
-        },
-        body: JSON.stringify(addLocationForm),
     }
     
     const handleSaveLocationAddress = async () => {
         setLoading(true)
 
-        await fetch("https://banturide.onrender.com/favorites/add-favorites", options)
+        await fetch("http://localhost:8080/favorites/add-favorites", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: JSON.stringify(addLocationForm)
+        })
         .then( response => response.json())
         .then(data => {
             if(data.success === false){

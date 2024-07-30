@@ -14,7 +14,6 @@ const RequestMap = (props) => {
         <MapView
             ref={props.mapRef}
             className="w-full h-full"
-            provider={PROVIDER_GOOGLE}
             showsUserLocation
             initialRegion={{
               latitude: origin?.location.lat,

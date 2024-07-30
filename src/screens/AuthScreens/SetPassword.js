@@ -49,9 +49,16 @@ const SetPassword = (props) => {
         body: JSON.stringify(userForm)
     };
 
+    const validatePassword = (password) => {
+        const passwordRegex = /^(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*\d).{8,}$/;
+        return passwordRegex.test(password);
+    }      
+
     const handleSignUp = async () => {
         Keyboard.dismiss();
         setLoading(true)
+
+        const isPasswordValid = validatePassword(password)
 
         if(password === "" || confirmPassword === ""){
             setLoading(false)
@@ -71,28 +78,78 @@ const SetPassword = (props) => {
             return;
         }
 
-        await fetch('https://banturide.onrender.com/auth/create-user', options)
+        if(isPasswordValid === false){
+            setLoading(false)
+            setError(true);
+            setTimeout(() => {
+                setError(false)
+            }, 4000);
+            return;
+        }
+
+        await fetch('http://localhost:8080/auth/create-passenger', options)
         .then(response => response.json())
         .then(async data => {
-            if(data.success === false){
+
+            if(data.message === "User created successfully"){
+                // await SecureStore.setItemAsync("idToken", JSON.stringify(data.userCredential._tokenResponse.idToken).then(() => {
+                //     setLoading(false)
+                //     navigation.reset({
+                //         index: 0,
+                //         routes: [{name: "Signin"}]
+                //     })
+                // })).catch((err) => {
+                //     setLoading(false)
+                //     console.log(err)
+                // })
+                // await SecureStore.setItemAsync("idToken", JSON.stringify(data.userCredential._tokenResponse.idToken)).then(() => {
+                //     setLoading(false)
+                //     navigation.reset({
+                //         index: 0,
+                //         routes: [{name: "Signin"}]
+                //     })
+                // }).catch((err) => {
+                //     setLoading(false)
+                //     console.log(err)
+                // })
+
                 setLoading(false)
-                setErrorVisible(true);
+                console.log(data)
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Signin"}]
+                })
+            } else {
+                setLoading(false)
+                setErrorVisible(true)
                 setServerError(data.message);
                 setTimeout(() => {
                     setErrorVisible(false)
-                }, 4000);
-            } else {
-                await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
-                    setLoading(false)
-                    navigation.reset({
-                        index: 0,
-                        routes: [{name: "verifyotp"}]
-                    })
-                }).catch((err) => {
-                    setLoading(false)
-                    console.log(err)
-                })
+                }, 4000)
             }
+            // if(data.success === false){
+            //     setLoading(false)
+            //     setErrorVisible(true);
+            //     setServerError(data.message);
+            //     console.log(data)
+            //     setTimeout(() => {
+            //         setErrorVisible(false)
+            //     }, 4000);
+            // } else {
+            //     await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
+            //         setLoading(false)
+            //         navigation.reset({
+            //             index: 0,
+            //             routes: [{name: "verifyotp"}]
+            //         })
+            //     }).catch((err) => {
+            //         setLoading(false)
+            //         console.log(err)
+            //     })
+            // }
+        })
+        .catch((error) => {
+            console.log(error)
         })
     }
     

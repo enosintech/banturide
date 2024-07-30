@@ -8,13 +8,15 @@ import { useDispatch, useSelector } from "react-redux";
 
 import BurgerMenuItem from "../../components/atoms/BurgerMenuItem.js";
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar.js";
-import { selectIsSignedIn, setIsSignedIn } from "../../../slices/authSlice.js";
+
+import { setIsSignedIn, setToken } from "../../../slices/authSlice.js";
+
 import LoadingBlur from "../../components/atoms/LoadingBlur.js";
 
 const BurgerMenu = (props) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
-    const isSignedIn = useSelector(selectIsSignedIn)
+
 
     const [ loading, setLoading ] = useState(false);
 
@@ -26,14 +28,22 @@ const BurgerMenu = (props) => {
 
     const handleSignOut = async () => {
         setLoading(true)
-        await SecureStore.deleteItemAsync("user").then(() => {
-            dispatch(setIsSignedIn(!isSignedIn))
-            setTimeout(() => {
-                setLoading(false)
-            }, 5000)
-        }).catch((err) => {
+        
+        await fetch("http://localhost:8080/auth/passenger-signout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then( async () => {
             setLoading(false)
-            console.log(err)
+            await SecureStore.deleteItemAsync("tokens").then(() => {
+                console.log("Token deleted Successfully")
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(false))
+            }).catch((error) => {
+                console.log(error)
+            })
         })
     }
     

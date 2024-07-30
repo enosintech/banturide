@@ -1,17 +1,22 @@
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, Image, ScrollView, Modal, Button } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useDispatch, useSelector } from 'react-redux';
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId } from '../../../slices/navSlice';
 import LottieView from "lottie-react-native";
+import messaging from "@react-native-firebase/messaging";
 
 import RequestMap from "../../components/atoms/RequestMap";
 import PageLoader from '../../components/atoms/PageLoader';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
+
+import { ensureNoQuotes } from '../../../utils/removeQuotes';
+import { selectToken } from '../../../slices/authSlice';
+import { useFetchFcmToken } from '../../hooks/useFetchFcmToken';
 
 const RequestScreen = (props) => {
   
@@ -24,6 +29,7 @@ const RequestScreen = (props) => {
   const rating = 4.1;
 
   const dispatch = useDispatch();
+  const fcmToken = useFetchFcmToken();
 
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
@@ -36,7 +42,8 @@ const RequestScreen = (props) => {
   const toggle = useSelector(selectToggle);
   const booking = useSelector(selectBooking);
 
-  console.log(booking.booking._id);
+  const tokens = useSelector(selectToken);
+  const wsClientId = useSelector(selectWsClientId);
 
   const currentLocation = {
     latitude: origin?.location.lat,
@@ -49,30 +56,63 @@ const RequestScreen = (props) => {
     mapRef.current.animateToRegion(currentLocation, 1 * 1000)
   }
 
-  const options = {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      bookingId: booking?.booking._id
-    })
-  }
-
   useEffect(() => {
-    handleDriverSearch();
+    handleDriverSearch(booking.bookingId);
   }, [])
-  
+
+  // useEffect(() => {
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+  //       console.log("a new FCM message has arrived!", JSON.stringify(remoteMessage));
+  //   });
+
+  //   unsubscribe();
+  // }, []);
+
   const handleDriverSearch = async (bookingId) => {
     try{
-      const response = await fetch("")
-    } catch(err) {
-      console.error("Failed to find drivers: ", err)
-    }      
+      await fetch("http://localhost:8080/Booking/search-driver", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokens?.idToken}`,
+          'x-refresh-token' : tokens?.refreshToken,
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          fcmToken: fcmToken?.token,
+          wsClientId: wsClientId,
+        })
+      }).then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+
+    } catch (error) {
+      console.error("Failed to search for drivers: ", error)
+    }  
   }
 
-  const handleChooseDriver = async () => {
-
+  const handleChooseDriver = async (bookingId, driverId) => {
+    setLoading(true)
+    try {
+      await fetch("", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          driverId: driverId,
+        })
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        // choose driver logic
+      })
+    } catch (error) {
+      console.error("Failed to assign driver: ", error)
+    }
   }
 
   const handleRemoveDriver = async () => {

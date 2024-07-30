@@ -1,62 +1,79 @@
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { useDispatch, useSelector } from "react-redux";
 
-import { selectIsSignedIn, setUserInfo } from "../../slices/authSlice";
+import { selectIsSignedIn, selectToken, setToken, setUserInfo } from "../../slices/authSlice";
+
 import { selectProfileUpdated } from "../../slices/navSlice";
 
 export function useAuth () {
 
   const dispatch = useDispatch();
 
-  const [userData, setUserData] = useState({})
-  const [user, setUser] = useState("")
-
-  const userIsSignedIn = useSelector(selectIsSignedIn);
+  const token = useSelector(selectToken);
+  const isSignedIn = useSelector(selectIsSignedIn);
   const profileUpdated = useSelector(selectProfileUpdated);
+  const [ user, setUser ] = useState();
 
-  const getUserData = async () => {
-    await SecureStore.getItemAsync("user").then((data) => {
-        const responseData = JSON.parse(data);
-        setUserData(responseData)
-    }).catch((err) => {
-        console.log(err)
-    });
+  const retrieveTokens = async () => {
+    try {
+      const result = await SecureStore.getItemAsync('tokens');
+      if (result) {
+        const resultData = JSON.parse(result);
+
+        dispatch(setToken({
+          idToken: resultData.idToken,
+          refreshToken: resultData.refreshToken,
+        }))
+
+      } else {
+        console.log('No token found');
+      }
+    } catch (error) {
+      console.log('Error retrieving token', error);
+    }
+  }
+
+  const getUserProfile = async () => {
+    try {
+      await fetch("http://localhost:8080/profile/profile", {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.idToken}`,
+          'x-refresh-token' : token.refreshToken,
+        }
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if('error' in data){
+          dispatch(setUserInfo(null))
+          setUser(false)
+        } else {
+          dispatch(setUserInfo(data))
+          setUser(true)
+        }
+      })
+      .catch((error) => {
+        console.log("This error might be dumb ", error)
+      })
+
+    } catch (error) { 
+      console.log("There was an error while fetching User Profile:", error)
+    }
   }
 
   useEffect(() => {
-    const fetchProfileInfo = async () => {
-        try{
-            const response = await fetch(`https://banturide.onrender.com/profile/profile/${userData?.user?._id}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type" : "application/json"
-                }
-            })
-
-            const result = await response.json();
-            dispatch(setUserInfo(result))
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    fetchProfileInfo()
-  }, [userData, profileUpdated])
+    retrieveTokens();
+  }, [isSignedIn])
 
   useEffect(() => {
-      getUserData();
-  }, [userIsSignedIn])
-
-  useEffect(() => {
-    if(userData !== null){
-      if(Object.keys(userData).length > 1){
-        setUser(Object.keys(userData).includes("token") && userData?.token !== "" ? "signedin" : "signedout")
-      }
+    if(token?.idToken){
+      getUserProfile();
     } else {
-      setUser("signedout")
+      setUser(false)
     }
-  }, [userData])
+  }, [token, isSignedIn, profileUpdated])
   
   return {
     user

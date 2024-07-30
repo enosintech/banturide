@@ -6,11 +6,13 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { useEffect } from "react";
 
 const ProfileScreen = (props) => {
     const navigation = useNavigation();
+
+    const tokens = useSelector(selectToken);
 
     const [notificationToggle, setNotificationToggle] = useState(true);
     const [callDriverToggle, setCallDriverToggle] = useState(false);
@@ -36,13 +38,14 @@ const ProfileScreen = (props) => {
         }
 
         try {    
-            const response = await fetch("https://banturide.onrender.com/profile/toggle-notifications", {
+            const response = await fetch("http://localhost:8080/profile/toggle-notifications", {
                 method: "POST",
                 headers: {
-                    "Content-Type" : "application/json"
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokens?.idToken}`,
+                    'x-refresh-token' : tokens?.refreshToken,
                 },
                 body: JSON.stringify({
-                    userId: userInfo._id,
                     value: !notificationToggle,
                 })
             })
@@ -70,13 +73,14 @@ const ProfileScreen = (props) => {
 
         try {
 
-            const response = await fetch("https://banturide.onrender.com/profile/toggle-driver-should-call", {
+            const response = await fetch("http://localhost:8080/profile/toggle-driver-should-call", {
                 method: "POST",
                 headers: {
-                    "Content-Type" : "application/json"
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokens?.idToken}`,
+                    'x-refresh-token' : tokens?.refreshToken,
                 },
                 body: JSON.stringify({
-                    userId: userInfo._id,
                     value: !callDriverToggle
                 })
             })
@@ -133,7 +137,7 @@ const ProfileScreen = (props) => {
             <View className={`h-[28%] w-full absolute z-10 top-[15%] items-center`}>
                 <View className={`${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} h-full w-full flex items-center justify-center`}>
                     <View className={`rounded-full h-[50%] w-[30%] ${props.theme === "dark" ? "border-white" : "border-gray-100"} border-4 border-solid relative`}>
-                        <Image source={userInfo.avatar ? { uri: userInfo.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
+                        <Image source={userInfo?.avatar ? { uri: userInfo?.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                     </View>
                     <View className="mt-2">
                         <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>

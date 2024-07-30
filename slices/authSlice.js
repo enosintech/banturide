@@ -8,6 +8,7 @@ const initialState = {
         gender: "",
     },
     isSignedIn: false,
+    token: null,
     userInfo: null,
 }
 
@@ -21,16 +22,20 @@ export const authSlice = createSlice({
         setIsSignedIn: (state, action) => {
             state.isSignedIn = action.payload;
         },
+        setToken: (state, action) => {
+            state.token = action.payload;
+        },
         setUserInfo: (state, action) => {
             state.userData = action.payload;
         },
     }
 })
 
-export const { setUser, setIsSignedIn, setUserInfo } = authSlice.actions;
+export const { setUser, setIsSignedIn, setToken, setUserInfo } = authSlice.actions;
 
 export const selectUser = (state) => state.auth.user;
 export const selectIsSignedIn = (state) => state.auth.isSignedIn;
+export const selectToken = (state) => state.auth.token;
 export const selectUserInfo = (state) => state.auth.userData;
 
 export default authSlice.reducer;

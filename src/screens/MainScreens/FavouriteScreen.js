@@ -9,7 +9,9 @@ import ScreenTitle from "../../components/atoms/ScreenTitle";
 import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 
 import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated, setFavoriteWorkAddress } from "../../../slices/navSlice";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
+
+import { ensureNoQuotes } from "../../../utils/removeQuotes.js";
 
 const FavouriteScreen = (props) => {
 
@@ -18,6 +20,7 @@ const FavouriteScreen = (props) => {
     const navigation = useNavigation();
     const routes = useRoute();
     const dispatch = useDispatch();
+    const tokens = useSelector(selectToken);
 
     const { saveMessage } = routes.params ? routes.params : "No Message";
 
@@ -51,7 +54,14 @@ const FavouriteScreen = (props) => {
 
         const fetchFavorites = async () => {
             try {
-                const response = await fetch(`https://banturide.onrender.com/favorites/get-favorites/${userInfo?._id}`, options);
+                const response = await fetch(`http://localhost:8080/favorites/get-favorites`, {
+                    method: "GET",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokens?.idToken}`,
+                        'x-refresh-token' : tokens?.refreshToken,
+                    }
+                });
 
                 const result = await response.json();
                 setLoading(false)
@@ -173,7 +183,7 @@ const FavouriteScreen = (props) => {
                         favoritesData.length > 0
                         ?
                         favoritesData.map((fav, index) => (
-                            <Favorite key={fav._id} index={index} theme={props.theme} iconName={fav.type === "home" ? "home-filled" : fav.type === "work" ? "work" : ""} addName={fav.type === "home" ? "Home" : fav.type === "work" ? "Work" : fav.name} address={fav.address} {...fav} />
+                            <Favorite key={fav.id} index={index} theme={props.theme} iconName={fav.type === "home" ? "home-filled" : fav.type === "work" ? "work" : ""} addName={fav.type === "home" ? "Home" : fav.type === "work" ? "Work" : fav.name} address={fav.address} {...fav} />
                         ))
                         :
                         <Text style={{fontSize: getFontSize(14)}} className={`mt-2 tracking-tight`}>No Saved Addresses</Text>

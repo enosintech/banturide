@@ -7,13 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { safeViewAndroid } from "./WelcomeScreen";
 import BackButton from "../../components/atoms/BackButton";
-import { selectIsSignedIn, setIsSignedIn } from "../../../slices/authSlice";
 import LoadingBlur from "../../components/atoms/LoadingBlur";
+import { selectUserInfo, setIsSignedIn } from "../../../slices/authSlice";
+import { useFetchFcmToken } from "../../hooks/useFetchFcmToken";
 
 const SigninScreen = (props) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
-    const isSignedIn = useSelector(selectIsSignedIn);
 
     const fontScale = PixelRatio.getFontScale();
 
@@ -55,29 +55,47 @@ const SigninScreen = (props) => {
             return;
         }
 
-        await fetch("https://banturide.onrender.com/auth/signin", options)
+        await fetch("http://localhost:8080/auth/passenger-signin", options)
         .then(response => response.json())
-        .then(async data => {
-            if(data.success === false){
-                setLoading(false)
-                setErrorVisible(true)
-                setError(data.message)
-                setTimeout(() => {
-                    setErrorVisible(false)
-                }, 4000)
-                if(data.message === "Please verify your OTP before logging in."){
-                    navigation.navigate("loginVerifyOtp");
-                } 
-            } else {
-                await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
-                    dispatch(setIsSignedIn(!isSignedIn))
+        .then( async data => {
+            if(data.message === "User logged in successfully"){
+                await SecureStore.setItemAsync("tokens", JSON.stringify(data.userCredential._tokenResponse)).then(() => {
+                    dispatch(setIsSignedIn(true))
                     setTimeout(() => {
                         setLoading(false)
                     }, 5000)
-                }).catch((err) => {
-                    console.log(err);
                 })
+            } else {
+                setLoading(false)
+                setErrorVisible(true)
+                setError(data.message)
+                console.log(data)
+                setTimeout(() => {
+                    setErrorVisible(false)
+                }, 4000)
             }
+
+            // if(data.success === false){
+            //     setLoading(false)
+            //     setErrorVisible(true)
+            //     setError(data.message)
+            //     console.log(data)
+            //     setTimeout(() => {
+            //         setErrorVisible(false)
+            //     }, 4000)
+            //     if(data.message === "Please verify your OTP before logging in."){
+            //         navigation.navigate("loginVerifyOtp");
+            //     } 
+            // } else {
+            //     await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
+            //         dispatch(setIsSignedIn(!isSignedIn))
+            //         setTimeout(() => {
+            //             setLoading(false)
+            //         }, 5000)
+            //     }).catch((err) => {
+            //         console.log(err);
+            //     })
+            // }
         })
     }
 

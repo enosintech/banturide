@@ -9,11 +9,13 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ModalLoader from "./ModalLoader";
 import { selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
+import { selectToken } from "../../../slices/authSlice";
 
 const Favorite = (props) => {
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
+    const tokens = useSelector(selectToken)
     
     const [ loading, setLoading ] = useState(false);
     const [ modalVisible, setModalVisible ] = useState(false);
@@ -24,24 +26,20 @@ const Favorite = (props) => {
 
     const getFontSize = size => size / fontScale;
 
-    const favAddressForm = {
-        userId: props._id
-    }
-
-    const options = {
-        method: "DELETE",
-        headers: {
-            "Content-Type" : "application/json"
-        },
-        body: JSON.stringify(favAddressForm)
-    }
-
     const handleDeleteFavAddress = async () => {
         setModalVisible(false)
         setLoading(true)
         try {
-            const response = await fetch("https://banturide.onrender.com/favorites/favorites", options)
+            const response = await fetch("http://localhost:8080/favorites/favorites", {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokens?.idToken}`,
+                    'x-refresh-token' : tokens?.refreshToken,
+                },
+            })
             const result = await response.json();
+            console.log(result)
             dispatch(setFavAddressChanged(!favAddressChanged))
             setLoading(false)
         } catch (error) {

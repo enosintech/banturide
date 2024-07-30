@@ -13,9 +13,9 @@ import { GOOGLE_API_KEY } from "@env";
 
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
-import { selectUserData, selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserData, selectUserInfo } from "../../../slices/authSlice";
 
 Geocoder.init("AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE");
 
@@ -36,6 +36,8 @@ const HomeScreen = (props) => {
     const tripType = useSelector(selectTripType);
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
     const price = useSelector(selectPrice);
+
+    const tokens = useSelector(selectToken);
 
     const [ currentLocation, setCurrentLocation ] = useState(null)
     const [currentStreet, setCurrentStreet] = useState(null)
@@ -93,6 +95,51 @@ const HomeScreen = (props) => {
         .catch(error => console.warn(error))
         }
     }, [currentLocation])
+
+    useEffect(() => {
+        const socket = new WebSocket("ws://localhost:8080");
+
+        socket.onopen = () => {
+            console.log('WebSocket connection opened');
+            // socket.send('Hello Server, This is Enos Phone! We are finishing banturide this week!'); // Send a message to the server
+            // socket.send(JSON.stringify({ clientId: 'your-client-id' }));
+          };
+      
+        //   socket.onmessage = (event) => {
+        //     console.log('Message from server:', event.data);
+        //   };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "clientId") {
+                console.log("this is real time data: ", data?.clientId);
+                dispatch(setWsClientId(data?.clientId));
+            } else if (data.type === "requestReceived") {
+                console.log("this is real time data: ", data.message)
+            } else if (data.type === "searchStarted") {
+                console.log("this is real time data: ", data.message);
+            } else if (data.type === "driverFound") {
+                console.log("this is real time data: ", data.message, JSON.parse(data.driver));
+            } else if (data.type === "driversNotFoundOnTime") {
+                console.log("this is real time data:", data.message);
+            }
+            
+        }
+      
+          socket.onclose = () => {
+            console.log('WebSocket connection closed');
+          };
+      
+          socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+          };
+      
+          // Clean up on unmount
+          return () => {
+            socket.close();
+          };
+    }, [])
 
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
@@ -215,7 +262,7 @@ const HomeScreen = (props) => {
                         <View className="w-[98%] h-[45%] flex-row bg-white rounded-[25px] shadow-2xl">
                             { origin && destination 
                             ?
-                                <TouchableOpacity className={`w-full h-full ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-2xl items-center justify-center`} onPress={() => {
+                                <TouchableOpacity className={`w-full h-full ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-[25px] items-center justify-center`} onPress={() => {
                                     dispatch(setOrigin(null))
                                     dispatch(setPassThrough(null))
                                     dispatch(setDestination(null))

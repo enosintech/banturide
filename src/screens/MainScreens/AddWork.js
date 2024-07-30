@@ -6,20 +6,24 @@ import { useEffect, useRef, useState } from "react";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
+import { ensureNoQuotes } from "../../../utils/removeQuotes";
+
 const AddWork = (props) => {
 
-    const userInfo = useSelector(selectUserInfo);
+    // const userInfo = useSelector(selectUserInfo);
     const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
+
+    const tokens = useSelector(selectToken);
 
     const workAddressRef = useRef(null);
 
@@ -35,24 +39,23 @@ const AddWork = (props) => {
     const getFontSize = size => size / fontScale;
 
     const addWorkForm = {
-        userId: userInfo?._id,
         type: "work",
         address: workAddress?.description,
-        name: ""
+        name: "Work"
     }
-
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type" : "application/json",
-        },
-        body: JSON.stringify(addWorkForm)
-    }
-
+   
     const handleSaveWorkAddress = async () => {
         setLoading(true)
 
-        await fetch("https://banturide.onrender.com/favorites/add-favorites", options)
+        await fetch("http://localhost:8080/favorites/add-favorites", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: JSON.stringify(addWorkForm)
+        })
         .then( response => response.json())
         .then( data => {
             if(data.success === false){

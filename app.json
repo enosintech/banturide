@@ -15,10 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "config" : {
-        "googleMapsApiKey" : "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
-      },
       "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.creatifgenus.BantuRide"
     },
     "android": {
@@ -30,17 +28,29 @@
         "googleMaps": {
           "apiKey": "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
         }
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "package": "com.creatifgenus.BantuRide"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+      "firebaseApiKey": "AIzaSyC6JWbDJkEwfhOjGEbUUZJVcfinWY64G7M",
+      "firebaseAuthDomain": "bantu-ride-f7cf6.firebaseapp.com",
+      "firebaseProjectId": "bantu-ride-f7cf6",
+      "firebaseStorageBucket": "bantu-ride-f7cf6.appspot.com",
+      "firebaseMessagingSenderId": "413112601823",
+      "firebaseAppId": "1:413112601823:web:7dfd565681ca40b6c82d6a",
+      "firebaseMeasurementId": "G-54VLZFZ8RS",
       "eas": {
         "projectId": "b09f51e8-6961-4c74-9628-030fc2aee422"
       }
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      "./react-native-maps-plugin",
       [
         "expo-build-properties",
         {
@@ -50,7 +60,8 @@
             "buildToolsVersion": "31.0.0"
           },
           "ios": {
-            "deploymentTarget": "14.0"
+            "deploymentTarget": "14.0",
+            "useFrameworks": "static"
           }
         }
       ]

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "413112601823",
+    "project_id": "bantu-ride-f7cf6",
+    "storage_bucket": "bantu-ride-f7cf6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413112601823:android:88e6bb369ed7fde5c82d6a",
+        "android_client_info": {
+          "package_name": "com.creatifgenus.BantuRide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeK-iPK6c8beGJzdjn7VuUJeu0jtTxwGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

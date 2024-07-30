@@ -39,7 +39,6 @@ const Map = (props) => {
           }}
           initialRegion={props.initialRegion}
           className="flex-1" 
-          provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         > 
