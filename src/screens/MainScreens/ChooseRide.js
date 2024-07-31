@@ -60,7 +60,7 @@ const ChooseRide = (props) => {
                                       style: "currency",
                                       currency: "ZMW",
                                   }).format(
-                                    (travelTimeInformation.length > 1 ? (travelTimeInformation[0].duration.value + travelTimeInformation[1].duration.value) * SURGE_CHARGE_RATE * data.multiplier / 100  : travelTimeInformation[0].duration.value * SURGE_CHARGE_RATE * data.multiplier / 100)
+                                    (travelTimeInformation?.length > 1 ? (travelTimeInformation[0]?.duration.value + travelTimeInformation[1]?.duration.value) * SURGE_CHARGE_RATE * data.multiplier / 100  : travelTimeInformation[0]?.duration.value * SURGE_CHARGE_RATE * data.multiplier / 100)
                                   )))
                         }}>
                             <View className={`w-[25%] h-full flex items-center justify-center`}>

@@ -28,6 +28,7 @@ const initialState = {
         location: "",
     },
     wsClientId: null,
+    driverArray: [],
 }
 
 export const navSlice = createSlice({
@@ -96,11 +97,19 @@ export const navSlice = createSlice({
         },
         setWsClientId: (state, action) => {
             state.wsClientId = action.payload;
+        },
+        addDriver: (state, action) => {
+            const newDriver = action.payload;
+            const isDriverPresent = state.driverArray.some(driver => driver.driverId === newDriver.driverId);
+
+            if (!isDriverPresent) {
+                state.driverArray.push(newDriver);
+            }
         }
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;

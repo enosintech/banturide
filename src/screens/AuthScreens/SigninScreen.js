@@ -9,7 +9,6 @@ import { safeViewAndroid } from "./WelcomeScreen";
 import BackButton from "../../components/atoms/BackButton";
 import LoadingBlur from "../../components/atoms/LoadingBlur";
 import { selectUserInfo, setIsSignedIn } from "../../../slices/authSlice";
-import { useFetchFcmToken } from "../../hooks/useFetchFcmToken";
 
 const SigninScreen = (props) => {
     const navigation = useNavigation();
@@ -75,27 +74,6 @@ const SigninScreen = (props) => {
                 }, 4000)
             }
 
-            // if(data.success === false){
-            //     setLoading(false)
-            //     setErrorVisible(true)
-            //     setError(data.message)
-            //     console.log(data)
-            //     setTimeout(() => {
-            //         setErrorVisible(false)
-            //     }, 4000)
-            //     if(data.message === "Please verify your OTP before logging in."){
-            //         navigation.navigate("loginVerifyOtp");
-            //     } 
-            // } else {
-            //     await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
-            //         dispatch(setIsSignedIn(!isSignedIn))
-            //         setTimeout(() => {
-            //             setLoading(false)
-            //         }, 5000)
-            //     }).catch((err) => {
-            //         console.log(err);
-            //     })
-            // }
         })
     }
 

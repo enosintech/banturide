@@ -13,7 +13,7 @@ import { GOOGLE_API_KEY } from "@env";
 
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectToken, selectUserData, selectUserInfo } from "../../../slices/authSlice";
 
@@ -36,8 +36,10 @@ const HomeScreen = (props) => {
     const tripType = useSelector(selectTripType);
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
     const price = useSelector(selectPrice);
+    const driverArray = useSelector(state => state.nav.driverArray);
 
     const tokens = useSelector(selectToken);
+    const userInfo = useSelector(selectUserInfo);
 
     const [ currentLocation, setCurrentLocation ] = useState(null)
     const [currentStreet, setCurrentStreet] = useState(null)
@@ -97,49 +99,95 @@ const HomeScreen = (props) => {
     }, [currentLocation])
 
     useEffect(() => {
-        const socket = new WebSocket("ws://localhost:8080");
+
+        const userId = userInfo?.userId;
+        
+        const socket = new WebSocket(`ws://localhost:8080?userId=${encodeURIComponent(userId)}`);
 
         socket.onopen = () => {
             console.log('WebSocket connection opened');
-            // socket.send('Hello Server, This is Enos Phone! We are finishing banturide this week!'); // Send a message to the server
-            // socket.send(JSON.stringify({ clientId: 'your-client-id' }));
-          };
-      
-        //   socket.onmessage = (event) => {
-        //     console.log('Message from server:', event.data);
-        //   };
+            dispatch(setWsClientId(userId));
+        };
 
         socket.onmessage = (event) => {
+
             const data = JSON.parse(event.data);
 
-            if (data.type === "clientId") {
-                console.log("this is real time data: ", data?.clientId);
-                dispatch(setWsClientId(data?.clientId));
-            } else if (data.type === "requestReceived") {
+            if (data.type === "requestReceived") {
                 console.log("this is real time data: ", data.message)
             } else if (data.type === "searchStarted") {
                 console.log("this is real time data: ", data.message);
             } else if (data.type === "driverFound") {
-                console.log("this is real time data: ", data.message, JSON.parse(data.driver));
+                const driver = JSON.parse(data.driver)
+                console.log("driver found", driver);
+
+                // dispatch(setDriverArray([
+                //     ...driverArray.filter(d => d.driverId !== driver.driverId),
+                //     { driver }
+                // ]));
+
+                
+
+                // const isDriverPresent = driverArray.some(dri => dri.driverId === driver.driverId);
+
+                // if(!isDriverPresent){
+                //     // drivers.push(driver)
+                    
+                //     // dispatch(setDriverArray([
+                //     //     driver
+                //     // ]))
+
+                //     setDrivers([
+                //         ...drivers,
+                //         driver
+                //     ])
+                // }
+
+                // console.log("these are", drivers)
+
+                // dispatch(setDriverArray(prevArray => {
+                //     if (!prevArray.some(dri => dri?.driverId === driver?.driverId)) {
+                //         return [...prevArray, driver];
+                //     }
+                //     return prevArray;
+                // }))
+
+                dispatch(addDriver(driver))
+
             } else if (data.type === "driversNotFoundOnTime") {
                 console.log("this is real time data:", data.message);
+            } else if (data.type === "driverAssigned") {
+                dispatch(setBooking(data.booking))
+                console.log(booking);
+            } else if (data.type === "searchComplete") {
+                console.log("this is real time data:", data.message)
+            } else if (data.type === "rideStarted") {
+                console.log("this is real time data:", data.message)
+            } else if (data.type === "rideEnded") {
+                console.log("this is real time data:", data.message)
+            } else if (data.type === "searchComplete") {
+                console.log("this is real time data:", data.message)
+            } else if (data.type === "driverArrived") {
+                console.log("this is real time data:", data.message)
             }
             
         }
       
-          socket.onclose = () => {
+        socket.onclose = () => {
             console.log('WebSocket connection closed');
-          };
-      
-          socket.onerror = (error) => {
+        };
+    
+        socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-          };
-      
-          // Clean up on unmount
-          return () => {
+        };
+    
+        // Clean up on unmount
+        return () => {
             socket.close();
-          };
+        };
     }, [])
+
+    console.log(driverArray)
 
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>

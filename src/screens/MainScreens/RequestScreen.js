@@ -6,7 +6,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useDispatch, useSelector } from 'react-redux';
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray } from '../../../slices/navSlice';
 import LottieView from "lottie-react-native";
 import messaging from "@react-native-firebase/messaging";
 
@@ -25,7 +25,7 @@ const RequestScreen = (props) => {
 
   const [ loading, setLoading ] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
-  const [ driverArray, setDriverArray ] = useState([1, 2, 3, 4, 5, 6, 7])
+  // const [ driverArray, setDriverArray ] = useState([1, 2, 3, 4, 5, 6, 7])
   const rating = 4.1;
 
   const dispatch = useDispatch();
@@ -41,6 +41,7 @@ const RequestScreen = (props) => {
   const seats = useSelector(selectSeats);
   const toggle = useSelector(selectToggle);
   const booking = useSelector(selectBooking);
+  const driverArray = useSelector(state => state.nav.driverArray);
 
   const tokens = useSelector(selectToken);
   const wsClientId = useSelector(selectWsClientId);
@@ -96,11 +97,13 @@ const RequestScreen = (props) => {
   const handleChooseDriver = async (bookingId, driverId) => {
     setLoading(true)
     try {
-      await fetch("", {
+      await fetch("http://localhost:8080/Booking/select-driver", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokens?.idToken}`,
+          'x-refresh-token' : tokens?.refreshToken,
+      },
         body: JSON.stringify({
           bookingId: bookingId,
           driverId: driverId,
@@ -108,7 +111,8 @@ const RequestScreen = (props) => {
       })
       .then((response) => response.json())
       .then((data) => {
-        // choose driver logic
+        setLoading(false)
+        console.log(data)
       })
     } catch (error) {
       console.error("Failed to assign driver: ", error)
@@ -192,15 +196,15 @@ const RequestScreen = (props) => {
             gap: 5,
             paddingVertical: 10,
           }}>
-            {driverArray.map((num, index) => (
-              <View key={num} className={`w-[95%] h-[150px] ${props.theme === "dark" ? "" : "bg-gray-100 border-gray-100"} rounded-[20px] shadow-md border-[0.5px] flex`}>
+            {driverArray?.map((driver, index) => (
+              <View key={driver?.driverId} className={`w-[95%] h-[150px] ${props.theme === "dark" ? "" : "bg-gray-100 border-gray-100"} rounded-[20px] shadow-md border-[0.5px] flex`}>
                 <View className={`w-full h-1/2 flex flex-row items-center`}>
                   <View className={`w-[60%] h-full flex flex-row`}>
                     <View className={`w-[40%] h-full flex items-center justify-center`}>
                       <View className={`w-14 h-14 rounded-full ${props.theme === "dark" ? "" : "bg-white"}`}></View>
                     </View>
                     <View className={`w-[60%] h-full flex justify-center`}>
-                      <Text style={{fontFamily: "os-xb"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>Enos Nsamba</Text>
+                      <Text style={{fontFamily: "os-xb"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>{`${driver?.firstname} ${driver.lastname}`}</Text>
                       <Text style={{fontFamily: "os-mid"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>Red Toyota Prius</Text>
                       <Text style={{fontFamily: "os-light"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>BAE 3155</Text>
                     </View>
@@ -221,15 +225,16 @@ const RequestScreen = (props) => {
                     </View>
                     <View className={`flex flex-row`}>
                       <TouchableOpacity className="rounded-full bg-red-600 flex items-center justify-center w-12 h-12 mr-3" onPress={() => {
-                        setDriverArray(driverArray.filter((item) => {
-                          return item !== num
-                        }))
+                        // dispatch(setDriverArray(driverArray.filter((driver) => {
+                        //   return driver !==
+                        // })))
+                        // // setDriverArray(driverArray.filter((item) => {
+                        // //   return item !== num
+                        // // }))
                       }}>
                         <Entypo name="cross" size={25} color="white" />
                       </TouchableOpacity>
-                      <TouchableOpacity className={`bg-[#186f65] flex items-center justify-center w-12 h-12 rounded-full`} onPress={() => {
-                        dispatch(setDriver(num));
-                      }}>
+                      <TouchableOpacity className={`bg-[#186f65] flex items-center justify-center w-12 h-12 rounded-full`} onPress={handleChooseDriver}>
                         <Ionicons name="checkmark-sharp" size={25} color="white" />
                       </TouchableOpacity>
                     </View>
