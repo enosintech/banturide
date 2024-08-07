@@ -11,8 +11,6 @@ import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated, setFavoriteWorkAddress } from "../../../slices/navSlice";
 import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 
-import { ensureNoQuotes } from "../../../utils/removeQuotes.js";
-
 const FavouriteScreen = (props) => {
 
     const userInfo = useSelector( selectUserInfo );
@@ -36,13 +34,6 @@ const FavouriteScreen = (props) => {
     const [ homeAdded, setHomeAdded ] = useState(false);
     const [ workAdded, setWorkAdded ] = useState(false);
 
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type" : "application/x-www-form-urlencoded",
-        },
-    }
-
     useEffect(() => {
         setTimeout(() => {
             dispatch(setFavAddressUpdated(false))
@@ -54,7 +45,7 @@ const FavouriteScreen = (props) => {
 
         const fetchFavorites = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/favorites/get-favorites`, {
+                const response = await fetch(`https://banturide-api.onrender.com/favorites/get-favorites`, {
                     method: "GET",
                     headers: {
                         'Content-Type': 'application/json',

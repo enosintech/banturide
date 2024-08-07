@@ -48,7 +48,7 @@ const DriverScreen = (props) => {
             height: 0.7 * height
           }} className={`w-full relative`}>
             <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
-                    navigation.goBack()
+                    navigation.navigate("Home")
                 }}>
                 <Ionicons name="chevron-down" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
             </TouchableOpacity>

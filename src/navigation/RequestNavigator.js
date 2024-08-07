@@ -1,9 +1,6 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSelector } from 'react-redux';
-import { selectDriver } from '../../slices/navSlice';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import AddStop from "../screens/MainScreens/AddStop";
-import RequestScreen from "../screens/MainScreens/RequestScreen";
 import DriverScreen from '../screens/MainScreens/DriverScreen';
 import ContactDriver from '../screens/MainScreens/ContactDriver';
 import CancelScreen from '../screens/MainScreens/CancelScreen';
@@ -12,9 +9,6 @@ const Stack = createNativeStackNavigator();
 
 const RequestNavigator = (props) => {
 
-  const driver = useSelector(selectDriver);
-
-  if(driver){
     return (
       <Stack.Navigator initialRouteName='driver'>
         <Stack.Screen name="driver" options={{headerShown: false}}>
@@ -35,15 +29,6 @@ const RequestNavigator = (props) => {
         </Stack.Group>
       </Stack.Navigator>
     )
-  } else {
-    return (
-      <Stack.Navigator initialRouteName='requests'>
-          <Stack.Screen name="requests" options={{headerShown: false}}>
-              {() => <RequestScreen theme={props.theme}/>}
-          </Stack.Screen>
-      </Stack.Navigator>
-    )
-  }
 }
 
 export default RequestNavigator;

@@ -11,8 +11,6 @@ import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } f
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
 
-import { ensureNoQuotes } from "../../../utils/removeQuotes";
-
 const AddLocation = (props) => {
 
     const userInfo = useSelector(selectUserInfo);
@@ -45,7 +43,7 @@ const AddLocation = (props) => {
     const handleSaveLocationAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/add-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/add-favorite", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',

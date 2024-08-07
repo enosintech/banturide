@@ -13,7 +13,7 @@ import { GOOGLE_API_KEY } from "@env";
 
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectToken, selectUserData, selectUserInfo } from "../../../slices/authSlice";
 
@@ -37,6 +37,7 @@ const HomeScreen = (props) => {
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
     const price = useSelector(selectPrice);
     const driverArray = useSelector(state => state.nav.driverArray);
+    const searchComplete = useSelector(state => state.nav.searchComplete);
 
     const tokens = useSelector(selectToken);
     const userInfo = useSelector(selectUserInfo);
@@ -99,10 +100,14 @@ const HomeScreen = (props) => {
     }, [currentLocation])
 
     useEffect(() => {
+        console.log("Latest Booking info: ", booking)
+    }, [booking])
+
+    useEffect(() => {
 
         const userId = userInfo?.userId;
         
-        const socket = new WebSocket(`ws://localhost:8080?userId=${encodeURIComponent(userId)}`);
+        const socket = new WebSocket(`wss://banturide-api.onrender.com?userId=${encodeURIComponent(userId)}`);
 
         socket.onopen = () => {
             console.log('WebSocket connection opened');
@@ -121,56 +126,29 @@ const HomeScreen = (props) => {
                 const driver = JSON.parse(data.driver)
                 console.log("driver found", driver);
 
-                // dispatch(setDriverArray([
-                //     ...driverArray.filter(d => d.driverId !== driver.driverId),
-                //     { driver }
-                // ]));
-
-                
-
-                // const isDriverPresent = driverArray.some(dri => dri.driverId === driver.driverId);
-
-                // if(!isDriverPresent){
-                //     // drivers.push(driver)
-                    
-                //     // dispatch(setDriverArray([
-                //     //     driver
-                //     // ]))
-
-                //     setDrivers([
-                //         ...drivers,
-                //         driver
-                //     ])
-                // }
-
-                // console.log("these are", drivers)
-
-                // dispatch(setDriverArray(prevArray => {
-                //     if (!prevArray.some(dri => dri?.driverId === driver?.driverId)) {
-                //         return [...prevArray, driver];
-                //     }
-                //     return prevArray;
-                // }))
-
                 dispatch(addDriver(driver))
 
             } else if (data.type === "driversNotFoundOnTime") {
                 console.log("this is real time data:", data.message);
             } else if (data.type === "driverAssigned") {
-                dispatch(setBooking(data.booking))
-                console.log(booking);
+                
+                dispatch(setBooking(JSON.parse(data.booking)))
+
+                dispatch(setDriver(JSON.parse(data.driver)))
+    
             } else if (data.type === "searchComplete") {
                 console.log("this is real time data:", data.message)
             } else if (data.type === "rideStarted") {
                 console.log("this is real time data:", data.message)
             } else if (data.type === "rideEnded") {
                 console.log("this is real time data:", data.message)
-            } else if (data.type === "searchComplete") {
+            } else if (data.type === "paymentReceived") {
                 console.log("this is real time data:", data.message)
             } else if (data.type === "driverArrived") {
                 console.log("this is real time data:", data.message)
+            } else if (data.type === "locationUpdated") {
+                console.log("this is real time data:", data.message, data.booking)
             }
-            
         }
       
         socket.onclose = () => {
@@ -187,8 +165,6 @@ const HomeScreen = (props) => {
         };
     }, [])
 
-    console.log(driverArray)
-
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
             <View className={`h-full w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>
@@ -200,7 +176,11 @@ const HomeScreen = (props) => {
                 <View className="absolute h-[18%] w-full bottom-[12%] flex items-center">
                     <View className="h-full w-[98%] p-3 fleex items-center justify-center">
                         <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[20px]  shadow-2xl ${props.theme === "dark" ? "bg-[#0e1115] border-[#0e1115]" : "bg-white border-white"}`} onPress={() => {
-                            navigation.navigate("RequestNavigator")
+                            if(booking.status === "confirmed"){
+                                navigation.navigate("RequestNavigator")
+                            } else {
+                                navigation.navigate("requests")
+                            }
                         }}>
                             <View className={`h-full w-1/2 flex items-center justify-center`}>
                                 <View className={`relative w-full h-1/2 flex items-center rounded-2xl overflow-hidden`}>
@@ -251,9 +231,9 @@ const HomeScreen = (props) => {
                             <View className={`h-full w-1/2 ${driver ? "bg-[#186f65]" : ""}  flex py-1 items-center justify-between rounded-[25px]`}>
                                 <View className={`relative ${driver ? "h-[50%]" : "h-[45%]"} w-full flex items-center justify-center overflow-hidden rounded-[25px]`}>
                                     {
-                                        driver 
+                                        booking?.status === "confirmed" || searchComplete
                                         ?
-                                        <View className={`w-full h-full rounded-[25px] ${onTheWay ? "bg-green-200" : "bg-[#186f65]"} absolute`}></View>
+                                        <View className={`w-full h-full rounded-[25px] ${booking.status === "ongoing" ? "bg-green-200" : "bg-[#186f65]"} absolute`}></View>
                                         :
                                         <LottieView 
                                             source={require("../../../assets/animations/findDriver.json")}
@@ -267,7 +247,7 @@ const HomeScreen = (props) => {
                                             }}
                                         />
                                     }
-                                    <Text style={{fontSize: getFontSize(14)}} className={`${driver ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-bold tracking-tight`}>{driver && !hasArrived ? "Driver is on the way" : driver && hasArrived ? "Driver has Arrived" : driver && onTheWay ? "You're on the way!" : !driver ? "Looking for drivers..." : ""}</Text>
+                                    <Text style={{fontSize: getFontSize(14)}} className={`${booking?.status === "confirmed" || searchComplete ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-bold tracking-tight`}>{booking?.status === "confirmed" ? "Driver is on the way" : booking?.status === "confirmed" && booking?.driverArrivedAtPickup ? "Driver has Arrived" : booking?.status === "ongoing" ? "You're on the way!" : booking?.status === "pending" && searchComplete !== true ? "Looking for drivers..." : "Search Complete"}</Text>
                                 </View>
                                 <View className={`h-[50%] ${driver ? "w-[95%]" : "w-full"} flex items-center relative rounded-t-[10px] rounded-b-[20px] justify-center bg-white shadow-md border-[0.5px] border-gray-100`}>
                                     <View className={`w-[90%]`}>
@@ -326,11 +306,9 @@ const HomeScreen = (props) => {
                                 }}>
                                     <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "ride" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Ride</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity className={`w-[50%] h-[100%] ${toggle === "delivery" ? "bg-[#186F65]" : "bg-white" } items-center justify-center  rounded-[25px] `} onPress={() => {
-                                    dispatch(setToggle("delivery"))
-                                    dispatch(setTripType("normal"))
-                                }}>
+                                <TouchableOpacity disabled={true} className={`w-[50%] h-[100%] opacity-20 ${toggle === "delivery" ? "bg-[#186F65]" : "bg-white" } items-center justify-center  rounded-[25px] `}>
                                     <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "delivery" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Delivery</Text>
+                                    <Text tyle={{fontSize: getFontSize(14)}} className={`font-light tracking-tight`}>Coming Soon</Text>
                                 </TouchableOpacity>
                             </>
                             }

@@ -11,7 +11,7 @@ import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } f
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
 
-const AddLocation = (props) => {
+const EditLocation = (props) => {
 
     const routes = useRoute();
 
@@ -41,12 +41,13 @@ const AddLocation = (props) => {
     const editLocationForm = {
         address: locationAddress?.description,
         name: locationName,
+        locationId: id
     }
     
     const handleSaveLocationAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/update-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/update-favorite", {
             method: "PUT",
             headers: {
                 'Content-Type': 'application/json',
@@ -180,4 +181,4 @@ const AddLocation = (props) => {
     )
 }
 
-export default AddLocation;
+export default EditLocation;

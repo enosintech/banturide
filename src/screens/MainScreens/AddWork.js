@@ -11,8 +11,6 @@ import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
-import { ensureNoQuotes } from "../../../utils/removeQuotes";
-
 const AddWork = (props) => {
 
     // const userInfo = useSelector(selectUserInfo);
@@ -47,7 +45,7 @@ const AddWork = (props) => {
     const handleSaveWorkAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/add-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/add-favorite", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +71,7 @@ const AddWork = (props) => {
         })
         .catch((err) => {
             setLoading(false)
-            console.log(err)
+            console.log("Error adding favorite address: ", err);
         })
     }
 

@@ -2,16 +2,16 @@ import { View, Text, SafeAreaView, TouchableOpacity, Image, PixelRatio } from 'r
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from '@react-navigation/native';
 
 import PageLoader from '../../components/atoms/PageLoader';
 
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId, selectPaymentMethod, setBookingRequested } from '../../../slices/navSlice';
 import { setDestination, setOrigin, setPrice, setToggle, setTravelTimeInformation, setTripDetails, setBooking } from '../../../slices/navSlice';
 import { selectToken, selectUserInfo } from '../../../slices/authSlice';
-import { useFetchFcmToken } from '../../hooks/useFetchFcmToken';
 
 const ConfirmScreen = (props) => {
 
@@ -34,13 +34,7 @@ const ConfirmScreen = (props) => {
   const schoolPickup = useSelector(selectSchoolPickup);
   const userInfo = useSelector(selectUserInfo);
   const tokens = useSelector(selectToken);
-
-  const fcmToken = useFetchFcmToken();
-  const wsClientId = useSelector(selectWsClientId);
-
-  console.log(wsClientId)
-
-  // console.log(fcmToken?.token);
+  const paymentMethod = useSelector(selectPaymentMethod);
 
   const requestForm = {
     user: userInfo ? userInfo._id : "",
@@ -52,13 +46,13 @@ const ConfirmScreen = (props) => {
     pickUpLongitude: origin.location.lng,
     dropOffLatitude: destination.location.lat,
     dropOffLongitude: destination.location.lng,
-    fcmToken: fcmToken?.token,
-    wsClientId: wsClientId,
+    seats: seats,
+    paymentMethod: paymentMethod
   }
 
   const handleMakeRequest = async () => {
     dispatch(setBookingRequestLoading(true));
-    await fetch("http://localhost:8080/Booking/book-request", {
+    await fetch("https://banturide-api.onrender.com/booking/book-request", {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -75,9 +69,10 @@ const ConfirmScreen = (props) => {
         console.log(data.error, "failed")
       } else {
         dispatch(setBookingRequestLoading(false))
-        dispatch(setBooking(data))
+        dispatch(setBooking(data.booking))
+        dispatch(setBookingRequested(true))
         navigation.navigate("Home")
-        console.log(data)
+        navigation.navigate("requests")
       }
     })
   }
@@ -163,7 +158,7 @@ const ConfirmScreen = (props) => {
                     <Text style={{fontSize: getFontSize(15)}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Origin</Text>
                   </View>
                   <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                    <Text style={{fontSize: getFontSize(13)}} className={`font-light tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
+                    <Text style={{fontSize: getFontSize(13)}} className={`font-light text-center tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
                   </View>
                 </View>
               </View>
@@ -182,7 +177,7 @@ const ConfirmScreen = (props) => {
                             <MaterialIcons name="keyboard-arrow-right" size={getFontSize(20)} color={props.theme === "dark" ? "white" : "black"}/>
                           </View>
                           <View className={`w-[80%] h-0 border-t-[0.5px] ${props.theme === "dark" ? "border-gray-100" : "border-gray-300"}`}></View>
-                          <Text style={{fontSize: getFontSize(12)}} className={`font-light tracking-tight w-[80%] mt-1 h-1/2 truncate ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
+                          <Text style={{fontSize: getFontSize(12)}} className={`font-light tracking-tight w-[80%] mt-1 h-1/2 truncate text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
                         </View>
                         <View className={`w-[40%] h-full flex items-center justify-center`}>
                           <TouchableOpacity className={`p-2 rounded-full border-[0.5px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white shadow border-gray-100"}`} onPress={() => {
@@ -211,7 +206,7 @@ const ConfirmScreen = (props) => {
                           <Text style={{fontSize: getFontSize(15)}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
                         </View>
                         <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                          <Text style={{fontSize: getFontSize(13)}} className={`font-light tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
+                          <Text style={{fontSize: getFontSize(13)}} className={`font-light text-center tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
                         </View>
                       </View>
                     </View>
@@ -223,21 +218,23 @@ const ConfirmScreen = (props) => {
           </View>
         </View>
       </View>
-      <View className={`w-[90%] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white"} rounded-[20px] h-[30%] flex`}>
-        <View className={`w-full h-1/3 flex items-center justify-end`}>
-          <View className={`w-[90%] h-[75%] shadow border-[0.5px] rounded-full ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white border-gray-100"}`}></View>
-        </View>
-        <View className={`w-full h-2/3 flex-row items-center`}>
+      <View className={`w-[90%] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white"} rounded-[20px] h-[23%] flex`}>
+        <View className={`w-full h-full flex-row items-center`}>
           <TouchableOpacity className={`w-[18%] h-full flex items-center justify-center`} onPress={() => {
             navigation.navigate("togglePayment");
           }}>
-            <Ionicons name="cash" size={getFontSize(30)} color={"#186f65"}/>
+              {paymentMethod === "cash" ? 
+                  <Ionicons name="cash" size={getFontSize(30)} color="green" />
+              :
+                  <Entypo name="wallet" color={"black"} size={getFontSize(30)} />
+              }
           </TouchableOpacity>
           <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-white" : "border-gray-300"}`}></View>
           <View className={`w-[41%] h-full flex items-center justify-center`}>
             <TouchableOpacity className={`h-[80%] w-[90%] rounded-[20px] bg-red-600 shadow flex items-center justify-center`} onPress={() => {
               dispatch(setDestination(null))
               dispatch(setOrigin(null))
+              dispatch(setPassThrough(null))
               dispatch(setPrice(null))
               dispatch(setTravelTimeInformation(null))
               dispatch(setTripDetails(null))

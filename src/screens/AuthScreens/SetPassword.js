@@ -87,32 +87,11 @@ const SetPassword = (props) => {
             return;
         }
 
-        await fetch('http://localhost:8080/auth/create-passenger', options)
+        await fetch('https://banturide-api.onrender.com/auth/create-passenger', options)
         .then(response => response.json())
         .then(async data => {
 
             if(data.message === "User created successfully"){
-                // await SecureStore.setItemAsync("idToken", JSON.stringify(data.userCredential._tokenResponse.idToken).then(() => {
-                //     setLoading(false)
-                //     navigation.reset({
-                //         index: 0,
-                //         routes: [{name: "Signin"}]
-                //     })
-                // })).catch((err) => {
-                //     setLoading(false)
-                //     console.log(err)
-                // })
-                // await SecureStore.setItemAsync("idToken", JSON.stringify(data.userCredential._tokenResponse.idToken)).then(() => {
-                //     setLoading(false)
-                //     navigation.reset({
-                //         index: 0,
-                //         routes: [{name: "Signin"}]
-                //     })
-                // }).catch((err) => {
-                //     setLoading(false)
-                //     console.log(err)
-                // })
-
                 setLoading(false)
                 console.log(data)
                 navigation.reset({
@@ -127,26 +106,7 @@ const SetPassword = (props) => {
                     setErrorVisible(false)
                 }, 4000)
             }
-            // if(data.success === false){
-            //     setLoading(false)
-            //     setErrorVisible(true);
-            //     setServerError(data.message);
-            //     console.log(data)
-            //     setTimeout(() => {
-            //         setErrorVisible(false)
-            //     }, 4000);
-            // } else {
-            //     await SecureStore.setItemAsync("user", JSON.stringify(data)).then(() => {
-            //         setLoading(false)
-            //         navigation.reset({
-            //             index: 0,
-            //             routes: [{name: "verifyotp"}]
-            //         })
-            //     }).catch((err) => {
-            //         setLoading(false)
-            //         console.log(err)
-            //     })
-            // }
+           
         })
         .catch((error) => {
             console.log(error)

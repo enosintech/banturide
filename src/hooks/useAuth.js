@@ -36,7 +36,7 @@ export function useAuth () {
 
   const getUserProfile = async () => {
     try {
-      await fetch("http://localhost:8080/profile/profile", {
+      await fetch("https://banturide-api.onrender.com/profile/get-user-profile", {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -47,15 +47,13 @@ export function useAuth () {
       .then((response) => response.json())
       .then((data) => {
         if('error' in data){
+          console.log(data)
           dispatch(setUserInfo(null))
           setUser(false)
         } else {
           dispatch(setUserInfo(data))
           setUser(true)
         }
-      })
-      .catch((error) => {
-        console.log("This error might be dumb ", error)
       })
 
     } catch (error) { 

@@ -32,7 +32,7 @@ const ChangeName = (props) => {
       try {
         setLoading(true)
 
-        const response = await fetch(`http://localhost:8080/profile/profile/name`, {
+        const response = await fetch(`https://banturide-api.onrender.com/profile/profile/name`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -48,8 +48,8 @@ const ChangeName = (props) => {
         const result = await response.json();
 
         if(result) {
-          setLoading(false)
           dispatch(setProfileUpdated(!profileUpdated))
+          setLoading(false)
           navigation.goBack();
         }
 

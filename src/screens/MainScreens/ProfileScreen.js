@@ -8,11 +8,13 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { useEffect } from "react";
+import { selectBooking } from "../../../slices/navSlice";
 
 const ProfileScreen = (props) => {
     const navigation = useNavigation();
 
     const tokens = useSelector(selectToken);
+    const booking = useSelector(selectBooking);
 
     const [notificationToggle, setNotificationToggle] = useState(true);
     const [callDriverToggle, setCallDriverToggle] = useState(false);
@@ -38,7 +40,7 @@ const ProfileScreen = (props) => {
         }
 
         try {    
-            const response = await fetch("http://localhost:8080/profile/toggle-notifications", {
+            const response = await fetch("https://banturide-api.onrender.com/profile/toggle-notifications", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,6 +54,7 @@ const ProfileScreen = (props) => {
     
             await response.json()
             .then((data) => {
+                console.log(data)
                 setNotificationAlert(!notificationAlert)
                 setNotificationValue(data.notificationsEnabled)
             })
@@ -73,7 +76,7 @@ const ProfileScreen = (props) => {
 
         try {
 
-            const response = await fetch("http://localhost:8080/profile/toggle-driver-should-call", {
+            const response = await fetch("https://banturide-api.onrender.com/profile/toggle-driver-should-call", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,6 +100,28 @@ const ProfileScreen = (props) => {
             console.log(error)
         }
     }
+    
+    const updateBookingLocation = async (req, res) => {
+        await fetch("https://banturide-api.onrender.com/location/update-booking-location", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: JSON.stringify({
+                bookingId: "8tTIpjER8ujsMlDTkTQa",
+                driverId: "LY1HpRCfgWamdErqMjWmsKRq7iR2"
+            })
+        }).then(response => response.json())
+        .then(data => {
+          console.log(data);
+        })
+    }
+
+    useEffect(() => {
+        updateBookingLocation();
+    }, [])
 
     useEffect(() => {
         setTimeout(() => {

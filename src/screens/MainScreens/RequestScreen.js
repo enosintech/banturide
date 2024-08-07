@@ -1,22 +1,20 @@
+import { View, Text, TouchableOpacity, Image, ScrollView, PixelRatio } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useDispatch, useSelector } from 'react-redux';
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray } from '../../../slices/navSlice';
+
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver } from '../../../slices/navSlice';
 import LottieView from "lottie-react-native";
-import messaging from "@react-native-firebase/messaging";
 
 import RequestMap from "../../components/atoms/RequestMap";
 import PageLoader from '../../components/atoms/PageLoader';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
 
-import { ensureNoQuotes } from '../../../utils/removeQuotes';
 import { selectToken } from '../../../slices/authSlice';
-import { useFetchFcmToken } from '../../hooks/useFetchFcmToken';
 
 const RequestScreen = (props) => {
   
@@ -25,11 +23,17 @@ const RequestScreen = (props) => {
 
   const [ loading, setLoading ] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
-  // const [ driverArray, setDriverArray ] = useState([1, 2, 3, 4, 5, 6, 7])
   const rating = 4.1;
 
   const dispatch = useDispatch();
-  const fcmToken = useFetchFcmToken();
+
+  const bookingRequested = useSelector(state => state.nav.bookingRequested);
+  const searchPerformed = useSelector(state => state.nav.searchPerformed);
+  const searchComplete = useSelector(state => state.nav.searchComplete);
+
+  const fontScale = PixelRatio.getFontScale();
+
+  const getFontSize = size => size / fontScale;
 
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
@@ -41,10 +45,8 @@ const RequestScreen = (props) => {
   const seats = useSelector(selectSeats);
   const toggle = useSelector(selectToggle);
   const booking = useSelector(selectBooking);
-  const driverArray = useSelector(state => state.nav.driverArray);
-
   const tokens = useSelector(selectToken);
-  const wsClientId = useSelector(selectWsClientId);
+  const driverArray = useSelector(state => state.nav.driverArray);
 
   const currentLocation = {
     latitude: origin?.location.lat,
@@ -57,22 +59,10 @@ const RequestScreen = (props) => {
     mapRef.current.animateToRegion(currentLocation, 1 * 1000)
   }
 
-  useEffect(() => {
-    handleDriverSearch(booking.bookingId);
-  }, [])
-
-  // useEffect(() => {
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
-  //       console.log("a new FCM message has arrived!", JSON.stringify(remoteMessage));
-  //   });
-
-  //   unsubscribe();
-  // }, []);
-
   const handleDriverSearch = async (bookingId) => {
+    dispatch(setSearchComplete(false))
     try{
-      await fetch("http://localhost:8080/Booking/search-driver", {
+      await fetch("https://banturide-api.onrender.com/booking/search-driver", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -81,12 +71,15 @@ const RequestScreen = (props) => {
         },
         body: JSON.stringify({
           bookingId: bookingId,
-          fcmToken: fcmToken?.token,
-          wsClientId: wsClientId,
         })
       }).then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        if(data.message === "Booking confirmed. Search has been stopped."){
+          console.log(data)
+        } else {
+          dispatch(setSearchComplete(true))
+          console.log(data)
+        }
       })
 
     } catch (error) {
@@ -94,16 +87,21 @@ const RequestScreen = (props) => {
     }  
   }
 
+  const handleDriverReSearch = () => {
+    dispatch(resetSearch()); 
+    dispatch(setBookingRequested(true));
+  };
+
   const handleChooseDriver = async (bookingId, driverId) => {
     setLoading(true)
     try {
-      await fetch("http://localhost:8080/Booking/select-driver", {
+      await fetch("https://banturide-api.onrender.com/booking/select-driver", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tokens?.idToken}`,
           'x-refresh-token' : tokens?.refreshToken,
-      },
+        },
         body: JSON.stringify({
           bookingId: bookingId,
           driverId: driverId,
@@ -111,21 +109,35 @@ const RequestScreen = (props) => {
       })
       .then((response) => response.json())
       .then((data) => {
-        setLoading(false)
-        console.log(data)
+        if(data.message === "Error in assigning driver to booking."){
+          setLoading(false)
+          console.log(data)
+        } else {
+          setLoading(false)
+          console.log(data)
+          navigation.navigate("RequestNavigator");
+        }
+        
       })
     } catch (error) {
       console.error("Failed to assign driver: ", error)
     }
   }
 
-  const handleRemoveDriver = async () => {
-
-  }
-
   const handleCancelBooking = async () => {
     setLoading(true)
-    await fetch("https://banturide.onrender.com/bookride/cancel-booking", options)
+    await fetch("https://banturide-api.onrender.com/booking/cancel-booking", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokens?.idToken}`,
+        'x-refresh-token' : tokens?.refreshToken,
+      },
+      body: JSON.stringify({
+        bookingId: booking?.bookingId,
+        reason: "",
+      })
+    })
     .then(response => response.json())
     .then(data => {
       if(data.success === false){
@@ -134,41 +146,74 @@ const RequestScreen = (props) => {
       } else {
         setLoading(false)
         setModalVisible(false)
-        // dispatch(setDestination(null))
-        // dispatch(setOrigin(null))
-        // dispatch(setPrice(null))
-        // dispatch(setTravelTimeInformation(null))
-        // dispatch(setTripDetails(null))
-        // dispatch(setPassThrough(null))
-        // dispatch(setBooking(null))
+        dispatch(setDestination(null))
+        dispatch(setOrigin(null))
+        dispatch(setPrice(null))
+        dispatch(setTravelTimeInformation(null))
+        dispatch(setTripDetails(null))
+        dispatch(setPassThrough(null))
+        dispatch(setBooking(null))
+        dispatch(setBookingRequested(false))
+        dispatch(setSearchPerformed(false))
+        setSearchComplete(false)
         navigation.navigate("Home")
       }
     })
   } 
 
+  useEffect(() => {
+    if (bookingRequested && !searchPerformed) {
+      handleDriverSearch(booking.bookingId);
+      dispatch(setSearchPerformed(true));
+    }
+  }, [bookingRequested, searchPerformed, dispatch]);
+
   return (
-    <View className={`flex-1 ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-gray-100"}`}>
-      <Modal visible={modalVisible} onRequestClose={() => {setModalVisible(false)}} animationType="fade" >
-        <View className={`w-full h-full flex flex-col items-center justify-end py-10 relative bg-white`}>
-          <LoadingBlur loading={loading} />
-          <View className={`w-[95%] h-[40%] px-5 flex flex-col items-center justify-center`}>
-            <View className={`w-[80%] h-[50%]  bg-red-500`}></View>
-            <Text className={`text-black font-extrabold text-2xl mt-5 text-center`}>Are you sure you would like to cancel this request?</Text>
-            <Text className={`text-black mt-3 text-lg font-thin`}>If you wait you could be on your way soon!</Text>
-          </View>
-          <View className={`w-[95%] h-[15%] bg-white shadow border ${props.theme === "dark" ? "" : "border-gray-100"} mt-10 rounded-[20px] flex flex-row items-center justify-evenly`}>
-            <TouchableOpacity onPress={handleCancelBooking} className={`w-[45%] h-[60%] flex items-center justify-center bg-red-700 rounded-[20px]`}>
-              <Text className={`text-white font-bold text-lg`}>Cancel Request</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {setModalVisible(false)}} className={`w-[45%] h-[60%] flex items-center justify-center bg-green-700 rounded-[20px]`}>
-              <Text className={`text-white font-bold text-lg`}>Keep Request</Text>
-            </TouchableOpacity>
+    <View className={`flex-1 ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-gray-100"} relative`}>
+    
+      <LoadingBlur loading={loading} />
+
+      {searchComplete && 
+        <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex flex-row items-end`}>
+          <View className={`w-full h-[25%] bg-white rounded-t-[25px] flex flex-col`}>
+            <View className={`w-full h-1/2 flex items-center justify-center`}>
+              <Text style={{fontSize: getFontSize(20)}}  className={`font-bold tracking-tight text-center max-w-[80%]`}>Search ran for 2 minutes without a driver being selected</Text>
+            </View>
+            <View className={`w-full h-[40%] flex flex-row items-center justify-evenly`}>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Cancel Request</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-green-700 flex items-center justify-center`} onPress={() => handleDriverReSearch()}>
+                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Search Again</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </Modal>
+      }
+
+      {modalVisible && 
+        <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex items-center justify-center`}>
+          <View className={`w-[90%] h-[20%] bg-white rounded-[25px] flex flex-col`}>
+            <View className="w-full h-1/2 flex items-center justify-center">
+              <Text style={{fontSize: getFontSize(16)}} className={`font-medium tracking-tight text-center max-w-[90%]`}>Are you sure you want to cancel your request? We will find you a suitable driver soon!</Text>
+            </View>
+            <View className="w-full h-1/2 flex flex-row items-center justify-evenly">
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-green-700 flex items-center justify-center`} onPress={ () => setModalVisible(false)}>
+                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      }
+      
       <View className={`relative h-[65%] w-full flex items-center justify-center`}>
         <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
-                    navigation.navigate("Home")
+                    navigation.navigate("Home");
                 }}>
                 <Ionicons name="chevron-down" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
         </TouchableOpacity>
@@ -177,16 +222,21 @@ const RequestScreen = (props) => {
         </TouchableOpacity>
         <RequestMap mapRef={mapRef} theme={props.theme} />
         <View className={`absolute w-[300px] h-[300px] flex items-center justify-center`}>
-            <LottieView 
-              source={require("../../../assets/animations/findDriver.json")}
-              loop
-              autoPlay
-              speed={1}
-              style={{
-                  width: 600,
-                  height: 600
-              }}
-            />
+            {
+              searchComplete ? 
+              <View></View>
+            : 
+              <LottieView 
+                source={require("../../../assets/animations/findDriver.json")}
+                loop
+                autoPlay
+                speed={1}
+                style={{
+                    width: 600,
+                    height: 600
+                }}
+              />
+            }
         </View>
         <View className={`absolute top-20 w-[95%] h-[70%]`}>
           <ScrollView contentContainerStyle={{
@@ -225,16 +275,11 @@ const RequestScreen = (props) => {
                     </View>
                     <View className={`flex flex-row`}>
                       <TouchableOpacity className="rounded-full bg-red-600 flex items-center justify-center w-12 h-12 mr-3" onPress={() => {
-                        // dispatch(setDriverArray(driverArray.filter((driver) => {
-                        //   return driver !==
-                        // })))
-                        // // setDriverArray(driverArray.filter((item) => {
-                        // //   return item !== num
-                        // // }))
+                        dispatch(removeDriver(driver.driverId))
                       }}>
                         <Entypo name="cross" size={25} color="white" />
                       </TouchableOpacity>
-                      <TouchableOpacity className={`bg-[#186f65] flex items-center justify-center w-12 h-12 rounded-full`} onPress={handleChooseDriver}>
+                      <TouchableOpacity className={`bg-[#186f65] flex items-center justify-center w-12 h-12 rounded-full`} onPress={() => handleChooseDriver(booking?.bookingId, driver?.driverId)}>
                         <Ionicons name="checkmark-sharp" size={25} color="white" />
                       </TouchableOpacity>
                     </View>
@@ -361,7 +406,7 @@ const RequestScreen = (props) => {
         <View className={`w-full h-[40%] flex items-center justify-start`}>
           <View className={`w-[95%] h-[80%] rounded-t-[20px] rounded-b-[30px] mt-1 shadow-md border-[0.5px] flex items-center justify-center ${props.theme === "dark" ? "" : "bg-white border-gray-100"}`}>
             <TouchableOpacity className={`w-[90%] h-[65%] bg-red-600 rounded-2xl flex items-center justify-center shadow-xl`} onPress={() => {
-              navigation.navigate("Home")
+              setModalVisible(true)
             }}>
                 <Text style={{fontFamily: "os-xb"}} className={`text-white text-lg`}>Cancel Request</Text>
             </TouchableOpacity>

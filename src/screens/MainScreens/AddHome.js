@@ -6,8 +6,6 @@ import { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { ensureNoQuotes } from "../../../utils/removeQuotes";
-
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import { selectToken, selectUserInfo } from "../../../slices/authSlice";
@@ -48,7 +46,7 @@ const AddHome = (props) => {
     const handleSaveHomeAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/add-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/add-favorite", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +72,7 @@ const AddHome = (props) => {
         })
         .catch((err) => {
             setLoading(false)
-            console.log(err)
+            console.log("Error adding favorite address: ", err);
         })
     }
 

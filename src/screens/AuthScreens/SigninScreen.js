@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { safeViewAndroid } from "./WelcomeScreen";
 import BackButton from "../../components/atoms/BackButton";
 import LoadingBlur from "../../components/atoms/LoadingBlur";
-import { selectUserInfo, setIsSignedIn } from "../../../slices/authSlice";
+import { selectIsSignedIn, selectUserInfo, setIsSignedIn } from "../../../slices/authSlice";
 
 const SigninScreen = (props) => {
     const navigation = useNavigation();
@@ -26,6 +26,8 @@ const SigninScreen = (props) => {
     const [ loading, setLoading ] = useState(false);
 
     const height = Dimensions.get("window").height;
+
+    const isSignedIn = useSelector(selectIsSignedIn);
 
     const userForm = {
         email: email,
@@ -54,12 +56,12 @@ const SigninScreen = (props) => {
             return;
         }
 
-        await fetch("http://localhost:8080/auth/passenger-signin", options)
+        await fetch("https://banturide-api.onrender.com/auth/signin", options)
         .then(response => response.json())
         .then( async data => {
-            if(data.message === "User logged in successfully"){
+            if(data.message === "Logged in successfully"){
                 await SecureStore.setItemAsync("tokens", JSON.stringify(data.userCredential._tokenResponse)).then(() => {
-                    dispatch(setIsSignedIn(true))
+                    dispatch(setIsSignedIn(!isSignedIn))
                     setTimeout(() => {
                         setLoading(false)
                     }, 5000)
@@ -72,7 +74,7 @@ const SigninScreen = (props) => {
                 setTimeout(() => {
                     setErrorVisible(false)
                 }, 4000)
-            }
+            }1
 
         })
     }

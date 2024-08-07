@@ -12,7 +12,7 @@ import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated, setFavoriteHomeAddress } from "../../../slices/navSlice";
 
-const AddHome = (props) => {
+const EditHome = (props) => {
 
     const routes = useRoute();
 
@@ -40,12 +40,16 @@ const AddHome = (props) => {
 
     const editHomeForm = {
         address: homeAddress?.description,
+        locationId: id,
+        name: "home"
     }
+
+    console.log(id)
 
     const handleSaveHomeAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/update-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/update-favorite", {
             method: "PUT",
             headers: {
                 'Content-Type': 'application/json',
@@ -172,4 +176,4 @@ const AddHome = (props) => {
     )
 }
 
-export default AddHome;
+export default EditHome;

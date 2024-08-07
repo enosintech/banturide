@@ -36,13 +36,6 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "firebaseApiKey": "AIzaSyC6JWbDJkEwfhOjGEbUUZJVcfinWY64G7M",
-      "firebaseAuthDomain": "bantu-ride-f7cf6.firebaseapp.com",
-      "firebaseProjectId": "bantu-ride-f7cf6",
-      "firebaseStorageBucket": "bantu-ride-f7cf6.appspot.com",
-      "firebaseMessagingSenderId": "413112601823",
-      "firebaseAppId": "1:413112601823:web:7dfd565681ca40b6c82d6a",
-      "firebaseMeasurementId": "G-54VLZFZ8RS",
       "eas": {
         "projectId": "b09f51e8-6961-4c74-9628-030fc2aee422"
       }

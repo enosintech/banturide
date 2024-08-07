@@ -30,13 +30,16 @@ const Favorite = (props) => {
         setModalVisible(false)
         setLoading(true)
         try {
-            const response = await fetch("http://localhost:8080/favorites/favorites", {
+            const response = await fetch("https://banturide-api.onrender.com/favorites/delete-favorite", {
                 method: "DELETE",
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${tokens?.idToken}`,
                     'x-refresh-token' : tokens?.refreshToken,
                 },
+                body: JSON.stringify({
+                    locationId: props.id,
+                })
             })
             const result = await response.json();
             console.log(result)
@@ -44,7 +47,6 @@ const Favorite = (props) => {
             setLoading(false)
         } catch (error) {
             setLoading(false)
-            console.log(error)
         }
     }
 
@@ -92,15 +94,15 @@ const Favorite = (props) => {
                     <TouchableOpacity onPress={() => {
                         if(props.iconName && props.iconName === "home-filled"){
                             navigation.navigate("edithome", {
-                                id: props._id,
+                                id: props.id,
                             })
                         } else if(props.iconName && props.iconName === "work"){
                             navigation.navigate("editwork", {
-                                id: props._id
+                                id: props.id
                             })
                         } else {
                             navigation.navigate("editlocation", {
-                                id: props._id
+                                id: props.id
                             })
                         }
                     }}>

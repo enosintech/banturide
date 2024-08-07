@@ -11,7 +11,7 @@ import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
-const AddWork = (props) => {
+const EditWork = (props) => {
 
     const routes = useRoute();
 
@@ -39,12 +39,14 @@ const AddWork = (props) => {
 
     const editWorkForm = {
         address: workAddress?.description,
+        locationId: id,
+        name: "work"
     }
 
     const handleSaveWorkAddress = async () => {
         setLoading(true)
 
-        await fetch("http://localhost:8080/favorites/update-favorites", {
+        await fetch("https://banturide-api.onrender.com/favorites/update-favorite", {
             method: "PUT",
             headers: {
                 'Content-Type': 'application/json',
@@ -169,4 +171,4 @@ const AddWork = (props) => {
     )
 }
 
-export default AddWork;
+export default EditWork;

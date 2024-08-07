@@ -29,7 +29,7 @@ const BurgerMenu = (props) => {
     const handleSignOut = async () => {
         setLoading(true)
         
-        await fetch("http://localhost:8080/auth/passenger-signout", {
+        await fetch("https://banturide-api.onrender.com/auth/signout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

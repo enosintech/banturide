@@ -7,6 +7,7 @@ const initialState = {
     travelTimeInformation: null,
     toggle: "ride",
     tripDetails: null,
+    paymentMethod: "cash",
     price: null,
     seats: "4",
     booking: null,
@@ -19,6 +20,9 @@ const initialState = {
     favAddressChanged: false,
     favAddressUpdated: false,
     profileUpdated: false,
+    bookingRequested: false, 
+    searchPerformed: false,
+    searchComplete: false,
     favoriteHomeAddress: {
         description: "",
         location: "",
@@ -46,6 +50,9 @@ export const navSlice = createSlice({
         },
         setTravelTimeInformation: (state, action)  => {
             state.travelTimeInformation = action.payload;
+        },
+        setPaymentMethod: (state, action ) => {
+            state.paymentMethod = action.payload;
         },
         setToggle : (state, action) => {
             state.toggle = action.payload;
@@ -98,6 +105,18 @@ export const navSlice = createSlice({
         setWsClientId: (state, action) => {
             state.wsClientId = action.payload;
         },
+        setBookingRequested(state, action) {
+            state.bookingRequested = action.payload;
+        },
+        setSearchPerformed(state, action) {
+            state.searchPerformed = action.payload;
+        },
+        setSearchComplete(state, action){
+            state.searchComplete = action.payload;
+        },
+        resetSearch(state) {
+            state.searchPerformed = false;
+        },
         addDriver: (state, action) => {
             const newDriver = action.payload;
             const isDriverPresent = state.driverArray.some(driver => driver.driverId === newDriver.driverId);
@@ -105,11 +124,15 @@ export const navSlice = createSlice({
             if (!isDriverPresent) {
                 state.driverArray.push(newDriver);
             }
-        }
+        },
+        removeDriver: (state, action) => {
+            const driverIdToRemove = action.payload;
+            state.driverArray = state.driverArray.filter(driver => driver.driverId !== driverIdToRemove);
+          }
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver, removeDriver, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -132,5 +155,6 @@ export const selectProfileUpdated = (state) => state.nav.profileUpdated;
 export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddress;
 export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
 export const selectWsClientId = (state) => state.nav.wsClientId;
+export const selectPaymentMethod = (state) => state.nav.paymentMethod;
 
 export default navSlice.reducer;

@@ -6,6 +6,7 @@ import NotificationsScreen from "../screens/MainScreens/NotificationsScreen";
 import SearchModal from "../screens/MainScreens/SearchModal";
 import BookNavigator from "./BookNavigator";
 import RequestNavigator from "../navigation/RequestNavigator";
+import RequestScreen from "../screens/MainScreens/RequestScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,9 @@ const HomeNavigator = (props) => {
                 </Stack.Screen>
             </Stack.Group>
             <Stack.Group screenOptions={{presentation: "fullScreenModal"}}>
+                <Stack.Screen name="requests" options={{headerShown: false}}>
+                    {() => <RequestScreen theme={props.theme}/>}
+                </Stack.Screen>
                 <Stack.Screen name="BookNavigator" options={{headerShown: false}}>
                     {() => <BookNavigator initialRegion={initialRegion} theme={props.theme} />}
                 </Stack.Screen>
