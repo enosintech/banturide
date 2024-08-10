@@ -9,6 +9,7 @@ import { Provider } from "react-redux";
 import { store } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
 import { isLoaded } from 'expo-font';
+import { WebSocketProvider } from './src/components/atoms/WebSocket';
 
 SplashScreen.preventAutoHideAsync();
 

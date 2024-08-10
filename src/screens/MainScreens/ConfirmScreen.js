@@ -52,7 +52,7 @@ const ConfirmScreen = (props) => {
 
   const handleMakeRequest = async () => {
     dispatch(setBookingRequestLoading(true));
-    await fetch("https://banturide-api.onrender.com/booking/book-request", {
+    await fetch("https://banturide-api.onrender.com/booking/make-book-request", {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',

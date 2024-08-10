@@ -10,6 +10,7 @@ const initialState = {
     isSignedIn: false,
     token: null,
     userInfo: null,
+    tokenFetched: false,
 }
 
 export const authSlice = createSlice({
@@ -28,14 +29,18 @@ export const authSlice = createSlice({
         setUserInfo: (state, action) => {
             state.userData = action.payload;
         },
+        setTokenFetched: (state, action) => {
+            state.tokenFetched = action.payload;
+        }
     }
 })
 
-export const { setUser, setIsSignedIn, setToken, setUserInfo } = authSlice.actions;
+export const { setUser, setIsSignedIn, setToken, setUserInfo, setTokenFetched } = authSlice.actions;
 
 export const selectUser = (state) => state.auth.user;
 export const selectIsSignedIn = (state) => state.auth.isSignedIn;
 export const selectToken = (state) => state.auth.token;
 export const selectUserInfo = (state) => state.auth.userData;
+export const selectTokenFetched = (state) => state.auth.tokenFetched;
 
 export default authSlice.reducer;

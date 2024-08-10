@@ -5,7 +5,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from 'react-native-maps-directions';
 import LottieView from "lottie-react-native";
 
-import { selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
+import { selectBooking, selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
 import { lightModeMapStyle, darkModeMapStyle } from '../../../assets/styles/MapStyles.js';
 
 const Map = (props) => {
@@ -15,6 +15,7 @@ const Map = (props) => {
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
   const destination = useSelector(selectDestination); 
+  const booking = useSelector(selectBooking);
 
   const fontScale = PixelRatio.getFontScale();
 
@@ -42,7 +43,7 @@ const Map = (props) => {
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         > 
-          {origin && destination && 
+          {origin && destination && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) &&
             <MapViewDirections 
                 origin={origin.description}
                 destination={destination.description}
@@ -53,7 +54,7 @@ const Map = (props) => {
             />
           }
 
-          {origin?.location && (
+          {origin?.location && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) && (
             <Marker 
               coordinate={{
                 latitude: origin.location.lat,
@@ -69,7 +70,7 @@ const Map = (props) => {
             </Marker>
           )}
           
-          {passThrough?.location && (
+          {passThrough?.location && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) &&  (
             <Marker
               coordinate={{
                 latitude: passThrough.location.lat,
@@ -85,7 +86,7 @@ const Map = (props) => {
             </Marker>
           )}
 
-          {destination?.location && (
+          {destination?.location &&  (
             <Marker
                 coordinate={{
                     latitude: destination.location.lat,
@@ -100,7 +101,7 @@ const Map = (props) => {
               </View>
             </Marker>
         )}
-        </MapView>
+        </MapView> 
       ) : 
       <View className="flex-1">
         <View className={`w-full h-[75%] items-center justify-center ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>

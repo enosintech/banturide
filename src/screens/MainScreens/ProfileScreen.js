@@ -5,16 +5,17 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { useEffect } from "react";
-import { selectBooking } from "../../../slices/navSlice";
+import { selectProfileUpdated, setProfileUpdated } from "../../../slices/navSlice";
 
 const ProfileScreen = (props) => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const tokens = useSelector(selectToken);
-    const booking = useSelector(selectBooking);
+    const profileUpdated = useSelector(selectProfileUpdated);
 
     const [notificationToggle, setNotificationToggle] = useState(true);
     const [callDriverToggle, setCallDriverToggle] = useState(false);
@@ -54,12 +55,9 @@ const ProfileScreen = (props) => {
     
             await response.json()
             .then((data) => {
-                console.log(data)
                 setNotificationAlert(!notificationAlert)
-                setNotificationValue(data.notificationsEnabled)
-            })
-            .catch((err) => {
-                throw err;
+                setNotificationValue(data.value)
+                dispatch(setProfileUpdated(!profileUpdated))
             })
     
         } catch (error) {
@@ -91,37 +89,14 @@ const ProfileScreen = (props) => {
             await response.json()
             .then((data) => {
                 setCallDriverAlert(!callDriverAlert)
-                setCallDriverValue(data.driverShouldCall)
+                setCallDriverValue(data.value)
+                dispatch(setProfileUpdated(!profileUpdated))
             })
-            .catch((err) => {
-                throw err;
-            })
+            
         } catch (error) {
             console.log(error)
         }
     }
-    
-    const updateBookingLocation = async (req, res) => {
-        await fetch("https://banturide-api.onrender.com/location/update-booking-location", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tokens?.idToken}`,
-                'x-refresh-token' : tokens?.refreshToken,
-            },
-            body: JSON.stringify({
-                bookingId: "8tTIpjER8ujsMlDTkTQa",
-                driverId: "LY1HpRCfgWamdErqMjWmsKRq7iR2"
-            })
-        }).then(response => response.json())
-        .then(data => {
-          console.log(data);
-        })
-    }
-
-    useEffect(() => {
-        updateBookingLocation();
-    }, [])
 
     useEffect(() => {
         setTimeout(() => {
@@ -137,6 +112,7 @@ const ProfileScreen = (props) => {
 
     return(
         <View className={`${props.theme === "dark" ? "bg-[#222831]" : ""} h-full w-full flex-1 relative`}>
+
             {notificationAlert &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-[50%] h-[80%] bg-black rounded-[10px] flex items-center justify-center`}>
@@ -162,7 +138,7 @@ const ProfileScreen = (props) => {
             <View className={`h-[28%] w-full absolute z-10 top-[15%] items-center`}>
                 <View className={`${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} h-full w-full flex items-center justify-center`}>
                     <View className={`rounded-full h-[50%] w-[30%] ${props.theme === "dark" ? "border-white" : "border-gray-100"} border-4 border-solid relative`}>
-                        <Image source={userInfo?.avatar ? { uri: userInfo?.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
+                        <Image source={userInfo && userInfo?.avatar !== null ? { uri: userInfo.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                     </View>
                     <View className="mt-2">
                         <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>

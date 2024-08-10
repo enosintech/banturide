@@ -126,7 +126,7 @@ const RequestScreen = (props) => {
 
   const handleCancelBooking = async () => {
     setLoading(true)
-    await fetch("https://banturide-api.onrender.com/booking/cancel-booking", {
+    await fetch("https://banturide-api.onrender.com/booking/cancel-booking-request", {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
 import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
-import { selectToken, selectUserData, selectUserInfo } from "../../../slices/authSlice";
+import { selectNotificationsArray } from "../../../slices/notificationSlice";
 
 Geocoder.init("AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE");
 
@@ -30,17 +30,12 @@ const HomeScreen = (props) => {
     const toggle = useSelector(selectToggle);
     const booking = useSelector(selectBooking);
     const driver = useSelector(selectDriver);
-    const hasArrived = useSelector(selectHasArrived);
-    const onTheWay = useSelector(selectOnTheWay);
     const tripDetails = useSelector(selectTripDetails);
     const tripType = useSelector(selectTripType);
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
     const price = useSelector(selectPrice);
-    const driverArray = useSelector(state => state.nav.driverArray);
     const searchComplete = useSelector(state => state.nav.searchComplete);
-
-    const tokens = useSelector(selectToken);
-    const userInfo = useSelector(selectUserInfo);
+    const notificationsArray = useSelector(selectNotificationsArray);
 
     const [ currentLocation, setCurrentLocation ] = useState(null)
     const [currentStreet, setCurrentStreet] = useState(null)
@@ -49,6 +44,8 @@ const HomeScreen = (props) => {
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
+
+    const unreadNotifications = notificationsArray.filter(notification => notification.status === "unread");
 
     const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -103,68 +100,6 @@ const HomeScreen = (props) => {
         console.log("Latest Booking info: ", booking)
     }, [booking])
 
-    useEffect(() => {
-
-        const userId = userInfo?.userId;
-        
-        const socket = new WebSocket(`wss://banturide-api.onrender.com?userId=${encodeURIComponent(userId)}`);
-
-        socket.onopen = () => {
-            console.log('WebSocket connection opened');
-            dispatch(setWsClientId(userId));
-        };
-
-        socket.onmessage = (event) => {
-
-            const data = JSON.parse(event.data);
-
-            if (data.type === "requestReceived") {
-                console.log("this is real time data: ", data.message)
-            } else if (data.type === "searchStarted") {
-                console.log("this is real time data: ", data.message);
-            } else if (data.type === "driverFound") {
-                const driver = JSON.parse(data.driver)
-                console.log("driver found", driver);
-
-                dispatch(addDriver(driver))
-
-            } else if (data.type === "driversNotFoundOnTime") {
-                console.log("this is real time data:", data.message);
-            } else if (data.type === "driverAssigned") {
-                
-                dispatch(setBooking(JSON.parse(data.booking)))
-
-                dispatch(setDriver(JSON.parse(data.driver)))
-    
-            } else if (data.type === "searchComplete") {
-                console.log("this is real time data:", data.message)
-            } else if (data.type === "rideStarted") {
-                console.log("this is real time data:", data.message)
-            } else if (data.type === "rideEnded") {
-                console.log("this is real time data:", data.message)
-            } else if (data.type === "paymentReceived") {
-                console.log("this is real time data:", data.message)
-            } else if (data.type === "driverArrived") {
-                console.log("this is real time data:", data.message)
-            } else if (data.type === "locationUpdated") {
-                console.log("this is real time data:", data.message, data.booking)
-            }
-        }
-      
-        socket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-    
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-    
-        // Clean up on unmount
-        return () => {
-            socket.close();
-        };
-    }, [])
-
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
             <View className={`h-full w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>
@@ -176,7 +111,7 @@ const HomeScreen = (props) => {
                 <View className="absolute h-[18%] w-full bottom-[12%] flex items-center">
                     <View className="h-full w-[98%] p-3 fleex items-center justify-center">
                         <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[20px]  shadow-2xl ${props.theme === "dark" ? "bg-[#0e1115] border-[#0e1115]" : "bg-white border-white"}`} onPress={() => {
-                            if(booking.status === "confirmed"){
+                            if(booking.status === "confirmed" || booking.status === "ongoing" || booking.status === "arrived"){
                                 navigation.navigate("RequestNavigator")
                             } else {
                                 navigation.navigate("requests")
@@ -304,10 +239,10 @@ const HomeScreen = (props) => {
                                     dispatch(setToggle("ride"))
                                     dispatch(setTripType("normal"))
                                 }}>
-                                    <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "ride" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Ride</Text>
+                                    <Text style={{fontSize: getFontSize(23)}} className={`${toggle === "ride" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Ride</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity disabled={true} className={`w-[50%] h-[100%] opacity-20 ${toggle === "delivery" ? "bg-[#186F65]" : "bg-white" } items-center justify-center  rounded-[25px] `}>
-                                    <Text style={{fontSize: getFontSize(18)}} className={`${toggle === "delivery" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Delivery</Text>
+                                    <Text style={{fontSize: getFontSize(20)}} className={`${toggle === "delivery" ? "text-white" : "text-black"} font-semibold tracking-tight`}>Delivery</Text>
                                     <Text tyle={{fontSize: getFontSize(14)}} className={`font-light tracking-tight`}>Coming Soon</Text>
                                 </TouchableOpacity>
                             </>
@@ -321,6 +256,9 @@ const HomeScreen = (props) => {
                 navigation.navigate("Notifications")
             }}>
                 <Ionicons name="notifications" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <View className={`w-5 h-5 rounded-full bg-red-600 flex items-center justify-center absolute -top-[6px] -left-[6px]`}>
+                    <Text className={`text-white`}>{unreadNotifications?.length}</Text>
+                </View>
             </TouchableOpacity>
 
             <TouchableOpacity className={`absolute bottom-[30%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrent()} disabled={!props.initialRegion}>

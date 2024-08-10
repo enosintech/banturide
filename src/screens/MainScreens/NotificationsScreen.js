@@ -6,8 +6,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 import NewNotification from "../../components/atoms/NewNotification";
 import OldNotification from "../../components/atoms/OldNotification";
+import { useSelector } from "react-redux";
+import { selectNotificationsArray } from "../../../slices/notificationSlice";
 
 const NotificationsScreen = (props) => {
+
     const navigation = useNavigation();
 
     const [notifToggle, setNotifToggle] = useState("unread");
@@ -15,6 +18,12 @@ const NotificationsScreen = (props) => {
     const fontScale = PixelRatio.getFontScale();
 
     const getFontSize = size => size / fontScale;
+
+    const notificationsArray = useSelector(selectNotificationsArray);
+
+    const unreadNotifications = notificationsArray.filter(notification => notification.status === "unread");
+
+    const readNotifications = notificationsArray.filter(notification => notification.status === "read");
 
     return(
         <SafeAreaView className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-full`}>
@@ -56,8 +65,13 @@ const NotificationsScreen = (props) => {
                         <ScrollView className={`w-full`} contentContainerStyle={{
                             alignItems: "center"
                         }}>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="2 mins ago"/>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="4 mins ago"/>
+                            {unreadNotifications.length > 0 ? 
+                                unreadNotifications.map((notification, idx) => (
+                                    <NewNotification key={notification.id} theme={props.theme} {...notification} time="4 mins ago"/>
+                                ))
+                            : 
+                                <Text style={{fontSize: getFontSize(18)}} className={`mt-4 tracking-tight`}>No New Notifications</Text>
+                            }
                         </ScrollView>
                     </View> 
                     : notifToggle === "read" 
@@ -66,9 +80,13 @@ const NotificationsScreen = (props) => {
                         <ScrollView className="w-full" contentContainerStyle={{
                             alignItems: "center"
                         }}>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="15 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="20 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="35 mins ago"/>
+                            {readNotifications.length > 0 ? 
+                                readNotifications.map((notification, idx) => (
+                                    <OldNotification key={notification.id} theme={props.theme} {...notification} time="35 mins ago"/>
+                                ))
+                            : 
+                                <Text style={{fontSize: getFontSize(18)}} className={`mt-4 tracking-tight`}>No Read Notifications</Text>
+                            }
                         </ScrollView>
                     </View>
                     :
@@ -76,17 +94,17 @@ const NotificationsScreen = (props) => {
                         <ScrollView className="w-full" contentContainerStyle={{
                             alignItems: "center"
                         }}>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="2 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="20 mins ago"/>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="4 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="15 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="35 mins ago"/>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="2 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="15 mins ago"/>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="4 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="20 mins ago"/>
-                            <OldNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="35 mins ago"/>
-                            <NewNotification theme={props.theme} title="Payment Confirmation" content="Your payment is successful" time="2 mins ago"/>
+                            {notificationsArray.length > 0 ? 
+                                notificationsArray.map((notification, idx) => (
+                                    notification.status === "read" 
+                                    ?
+                                    <OldNotification key={notification.id} {...notification} theme={props.theme} time="35 mins ago"/>
+                                    :
+                                    <NewNotification key={notification.id} {...notification} theme={props.theme} time="4 mins ago"/>
+                                ))
+                            : 
+                                <Text style={{fontSize: getFontSize(18)}} className={`mt-4 tracking-tight`}>No Notifications</Text>
+                            }
                         </ScrollView>
                     </View>
                 }

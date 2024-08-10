@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import BurgerMenuItem from "../../components/atoms/BurgerMenuItem.js";
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar.js";
 
-import { setIsSignedIn, setToken } from "../../../slices/authSlice.js";
+import { setIsSignedIn, setToken, setTokenFetched } from "../../../slices/authSlice.js";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur.js";
 
@@ -41,6 +41,7 @@ const BurgerMenu = (props) => {
                 console.log("Token deleted Successfully")
                 dispatch(setToken(null))
                 dispatch(setIsSignedIn(false))
+                dispatch(setTokenFetched(false))
             }).catch((error) => {
                 console.log(error)
             })

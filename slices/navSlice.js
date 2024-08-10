@@ -16,6 +16,8 @@ const initialState = {
     driver: null,
     hasArrived: false,
     onTheWay: false,
+    remainingTripTime: 0,
+    remainingTripDistance: 0,
     bookingRequestLoading: false,
     favAddressChanged: false,
     favAddressUpdated: false,
@@ -33,6 +35,7 @@ const initialState = {
     },
     wsClientId: null,
     driverArray: [],
+    locationUpdateRan: false,
 }
 
 export const navSlice = createSlice({
@@ -114,6 +117,15 @@ export const navSlice = createSlice({
         setSearchComplete(state, action){
             state.searchComplete = action.payload;
         },
+        setLocationUpdatedRan: (state, action) => {
+            state.locationUpdateRan = action.payload;
+        },
+        setRemainingTripTime: (state, action) => {
+            state.remainingTripTime = action.payload;
+        },
+        setRemainingTripDistance: (state, action) => {
+            state.remainingTripDistance = action.payload;
+        },
         resetSearch(state) {
             state.searchPerformed = false;
         },
@@ -132,7 +144,7 @@ export const navSlice = createSlice({
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver, removeDriver, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver, removeDriver, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -156,5 +168,8 @@ export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddres
 export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
 export const selectWsClientId = (state) => state.nav.wsClientId;
 export const selectPaymentMethod = (state) => state.nav.paymentMethod;
+export const selectLocationUpdatedRan = (state) => state.nav.locationUpdateRan;
+export const selectRemainingTripTime = (state) => state.nav.remainingTripTime;
+export const selectRemaingTripDistance = (state) => state.nav.remainingTripDistance;
 
 export default navSlice.reducer;

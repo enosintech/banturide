@@ -87,13 +87,12 @@ const SetPassword = (props) => {
             return;
         }
 
-        await fetch('https://banturide-api.onrender.com/auth/create-passenger', options)
+        await fetch('https://banturide-api.onrender.com/auth/passenger-signup', options)
         .then(response => response.json())
         .then(async data => {
 
             if(data.message === "User created successfully"){
                 setLoading(false)
-                console.log(data)
                 navigation.reset({
                     index: 0,
                     routes: [{ name: "Signin"}]

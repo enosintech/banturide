@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { selectToken, selectUserInfo } from '../../../slices/authSlice';
 import { selectProfileUpdated, setProfileUpdated } from '../../../slices/navSlice';
+import LoadingBlur from '../../components/atoms/LoadingBlur';
 import ModalLoader from '../../components/atoms/ModalLoader';
 
 const ChangeName = (props) => {
@@ -32,7 +33,7 @@ const ChangeName = (props) => {
       try {
         setLoading(true)
 
-        const response = await fetch(`https://banturide-api.onrender.com/profile/profile/name`, {
+        const response = await fetch(`https://banturide-api.onrender.com/profile/edit-username`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ const ChangeName = (props) => {
 
       } catch (error) {
         setLoading(false)
-        console.log(error)
+        console.log("this is the error", error)
       }
       
     }

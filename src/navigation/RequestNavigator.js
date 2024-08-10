@@ -4,6 +4,7 @@ import AddStop from "../screens/MainScreens/AddStop";
 import DriverScreen from '../screens/MainScreens/DriverScreen';
 import ContactDriver from '../screens/MainScreens/ContactDriver';
 import CancelScreen from '../screens/MainScreens/CancelScreen';
+import TogglePayment from "../screens/MainScreens/TogglePayment";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,9 @@ const RequestNavigator = (props) => {
           </Stack.Screen>
           <Stack.Screen name="addStop" options={{headerShown: false }}>
               {() => <AddStop theme={props.theme}/>}
+          </Stack.Screen>
+          <Stack.Screen name="changePayment" options={{headerShown: false }}>
+              {() => <TogglePayment theme={props.theme} />}
           </Stack.Screen>
         </Stack.Group>
       </Stack.Navigator>

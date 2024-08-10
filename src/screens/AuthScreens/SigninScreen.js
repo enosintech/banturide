@@ -70,12 +70,14 @@ const SigninScreen = (props) => {
                 setLoading(false)
                 setErrorVisible(true)
                 setError(data.message)
-                console.log(data)
                 setTimeout(() => {
                     setErrorVisible(false)
                 }, 4000)
             }1
 
+        })
+        .catch((err) => {
+            console.log(err);
         })
     }
 
