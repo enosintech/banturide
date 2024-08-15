@@ -5,11 +5,13 @@ import MapViewDirections from 'react-native-maps-directions';
 import { useSelector } from 'react-redux';
 
 import { darkModeMapStyle, lightModeMapStyle } from '../../../assets/styles/MapStyles';
-import { selectBooking, selectOrigin } from '../../../slices/navSlice';
+import { selectBooking, selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
 
 const RequestMap = (props) => {
 
   const origin = useSelector(selectOrigin);
+  const destination = useSelector(selectDestination);
+  const passThrough = useSelector(selectPassThrough);
   const booking = useSelector(selectBooking);
 
   const api="AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
@@ -130,6 +132,41 @@ const RequestMap = (props) => {
                 </View>
               </Marker>
             </>
+          }
+
+          {(booking?.status === "ongoing" || booking?.status === "arrived") &&
+          <>
+            <MapViewDirections 
+                origin={{
+                    latitude: booking.driverCurrentLocation[0],
+                    longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={destination.description}
+                waypoints={[passThrough ? passThrough?.description : ""]}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "#186f65"}
+            />
+
+            <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : getFontSize(55),
+                      height: getFontSize(55),
+                  }}
+                />
+              </Marker>
+              </>
           }
 
 

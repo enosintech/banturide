@@ -1,5 +1,5 @@
 import { useEffect, useRef  } from 'react'
-import { View, Text, PixelRatio } from 'react-native';
+import { View, Text, PixelRatio, Image } from 'react-native';
 import { useSelector } from 'react-redux';
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from 'react-native-maps-directions';
@@ -25,10 +25,19 @@ const Map = (props) => {
 
     if(!origin || !destination) return;
 
-    mapRef.current?.fitToSuppliedMarkers(['origin', 'stop' , 'destination'], {
-        edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
-    })
-  }, [origin, destination])
+    if(booking?.status !== "ongoing" && booking?.status !== "arrived"){
+      mapRef.current?.fitToSuppliedMarkers(['origin', 'stop' , 'destination'], {
+          edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+      })
+    } else {
+      mapRef.current?.animateToRegion({
+        latitude: booking?.driverCurrentLocation[0],
+        longitude: booking?.driverCurrentLocation[1],
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01
+      }, 1 * 1000)
+    }
+  }, [origin, destination, booking])
 
   return (
     <View className="flex-1">
@@ -38,7 +47,12 @@ const Map = (props) => {
             mapRef.current = el;
             props.mapRef.current = el;
           }}
-          initialRegion={props.initialRegion}
+          initialRegion={booking?.status !== "ongoing" && booking?.status !== "arrived" ? props.initialRegion : {
+            latitude: booking?.driverCurrentLocation[0],
+            longitude: booking?.driverCurrentLocation[1],
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+          }}
           className="flex-1" 
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
@@ -52,6 +66,41 @@ const Map = (props) => {
                 strokeWidth={3}
                 strokeColor= {props.theme === "dark" ? "white" : "black"}
             />
+          }
+
+          {(booking?.status === "ongoing" || booking?.status === "arrived") &&
+          <>
+            <MapViewDirections 
+                origin={{
+                    latitude: booking?.driverCurrentLocation[0],
+                    longitude: booking?.driverCurrentLocation[1]
+                }}
+                destination={destination.description}
+                waypoints={[passThrough ? passThrough?.description : ""]}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "#186f65"}
+            />
+
+            <Marker 
+                coordinate={{
+                  latitude: booking?.driverCurrentLocation[0],
+                  longitude: booking?.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : getFontSize(55),
+                      height: getFontSize(55),
+                  }}
+                />
+              </Marker>
+              </>
           }
 
           {origin?.location && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) && (

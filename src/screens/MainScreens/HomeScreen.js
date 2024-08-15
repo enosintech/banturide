@@ -13,7 +13,7 @@ import { GOOGLE_API_KEY } from "@env";
 
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectNotificationsArray } from "../../../slices/notificationSlice";
 
@@ -36,6 +36,8 @@ const HomeScreen = (props) => {
     const price = useSelector(selectPrice);
     const searchComplete = useSelector(state => state.nav.searchComplete);
     const notificationsArray = useSelector(selectNotificationsArray);
+    const remainingTripTime = useSelector(selectRemainingTripTime);
+    const remainingTripDistance = useSelector(selectRemaingTripDistance);
 
     const [ currentLocation, setCurrentLocation ] = useState(null)
     const [currentStreet, setCurrentStreet] = useState(null)
@@ -69,6 +71,15 @@ const HomeScreen = (props) => {
         mapRef.current.animateToRegion(currentLocation, 1 * 1000)
     }
 
+    const goToCarLocation = () => {
+        mapRef.current.animateToRegion({
+            latitude: booking.driverCurrentLocation[0],
+            longitude: booking.driverCurrentLocation[1],
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+        }, 1 * 1000)
+    }
+
     const expandMaptoViewRoute = () => {
         if(!origin || !destination) return;
 
@@ -95,10 +106,6 @@ const HomeScreen = (props) => {
         .catch(error => console.warn(error))
         }
     }, [currentLocation])
-
-    useEffect(() => {
-        console.log("Latest Booking info: ", booking)
-    }, [booking])
 
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
@@ -144,7 +151,7 @@ const HomeScreen = (props) => {
                                         ?
                                             travelTimeInformation  
                                             ?
-                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
+                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{booking?.status !== "ongoing" && booking?.status !== "arrived" ? travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text): remainingTripDistance} KM</Text>
                                             :
                                                 <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                                         :
@@ -154,7 +161,7 @@ const HomeScreen = (props) => {
                                         ?
                                             travelTimeInformation  
                                             ?
-                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text)} Mins</Text>
+                                                <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{booking?.status !== "ongoing" && booking?.status !== "arrived" ? travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text) : remainingTripTime} Mins</Text>
                                             :
                                                 <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                                         :
@@ -166,9 +173,9 @@ const HomeScreen = (props) => {
                             <View className={`h-full w-1/2 ${driver ? "bg-[#186f65]" : ""}  flex py-1 items-center justify-between rounded-[25px]`}>
                                 <View className={`relative ${driver ? "h-[50%]" : "h-[45%]"} w-full flex items-center justify-center overflow-hidden rounded-[25px]`}>
                                     {
-                                        booking?.status === "confirmed" || searchComplete
+                                        booking?.status !== "pending" || searchComplete
                                         ?
-                                        <View className={`w-full h-full rounded-[25px] ${booking.status === "ongoing" ? "bg-green-200" : "bg-[#186f65]"} absolute`}></View>
+                                        <View className={`w-full h-full rounded-[25px] bg-[#186f65] absolute`}></View>
                                         :
                                         <LottieView 
                                             source={require("../../../assets/animations/findDriver.json")}
@@ -182,7 +189,7 @@ const HomeScreen = (props) => {
                                             }}
                                         />
                                     }
-                                    <Text style={{fontSize: getFontSize(14)}} className={`${booking?.status === "confirmed" || searchComplete ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-bold tracking-tight`}>{booking?.status === "confirmed" ? "Driver is on the way" : booking?.status === "confirmed" && booking?.driverArrivedAtPickup ? "Driver has Arrived" : booking?.status === "ongoing" ? "You're on the way!" : booking?.status === "pending" && searchComplete !== true ? "Looking for drivers..." : "Search Complete"}</Text>
+                                    <Text style={{fontSize: getFontSize(14)}} className={`${booking?.status === "confirmed" || searchComplete ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-bold tracking-tight`}>{booking?.status === "confirmed" && !booking?.driverArrivedAtPickup ? "Driver is on the way" : booking?.status === "confirmed" && booking?.driverArrivedAtPickup ? "Driver has Arrived" : booking?.status === "ongoing" ? "You're on the way!" : booking?.status === "arrived" ? "You have arrived" : booking?.status === "pending" && searchComplete !== true ? "Looking for drivers..." : "Search Complete"}</Text>
                                 </View>
                                 <View className={`h-[50%] ${driver ? "w-[95%]" : "w-full"} flex items-center relative rounded-t-[10px] rounded-b-[20px] justify-center bg-white shadow-md border-[0.5px] border-gray-100`}>
                                     <View className={`w-[90%]`}>
@@ -261,7 +268,7 @@ const HomeScreen = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[30%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrent()} disabled={!props.initialRegion}>
+            <TouchableOpacity className={`absolute bottom-[30%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
                 <MaterialIcons name="my-location" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 

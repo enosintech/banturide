@@ -7,8 +7,8 @@ const LongGreenBtn = (props) => {
     const getFontSize = size => size / fontScale;
 
     return(
-            <TouchableOpacity className="bg-[#186F65] shadow-lg w-[85%] h-[25%] rounded-[25px] flex justify-center items-center" onPress={props.handlePress}>
-                <Text style={{fontSize: getFontSize(15)}} className="text-white font-bold tracking-tight">{props.value}</Text>
+            <TouchableOpacity className="bg-[#186F65] shadow-sm w-[85%] h-[25%] rounded-[50px] flex justify-center items-center" onPress={props.handlePress}>
+                <Text style={{fontSize: getFontSize(20)}} className="text-white font-bold tracking-tight">{props.value}</Text>
             </TouchableOpacity>
     )
 }

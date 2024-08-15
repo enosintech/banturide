@@ -8,7 +8,7 @@ const LongTextInput = (props) => {
 
     return (
         <TextInput
-            className={`${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} h-[20%] w-[85%] border-[0.25px] border-solid rounded-xl p-2 font-bold tracking-tight`} 
+            className={`${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} h-[20%] w-[90%] border-[0.25px] border-solid rounded-[25px] p-2 px-4 font-bold tracking-tight`} 
             placeholder={props.placeholder}
             onChangeText={props.handleTextChange}
             onPressIn={props.dismissGenderToggle}

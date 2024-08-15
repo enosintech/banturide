@@ -1,6 +1,6 @@
+import {Text, View, PixelRatio, TouchableOpacity, TextInput, Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import {Text, View, PixelRatio, TouchableOpacity, TextInput, Keyboard } from "react-native";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur";
 
@@ -41,10 +41,10 @@ const ForgotPassword = (props) => {
             <View className="w-full h-[10%] p-5 flex items-center justify-center">
                 <Text style={{fontSize: getFontSize(15)}} className={`font-regular tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Please Enter your Email Address Below. We will send you a link that you can use to change your password</Text>
             </View>
-            <View className="w-[90%] h-[30%] shadow bg-white rounded-[20px] flex items-center justify-evenly">
+            <View className="w-[90%] h-[30%] shadow bg-white rounded-[40px] flex items-center justify-evenly">
                 <TextInput 
                     style={{fontSize: getFontSize(16)}}
-                    className={`w-[85%] h-[25%] bg-white rounded-full shadow px-3 font-medium tracking-tight`}
+                    className={`w-[85%] h-[25%] ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} rounded-full border-[0.25px] border-solid px-4 font-medium tracking-tight`}
                     placeholder="Your Email"
                     placeholderTextColor="rgb(156 163 175)"
                     onChangeText={(x) => setEmail(x)}

@@ -8,7 +8,7 @@ import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 const AboutScreen = (props) => {
     const navigation = useNavigation();
 
-    const [ aboutToggle, setAboutToggle ] = useState("tncs")
+    const [ aboutToggle, setAboutToggle ] = useState("tncs");
 
     const fontScale = PixelRatio.getFontScale();
 
@@ -16,6 +16,7 @@ const AboutScreen = (props) => {
 
     return(
         <SafeAreaView className={`${props.theme === "dark"? "bg-[#222831]" : ""} w-full h-full`}>
+            
             <View className={`w-full h-[10%] p-3`}>
                 <ProfileScreenTitle theme={props.theme} iconName={"info"} title="About" handlePress={() => {
                     navigation.goBack();
@@ -23,8 +24,8 @@ const AboutScreen = (props) => {
             </View>
 
             <View className="w-full h-[15%] flex flex-col items-center justify-center">
-                <Text style={{fontSize: getFontSize(24)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>BantuRide</Text>
-                <Text style={{fontSize: getFontSize(18)}} className={`mt-2 font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Version 1.0.0 Released 10th June 2024</Text>
+                <Text style={{fontSize: getFontSize(24)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Banturide</Text>
+                <Text style={{fontSize: getFontSize(18)}} className={`mt-2 font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Version 1.0.0 Released TBD</Text>
             </View>
 
             <View className={`w-full h-[60%]`}>
@@ -43,16 +44,16 @@ const AboutScreen = (props) => {
                     </View>
                 </View>
                 <View className={`w-full h-[85%]`}>
-                    {aboutToggle === "tncs" 
-                    ?
-                    
-                    <View className={`w-full h-full bg-red-500`}>
+                    {
+                        aboutToggle === "tncs" 
+                        ?
+                        <View className={`w-full h-full bg-red-500`}>
 
-                    </View>
-                    :
-                    <View className={`w-full h-full bg-orange-500`}>
+                        </View>
+                        :
+                        <View className={`w-full h-full bg-orange-500`}>
 
-                    </View>
+                        </View>
                     }
                 </View>
             </View>

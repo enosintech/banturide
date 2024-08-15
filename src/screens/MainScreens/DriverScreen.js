@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import RequestMap from '../../components/atoms/RequestMap';
-import { selectBooking, selectDestination, selectDriver, selectHasArrived, selectLocationUpdatedRan, selectOnTheWay, selectOrigin, selectPassThrough, selectPaymentMethod, selectTripType, setLocationUpdatedRan, setPassThrough, setRemainingTripDistance, setRemainingTripTime } from '../../../slices/navSlice';
+import { selectBooking, selectDestination, selectDriver, selectHasArrived, selectLocationUpdatedRan, selectOnTheWay, selectOrigin, selectPassThrough, selectPaymentMethod, selectRemaingTripDistance, selectRemainingTripTime, selectTripType, setLocationUpdatedRan, setPassThrough, setRemainingTripDistance, setRemainingTripTime } from '../../../slices/navSlice';
 import PageLoader from '../../components/atoms/PageLoader';
 import { selectToken } from '../../../slices/authSlice';
 
@@ -35,6 +35,7 @@ const DriverScreen = (props) => {
   const tripType = useSelector(selectTripType);
   const locationUpdateRan = useSelector(selectLocationUpdatedRan);
   const tokens = useSelector(selectToken);
+  const remainingTripDistance = useSelector(selectRemainingTripTime);
 
   const [ min, setMin ] = useState();
 
@@ -79,7 +80,7 @@ const DriverScreen = (props) => {
   }
 
   useEffect(() => {
-    if(booking.status === "confirmed"){
+    if(booking?.status === "confirmed"){
       fitMarkers();
     }
   }, [booking])
@@ -167,6 +168,14 @@ const DriverScreen = (props) => {
                     ?
                       <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>{booking?.status === "ongoing" ? "You're on the way" : booking?.driverArrivedAtPickup ? "Driver has Arrived" : min > 2  ? `Arriving in ${min} mins` : "Arriving Soon"}</Text>
                     :
+                    booking.status === "ongoing"
+                    ?
+                      <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>{remainingTripDistance} Minutes Left</Text>
+                    :
+                    booking.status === "arrived"
+                    ?
+                      <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>You have arrived</Text>
+                    :
                       <PageLoader />
                     }
                   </View>
@@ -182,7 +191,7 @@ const DriverScreen = (props) => {
                   navigation.navigate("chat");
                 }}>
                   {
-                    booking?.status === "ongoing" 
+                    booking?.status === "ongoing" || booking.status === "arrived"
                     ?
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
                       <MaterialIcons name="star-rate" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
@@ -252,7 +261,7 @@ const DriverScreen = (props) => {
                           <FontAwesome name="flag-checkered" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
                         </View>
                         <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-700" : "border-gray-200"}`}></View>
-                        {booking.status === "confirmed" 
+                        {booking?.status === "confirmed" 
                         ?
                           <View className={`w-[80%] h-full flex pr-5`}>
                             <View className={`w-full h-1/2 flex flex-row items-center justify-end`}>
@@ -310,7 +319,7 @@ const DriverScreen = (props) => {
                 </View>
               </View>
               {
-                booking?.status === "ongoing"
+                booking?.status === "ongoing" || booking.status === "arrived"
                 ?
                 <View className={`flex flex-col items-center`}>
                   <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`}>

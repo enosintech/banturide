@@ -74,7 +74,7 @@ const RequestScreen = (props) => {
         })
       }).then((response) => response.json())
       .then((data) => {
-        if(data.message === "Booking confirmed. Search has been stopped."){
+        if(data.message === "Booking confirmed and Search has now stopped" || data.message === "Booking confirmed successfully!"){
           console.log(data)
         } else {
           dispatch(setSearchComplete(true))
@@ -155,7 +155,7 @@ const RequestScreen = (props) => {
         dispatch(setBooking(null))
         dispatch(setBookingRequested(false))
         dispatch(setSearchPerformed(false))
-        setSearchComplete(false)
+        dispatch(setSearchComplete(false))
         navigation.navigate("Home")
       }
     })
@@ -204,7 +204,7 @@ const RequestScreen = (props) => {
               </TouchableOpacity>
 
               <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-green-700 flex items-center justify-center`} onPress={ () => setModalVisible(false)}>
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Continue</Text>
+                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Go Back</Text>
               </TouchableOpacity>
             </View>
           </View>

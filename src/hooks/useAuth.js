@@ -51,11 +51,9 @@ export function useAuth() {
       if (data.error) {
         dispatch(setUserInfo(null));
         setUser(false);
-        console.log(data);
       } else {
         dispatch(setUserInfo(data));
         setUser(true);
-        console.log(data);
       }
     } catch (error) {
       console.log("There was an error while fetching User Profile:", error);

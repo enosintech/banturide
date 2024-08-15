@@ -105,7 +105,7 @@ const SearchModal = (props) => {
                         setSelected(false)
                         setStopAdded(false)
                     }}>
-                        <Text style={{fontSize: getFontSize(16)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Booking</Text>
+                        <Text style={{fontSize: getFontSize(16)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Trip</Text>
                         <Text tyle={{fontSize: getFontSize(14)}} className={`font-light tracking-tight`}>Coming Soon</Text>
                     </TouchableOpacity>
                 </View>
