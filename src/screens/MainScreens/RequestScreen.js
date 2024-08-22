@@ -1,20 +1,22 @@
-import { View, Text, TouchableOpacity, Image, ScrollView, PixelRatio } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Entypo from "@expo/vector-icons/Entypo";
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useDispatch, useSelector } from 'react-redux';
-
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver } from '../../../slices/navSlice';
 import LottieView from "lottie-react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Entypo from "@expo/vector-icons/Entypo";
+
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver, setDriverArray, selectFindNewDriver, setFindNewDriver, setNewDriverCalled } from '../../../slices/navSlice';
+import { selectToken } from '../../../slices/authSlice';
 
 import RequestMap from "../../components/atoms/RequestMap";
 import PageLoader from '../../components/atoms/PageLoader';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
 
-import { selectToken } from '../../../slices/authSlice';
+
+const { width } = Dimensions.get("window");
 
 const RequestScreen = (props) => {
   
@@ -30,10 +32,10 @@ const RequestScreen = (props) => {
   const bookingRequested = useSelector(state => state.nav.bookingRequested);
   const searchPerformed = useSelector(state => state.nav.searchPerformed);
   const searchComplete = useSelector(state => state.nav.searchComplete);
+  const findNewDriver = useSelector(selectFindNewDriver);
+  const newDriverCalled = useSelector(state => state.nav.newDriverCalled)
 
-  const fontScale = PixelRatio.getFontScale();
-
-  const getFontSize = size => size / fontScale;
+  const fontSize = width * 0.05;
 
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
@@ -74,7 +76,7 @@ const RequestScreen = (props) => {
         })
       }).then((response) => response.json())
       .then((data) => {
-        if(data.message === "Booking confirmed and Search has now stopped" || data.message === "Booking confirmed successfully!"){
+        if(data.message === "Booking confirmed and Search has now stopped" || data.message === "Booking confirmed successfully!" || data.message === "Booking cancelled and Search has now stopped"){
           console.log(data)
         } else {
           dispatch(setSearchComplete(true))
@@ -83,6 +85,7 @@ const RequestScreen = (props) => {
       })
 
     } catch (error) {
+      dispatch(setSearchComplete(true))
       console.error("Failed to search for drivers: ", error)
     }  
   }
@@ -114,12 +117,17 @@ const RequestScreen = (props) => {
           console.log(data)
         } else {
           setLoading(false)
-          console.log(data)
+          dispatch(setDriverArray([]))
+          dispatch(setFindNewDriver(false))
+          dispatch(setNewDriverCalled(false))
+          dispatch(setBooking(data.booking))
+          dispatch(setDriver(data.driver))
           navigation.navigate("RequestNavigator");
         }
         
       })
     } catch (error) {
+      setLoading(false)
       console.error("Failed to assign driver: ", error)
     }
   }
@@ -144,6 +152,7 @@ const RequestScreen = (props) => {
         setLoading(false)
         console.log(data.message)
       } else {
+        console.log(data)
         setLoading(false)
         setModalVisible(false)
         dispatch(setDestination(null))
@@ -153,39 +162,51 @@ const RequestScreen = (props) => {
         dispatch(setTripDetails(null))
         dispatch(setPassThrough(null))
         dispatch(setBooking(null))
+        dispatch(setDriverArray([]))
         dispatch(setBookingRequested(false))
         dispatch(setSearchPerformed(false))
         dispatch(setSearchComplete(false))
         navigation.navigate("Home")
       }
     })
+    .catch((error) => {
+      setLoading(false)
+      console.log("this is why", error )
+    })
   } 
+
+  useEffect(() => {
+    if(findNewDriver && !newDriverCalled){
+      handleDriverReSearch();
+      dispatch(setNewDriverCalled(true))
+    }
+  }, [findNewDriver, newDriverCalled])
 
   useEffect(() => {
     if (bookingRequested && !searchPerformed) {
       handleDriverSearch(booking.bookingId);
       dispatch(setSearchPerformed(true));
     }
-  }, [bookingRequested, searchPerformed, dispatch]);
+  }, [bookingRequested, searchPerformed]);
 
   return (
-    <View className={`flex-1 ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-gray-100"} relative`}>
+    <View className={`flex-1 ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"} relative`}>
     
-      <LoadingBlur loading={loading} />
+      <LoadingBlur loading={loading} theme={props.theme} />
 
       {searchComplete && 
         <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex flex-row items-end`}>
-          <View className={`w-full h-[25%] bg-white rounded-t-[25px] flex flex-col`}>
+          <View className={`w-full h-[25%] ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} rounded-t-[40px] flex flex-col`}>
             <View className={`w-full h-1/2 flex items-center justify-center`}>
-              <Text style={{fontSize: getFontSize(20)}}  className={`font-bold tracking-tight text-center max-w-[80%]`}>Search ran for 2 minutes without a driver being selected</Text>
+              <Text style={{fontSize: fontSize}}  className={`font-bold tracking-tight text-center max-w-[80%] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Search ran for 2 minutes without a driver being selected</Text>
             </View>
             <View className={`w-full h-[40%] flex flex-row items-center justify-evenly`}>
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Cancel Request</Text>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[50px] shadow-sm bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+                <Text style={{fontSize: fontSize * 0.9}} className={`font-bold tracking-tight text-white`}>Cancel Request</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-green-700 flex items-center justify-center`} onPress={() => handleDriverReSearch()}>
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Search Again</Text>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[50px] shadow-sm bg-green-700 flex items-center justify-center`} onPress={() => handleDriverReSearch()}>
+                <Text style={{fontSize: fontSize * 0.9}} className={`font-bold tracking-tight text-white`}>Search Again</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -194,17 +215,17 @@ const RequestScreen = (props) => {
 
       {modalVisible && 
         <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex items-center justify-center`}>
-          <View className={`w-[90%] h-[20%] bg-white rounded-[25px] flex flex-col`}>
+          <View className={`w-[90%] h-[20%] ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} shadow-sm rounded-[40px] p-2 flex flex-col`}>
             <View className="w-full h-1/2 flex items-center justify-center">
-              <Text style={{fontSize: getFontSize(16)}} className={`font-medium tracking-tight text-center max-w-[90%]`}>Are you sure you want to cancel your request? We will find you a suitable driver soon!</Text>
+              <Text style={{fontSize: fontSize * 0.7}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} text-center max-w-[90%]`}>Are you sure you want to cancel your request? We will find you a suitable driver soon!</Text>
             </View>
             <View className="w-full h-1/2 flex flex-row items-center justify-evenly">
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Cancel</Text>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[40px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+                <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight text-white`}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[20px] bg-green-700 flex items-center justify-center`} onPress={ () => setModalVisible(false)}>
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight text-white`}>Go Back</Text>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[40px] bg-green-700 flex items-center justify-center`} onPress={ () => setModalVisible(false)}>
+                <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight text-white`}>Go Back</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -212,16 +233,16 @@ const RequestScreen = (props) => {
       }
       
       <View className={`relative h-[65%] w-full flex items-center justify-center`}>
-        <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+        <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-[15px] shadow-sm ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
                     navigation.navigate("Home");
                 }}>
-                <Ionicons name="chevron-down" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                <Ionicons name="chevron-down" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
         </TouchableOpacity>
-        <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrentLocation()}>
-                <MaterialIcons name="my-location" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+        <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-[15px] shadow-sm ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrentLocation()}>
+                <MaterialIcons name="my-location" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
         </TouchableOpacity>
         <RequestMap mapRef={mapRef} theme={props.theme} />
-        <View className={`absolute w-[300px] h-[300px] flex items-center justify-center`}>
+        <View className={`absolute w-[80%] h-[55%] flex items-center justify-center`}>
             {
               searchComplete ? 
               <View></View>
@@ -238,51 +259,57 @@ const RequestScreen = (props) => {
               />
             }
         </View>
-        <View className={`absolute top-20 w-[95%] h-[70%]`}>
+        <View className={`absolute top-20 w-[95%] h-full overflow-visible`}>
           <ScrollView contentContainerStyle={{
             alignItems: "center",
             justifyContent: "center",
             display: "flex",
             gap: 5,
             paddingVertical: 10,
+            overflow: "visible"
           }}>
             {driverArray?.map((driver, index) => (
-              <View key={driver?.driverId} className={`w-[95%] h-[150px] ${props.theme === "dark" ? "" : "bg-gray-100 border-gray-100"} rounded-[20px] shadow-md border-[0.5px] flex`}>
-                <View className={`w-full h-1/2 flex flex-row items-center`}>
+              <View key={driver?.driverId} className={`w-[95%] h-[220px] ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100 border-[0.5px] border-gray-100"} rounded-[40px] shadow-sm flex`}>
+                <View className={`w-full h-1/3 flex flex-row items-center`}>
                   <View className={`w-[60%] h-full flex flex-row`}>
                     <View className={`w-[40%] h-full flex items-center justify-center`}>
-                      <View className={`w-14 h-14 rounded-full ${props.theme === "dark" ? "" : "bg-white"}`}></View>
+                      <View className={`w-14 h-14 rounded-full ${props.theme === "dark" ? "bg-dark-tertiary" : "bg-white"}`}></View>
                     </View>
                     <View className={`w-[60%] h-full flex justify-center`}>
-                      <Text style={{fontFamily: "os-xb"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>{`${driver?.firstname} ${driver.lastname}`}</Text>
-                      <Text style={{fontFamily: "os-mid"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>Red Toyota Prius</Text>
-                      <Text style={{fontFamily: "os-light"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>BAE 3155</Text>
+                      <Text style={{fontSize: fontSize * 0.7}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{`${driver?.firstname} ${driver?.lastname}`}</Text>
+                      <Text style={{fontSize: fontSize * 0.7}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Red Toyota Prius</Text>
+                      <Text style={{fontSize: fontSize * 0.7}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>BAE 3155</Text>
                     </View>
                   </View>
-                  <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "" : "border-gray-300"}`}></View>
+                  <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-white" : "border-gray-300"}`}></View>
                   <View className={`w-[40%] h-full flex items-center justify-center`}>
-                    <View className={`w-[85%] h-[85%] rounded-[20px] flex items-center justify-center ${rating > 4 ? "bg-green-200" : rating > 2 ? "bg-gray-300" : "bg-red-200"}`}>
-                      <Text style={{fontFamily: "os-light"}}>Rating</Text>
-                      <Text style={{fontFamily: "os-xb"}} className={`text-3xl`}>{rating}</Text>
+                    <View className={`w-[85%] h-[85%] rounded-[40px] flex items-center justify-center ${rating > 4 ? "bg-green-200" : rating > 2 ? "bg-gray-300" : "bg-red-200"}`}>
+                      <Text style={{fontSize: fontSize * 0.6}} className={`font-light tracking-tight`}>Rating</Text>
+                      <Text style={{fontSize: fontSize * 1.5}} className={`font-black tracking-tight`}>{rating}</Text>
                     </View>
                   </View>
                 </View>
-                <View className={`w-full h-1/2 flex-row items-center justify-center`}>
-                  <View className={`w-[95%] h-[80%] shadow border-[0.5px] rounded-[20px] flex flex-row items-center justify-between pl-1 pr-3 ${props.theme === "dark" ? "" : "bg-white border-gray-100"}`}>
-                    <View className={`w-[50%] h-[85%] rounded-[20px] shadow-md border ${props.theme === "dark" ? "" : "bg-white border-gray-100"} flex px-2 py-1`}>
-                      <Text style={{fontFamily: "os-xb"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>Known For</Text>
-                      <Text className={`overflow-hidden w-full h-1/2`}>Clean Car, Punctual, Respectful</Text>
+                <View className={`w-full h-1/3 flex-row items-center justify-center`}>
+                  <View className={`w-[95%] h-[80%] shadow-sm rounded-[40px] flex flex-row items-center justify-between pl-1 pr-3 ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`}>
+                    <View className={`w-[50%] h-[85%] rounded-[40px] shadow-sm ${props.theme === "dark" ? "bg-dark-tertiary" : "bg-white border border-gray-100"} flex justify-center px-2 pl-3 py-1`}>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Known For</Text>
+                      <Text numberOfLines={1} style={{fontSize: fontSize * 0.55}} className={`font-medium ${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight w-full h-1/2`}>Clean Car, Punctual, Respectful</Text>
                     </View>
                     <View className={`flex flex-row`}>
                       <TouchableOpacity className="rounded-full bg-red-600 flex items-center justify-center w-12 h-12 mr-3" onPress={() => {
                         dispatch(removeDriver(driver.driverId))
                       }}>
-                        <Entypo name="cross" size={25} color="white" />
+                        <Entypo name="cross" size={fontSize * 1.4} color="white" />
                       </TouchableOpacity>
                       <TouchableOpacity className={`bg-[#186f65] flex items-center justify-center w-12 h-12 rounded-full`} onPress={() => handleChooseDriver(booking?.bookingId, driver?.driverId)}>
-                        <Ionicons name="checkmark-sharp" size={25} color="white" />
+                        <Ionicons name="checkmark-sharp" size={fontSize * 1.4} color="white" />
                       </TouchableOpacity>
                     </View>
+                  </View>
+                </View>
+                <View className={`w-full h-1/3 flex flex-row items-center justify-between px-4 pb-2`}>
+                  <View className={`w-full h-[85%] rounded-[40px] flex items-center justify-center ${driver?.timeRemaining < 10 ? "bg-red-200" : driver?.timeRemaining < 5 ? "bg-red-700" : "bg-neutral-200"} shadow-sm`}>
+                    <Text style={{fontSize: fontSize * 1.5}} className={`font-black tracking-tight`}> Expires in {driver?.timeRemaining}</Text>
                   </View>
                 </View>
               </View>
@@ -290,9 +317,9 @@ const RequestScreen = (props) => {
           </ScrollView>
         </View>
       </View>
-      <View className={`h-[35%] w-full flex border-t-4 border-solid ${props.theme === "dark" ? " bg-[#0e1115] border-white" : "border-gray-300"}`}>
+      <View className={`h-[35%] relative z-100 w-full flex border-t-4 border-solid ${props.theme === "dark" ? " bg-dark-primary border-white" : "bg-gray-100 border-gray-300"}`}>
         <View className={`w-full h-[60%] flex items-center justify-center`}>
-          <View className={`w-[95%] h-[90%] rounded-[20px] border-[0.5px] flex flex-row shadow-md ${props.theem === "dark" ? "" : "bg-white border-gray-100"}`}>
+          <View className={`w-[95%] h-[90%] rounded-[40px] flex flex-row shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`}>
             <View className={`w-1/2 h-full flex items-center`}>
               <View className={`w-full h-1/2 overflow-visible relative flex items-center justify-center`}>
                 <Image 
@@ -303,15 +330,15 @@ const RequestScreen = (props) => {
                     overflow: "visible",
                   }}
                 />
-                <Text style={{fontFamily: "os-xb"}} className={`text-[16px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{tripDetails?.title}</Text>
-                <Text style={{fontFamily: "os-light"}} className={`text-[12px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{seats} Seater</Text>
+                <Text style={{fontSize: fontSize * 0.7}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{tripDetails?.title}</Text>
+                <Text style={{fontSize: fontSize * 0.55}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{seats} Seater</Text>
               </View>
-              <View className={`w-[80%] h-0 border-t ${props.theme === "dark" ? "" : "border-gray-200"}`}></View>
+              <View className={`w-[80%] h-0 border-t ${props.theme === "dark" ? "border-white" : "border-gray-200"}`}></View>
               <View className={`w-full h-1/2 flex items-center`}>
               <View className={`w-full h-2/3 flex items-center justify-center`}>
                 {price
                 ?
-                  <Text style={{fontFamily: "os-b"}} className={`${props.theme === "dark" ? "text-white" : "text-gray-700"} text-3xl`}>{price}</Text>                              
+                  <Text style={{fontSize: fontSize * 1.6}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-gray-700"}`}>{price}</Text>                              
                 :
                   <PageLoader theme={props.theme} width="60%" height="70%"/>
                 }
@@ -321,38 +348,38 @@ const RequestScreen = (props) => {
                   ?
                     travelTimeInformation  
                     ?
-                        <Text style={{fontFamily: "os-light"}} className={`text-[14px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
+                        <Text style={{fontSize: fontSize * 0.65}} className={`text-[14px] font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
                     :
                         <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                   :
-                    <Text style={{fontFamily: "os-b"}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>Chaffeur</Text>
+                    <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Chaffeur</Text>
                 }
                 {tripType === "normal"
                   ?
                     travelTimeInformation  
                     ?
-                        <Text style={{fontFamily: "os-light"}} className={`text-[14px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text)} Mins</Text>
+                        <Text style={{fontSize: fontSize * 0.65}} className={`text-[14px] font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? parseInt(travelTimeInformation[0].duration.text) + parseInt(travelTimeInformation[1].duration.text) : parseInt(travelTimeInformation[0].duration.text)} Mins</Text>
                     :
                         <PageLoader theme={props.theme} width={"25%"} height={"50%"}/>
                   :
-                    <Text style={{fontFamily: "os-b"}} className={`text-xl ${props.theme === "dark" ? "text-white" : "text-black"}`}>Mode</Text>
+                    <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Mode</Text>
                 }
               </View>
             </View>
             </View>
             <View className={`w-1/2 h-full flex items-center justify-center`}>
             <View className={`w-[90%] flex justify-between h-[90%]`}>
-              <View className={`w-full h-1/3 flex-row items-center rounded-[16px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
+              <View className={`w-full h-1/3 flex-row items-center rounded-[40px] pr-2 ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
                 <View className={`w-[30%] h-full flex items-center justify-center`}>
-                  <MaterialIcons name="trip-origin" size={25} color={props.theme === "dark" ? "white" : "black"}/>
+                  <MaterialIcons name="trip-origin" size={fontSize * 1.3} color={props.theme === "dark" ? "white" : "black"}/>
                 </View>
                 <View className={`w-0 h-[80%] border-l-[0.5px] ${props.theme === "dark" ? "border-gray-700" : "border-gray-200"}`}></View>
                 <View className={`w-[70%] h-full flex`}>
                   <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                    <Text style={{fontFamily: "os-xb"}} className={`text-[15px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Origin</Text>
+                    <Text style={{fontSize: fontSize * 0.65}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Origin</Text>
                   </View>
                   <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                    <Text style={{fontFamily: "os-light"}} className={`text-[13px] ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
+                    <Text numberOfLines={1} style={{fontSize: fontSize * 0.55}} className={`font-light tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
                   </View>
                 </View>
               </View>
@@ -366,32 +393,32 @@ const RequestScreen = (props) => {
                       <View className={`w-full h-1/2 flex-row`}>
                         <View className={`w-full h-full flex items-center justify-center`}>
                           <View className={`w-full h-1/2 flex flex-row items-center justify-center`}>
-                            <MaterialIcons name="keyboard-arrow-right" size={20} color={props.theme === "dark" ? "white" : "black"}/>
-                            <Text style={{fontFamily: "os-xb"}} className={`${props.theme === "dark" ? "text-white" : "text-black"}`}>Stop</Text>
-                            <MaterialIcons name="keyboard-arrow-right" size={20} color={props.theme === "dark" ? "white" : "black"}/>
+                            <MaterialIcons name="keyboard-arrow-right" size={fontSize} color={props.theme === "dark" ? "white" : "black"}/>
+                            <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Stop</Text>
+                            <MaterialIcons name="keyboard-arrow-right" size={fontSize} color={props.theme === "dark" ? "white" : "black"}/>
                           </View>
                           <View className={`w-[80%] h-0 border-t-[0.5px] ${props.theme === "dark" ? "border-gray-100" : "border-gray-300"}`}></View>
-                          <Text style={{fontFamily: "os-light"}} className={`text-[12px] w-[80%] text-center mt-1 h-1/2 truncate ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
+                          <Text numberOfLines={1} style={{fontSize: fontSize * 0.55 }} className={`font-light tracking-tight w-[80%] text-center mt-1 h-1/2 truncate ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
                         </View>
                       </View>
                       :
                       <View className={`w-full h-1/2 flex items-center justify-center`}>
-                        <View className={`p-2 rounded-full border-[0.5px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white shadow border-gray-100"}`}>
-                          <Text style={{fontFamily: "os-mid"}} className={`text-[10px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>No Stop</Text>
+                        <View className={`p-2 rounded-full border-[0.5px] ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white shadow-sm border-gray-100"}`}>
+                          <Text style={{fontSize: fontSize * 0.45}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>No Stop</Text>
                         </View>
                       </View>
                     }
-                    <View className={`w-full h-1/2 flex-row items-center rounded-[16px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
+                    <View className={`w-full h-1/2 flex-row items-center rounded-[40px] pr-2 ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
                       <View className={`w-[30%] h-full flex items-center justify-center`}>
-                        <FontAwesome name="flag-checkered" size={25} color={props.theme === "dark" ? "white" : "black"}/>
+                        <FontAwesome name="flag-checkered" size={fontSize * 1.1} color={props.theme === "dark" ? "white" : "black"}/>
                       </View>
                       <View className={`w-0 h-[80%] border-l-[0.5px] ${props.theme === "dark" ? "border-gray-700" : "border-gray-200"}`}></View>
                       <View className={`w-[70%] h-full flex`}>
                         <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                          <Text style={{fontFamily: "os-xb"}} className={`text-[15px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
+                          <Text style={{fontSize: fontSize * 0.65}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
                         </View>
                         <View className={`w-full h-1/2 flex flex-row items-center justify-end pr-2`}>
-                          <Text style={{fontFamily: "os-light"}} className={`text-[13px] ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
+                          <Text numberOfLines={1} style={{fontSize: fontSize * 0.55}} className={`font-light tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
                         </View>
                       </View>
                     </View>
@@ -404,11 +431,11 @@ const RequestScreen = (props) => {
           </View>
         </View>
         <View className={`w-full h-[40%] flex items-center justify-start`}>
-          <View className={`w-[95%] h-[80%] rounded-t-[20px] rounded-b-[30px] mt-1 shadow-md border-[0.5px] flex items-center justify-center ${props.theme === "dark" ? "" : "bg-white border-gray-100"}`}>
-            <TouchableOpacity className={`w-[90%] h-[65%] bg-red-600 rounded-2xl flex items-center justify-center shadow-xl`} onPress={() => {
+          <View className={`w-[95%] h-[80%] rounded-[40px] mt-1 shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`}>
+            <TouchableOpacity className={`w-[90%] h-[65%] bg-red-600 rounded-[50px] flex items-center justify-center shadow-xl`} onPress={() => {
               setModalVisible(true)
             }}>
-                <Text style={{fontFamily: "os-xb"}} className={`text-white text-lg`}>Cancel Request</Text>
+                <Text style={{fontSize: fontSize * 0.85}} className={`text-white font-extrabold tracking-tight`}>Cancel Request</Text>
             </TouchableOpacity>
           </View>
         </View>

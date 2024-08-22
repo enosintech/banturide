@@ -1,15 +1,14 @@
-import { useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useDispatch, useSelector } from "react-redux";
 import { View, TouchableOpacity } from "react-native";
 import { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { GOOGLE_API_KEY } from "@env";
 
-import SmallMap from "../../components/atoms/SmallMap";
 import { selectBookingRequestLoading, selectDestination, selectOrigin, selectPassThrough, selectTravelTimeInformation } from "../../../slices/navSlice";
 import { setTravelTimeInformation, setPassThrough, setDestination, setPrice } from "../../../slices/navSlice";
 
@@ -17,7 +16,9 @@ import ConfirmScreen from "./ConfirmScreen";
 import ChooseRide from "./ChooseRide";
 import TogglePayment from "./TogglePayment";
 import AddStop from "./AddStop";
+
 import LoadingBlur from "../../components/atoms/LoadingBlur";
+import SmallMap from "../../components/atoms/SmallMap";
 
 const RideSelect = (props) => {
     const Stack = createNativeStackNavigator();
@@ -81,21 +82,19 @@ const RideSelect = (props) => {
 
     return(
         <View className="w-full h-full">
-            <LoadingBlur loading={bookingRequestLoading} />
+            <LoadingBlur theme={props.theme} loading={bookingRequestLoading} />
             <View className={`h-1/2 w-full`}>
-                <TouchableOpacity className={`absolute z-50 top-[15%] left-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+                <TouchableOpacity className={`absolute z-50 top-[15%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
                     navigation.goBack()
                 }}>
                     <Ionicons name="chevron-back" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
                 </TouchableOpacity>
                 <SmallMap expandMap={showFullJourneyOnMap} expandMapRef={mapRef} initialRegion={props.initialRegion} theme={props.theme}/>
-                <TouchableOpacity className={`absolute bottom-[10%] left-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={() => showFullJourneyOnMap()}>
+                <TouchableOpacity className={`absolute bottom-[10%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={() => showFullJourneyOnMap()}>
                     <MaterialCommunityIcons name="arrow-expand" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                 </TouchableOpacity>
-                <TouchableOpacity disabled={!passThrough} className={`absolute bottom-[10%] ${passThrough ? "opacity-100" : "opacity-40"} right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={handleSwitch}>
-                    <Octicons style={{
-                        transform: "rotate(90deg)"
-                    }} name="arrow-switch" size={19} color={props.theme === "dark" ? "white" : "black"} />
+                <TouchableOpacity disabled={!passThrough} className={`absolute bottom-[10%] rotate-90 ${passThrough ? "opacity-100" : "opacity-40"} right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={handleSwitch}>
+                    <Octicons name="arrow-switch" size={19} color={props.theme === "dark" ? "white" : "black"} />
                 </TouchableOpacity>
             </View>
             <View className={`h-1/2 w-full`}>

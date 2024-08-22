@@ -1,15 +1,18 @@
-import {Text, View, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, PixelRatio, Modal } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {Text, View, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Dimensions, Modal } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useState } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
-import { selectToken, selectUserInfo } from "../../../slices/authSlice";
-import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
+
+import { selectToken } from "../../../slices/authSlice";
+import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
+
+const { width } = Dimensions.get("window");
 
 const EditLocation = (props) => {
 
@@ -17,14 +20,13 @@ const EditLocation = (props) => {
 
     const { id } = routes.params; 
 
-    const favAddressChanged = useSelector(selectFavAddressChanged);
-
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
     const tokens = useSelector(selectToken);
+    const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const [ locationName, setLocationName ] = useState("");
     const [ locationAddress, setLocationAddress ] = useState({
@@ -34,9 +36,7 @@ const EditLocation = (props) => {
 
     const [ loading, setLoading ] = useState(false);
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     const editLocationForm = {
         address: locationAddress?.description,
@@ -63,7 +63,7 @@ const EditLocation = (props) => {
                 console.log(data.message)
             } else {
                 setLoading(false)
-                navigation.navigate("Favorite", {saveMessage: `${locationName} Address Editted Successfully`})
+                navigation.navigate("Favorite", {saveMessage: `${locationName} Address Edited Successfully`})
                 dispatch(setFavAddressUpdated(true));
                 dispatch(setFavAddressChanged(!favAddressChanged))
             }
@@ -87,7 +87,7 @@ const EditLocation = (props) => {
                     }
                 }}>
                     <View style={{backgroundColor: "rgba(0,0,0,0.6)"}} className={`w-full h-full flex items-center justify-center`}>
-                        <ModalLoader />
+                        <ModalLoader theme={props.theme}/>
                     </View>
                 </Modal>
                     
@@ -96,14 +96,14 @@ const EditLocation = (props) => {
                             <ShortModalNavBar theme={props.theme}/>
                         </View>
                         <View className={`w-full h-[15%] px-3 items-center flex-row`}>
-                            <MaterialIcons name="add-location" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                            <Text style={{fontSize: getFontSize(25)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Edit Location</Text>
+                            <MaterialIcons name="add-location" size={fontSize * 1.6} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                            <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Edit Location</Text>
                         </View>
                         <View className={`w-full h-[40%] pt-2 items-center relative z-20`}>
                             <TextInput
                                 className={`w-[90%] h-[36%] rounded-[25px] font-semibold tracking-tight shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d] text-white" : "bg-white border-gray-200 text-black"} px-2 `}
                                 placeholder="Name"
-                                style={{fontSize: getFontSize(15)}}
+                                style={{fontSize: fontSize * 0.75}}
                                 placeholderTextColor="rgb(156 163 175)"
                                 value={locationName}
                                 onChangeText={(x) => {setLocationName(x)}}
@@ -120,7 +120,7 @@ const EditLocation = (props) => {
                                             width: "100%",
                                         },
                                         textInput: {
-                                            fontSize: 15,
+                                            fontSize: fontSize * 0.75,
                                             height: "100%",
                                             width: "100%",
                                             fontWeight: "600",
@@ -132,11 +132,17 @@ const EditLocation = (props) => {
                                             zIndex: 100,
                                             elevation: 100,
                                             top: 70,
-                                            backgroundColor: "white",
+                                            backgroundColor: props.theme === "dark" ? "#222831" : "white",
                                             borderBottomLeftRadius: 20,
                                             borderBottomRightRadius: 20,
                                             height: 150    
-                                        }
+                                        },
+                                        row: {
+                                            backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                                        },
+                                        description: {
+                                            color: props.theme === "dark" ? "white" : "black"
+                                        },
                                     }}
                                     listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
                                     listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme} />}
@@ -164,14 +170,14 @@ const EditLocation = (props) => {
                                 />
                             </View>
                         </View>
-                        <View className={`w-[90%] h-[23%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-[#222831]" : "bg-white border-gray-200"} shadow border-[0.5px] flex flex-row justify-evenly items-center`}>
-                            <TouchableOpacity className={`bg-red-700 shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center`} onPress={() => {
+                        <View className={`w-[90%] h-[23%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-dark-secondary" : "bg-white border-gray-200"} shadow border-[0.5px] flex flex-row justify-evenly items-center`}>
+                            <TouchableOpacity className={`bg-red-700 shadow-sm w-[40%] h-[65%] rounded-[50px] flex justify-center items-center`} onPress={() => {
                                 navigation.goBack();
                             }}>
-                                <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Cancel</Text>
+                                <Text style={{fontSize: fontSize * 0.85}} className="font-bold tracking-tight text-white">Cancel</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity disabled={locationAddress["description"].length < 1 ? true : false} className={`bg-[#186F65] shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center ${locationAddress["description"].length < 1 ? "opacity-40" : "opacity-100"}`} onPress={handleSaveLocationAddress}>
-                                <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Save</Text>
+                            <TouchableOpacity disabled={locationAddress["description"].length < 1 ? true : false} className={`bg-[#186F65] shadow-sm w-[40%] h-[65%] rounded-[50px] flex justify-center items-center ${locationAddress["description"].length < 1 ? "opacity-40" : "opacity-100"}`} onPress={handleSaveLocationAddress}>
+                                <Text style={{fontSize: fontSize * 0.85}} className="font-bold tracking-tight text-white">Save</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

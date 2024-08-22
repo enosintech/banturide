@@ -1,23 +1,24 @@
-import {Text, View, TouchableOpacity, PixelRatio, Modal } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {Text, View, TouchableOpacity, Dimensions, Modal } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { useEffect, useRef, useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useState } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
+import { setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { selectToken } from "../../../slices/authSlice";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
-import { useDispatch, useSelector } from "react-redux";
-import { selectToken, selectUserInfo } from "../../../slices/authSlice";
-import { selectFavoriteWorkAddress, setFavoriteWorkAddress, setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
+
+const { width } = Dimensions.get("window");
 
 const EditWork = (props) => {
 
     const routes = useRoute();
 
     const  { id } = routes.params;
-
-    const favAddressChanged = useSelector(selectFavAddressChanged);
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
@@ -32,10 +33,9 @@ const EditWork = (props) => {
     })
 
     const tokens = useSelector(selectToken);
+    const favAddressChanged = useSelector(selectFavAddressChanged);
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     const editWorkForm = {
         address: workAddress?.description,
@@ -65,7 +65,7 @@ const EditWork = (props) => {
                 }, 4000)
             } else {
                 setLoading(false)
-                navigation.navigate("Favorite", {saveMessage: "Work Address Editted Successfully"})
+                navigation.navigate("Favorite", {saveMessage: "Work Address Edited Successfully"})
                 dispatch(setFavAddressUpdated(true))
                 dispatch(setFavAddressChanged(!favAddressChanged))
             }
@@ -87,7 +87,7 @@ const EditWork = (props) => {
                 }
              }}>
                 <View style={{backgroundColor: "rgba(0,0,0,0.6)"}} className={`w-full h-full flex items-center justify-center`}>
-                    <ModalLoader />
+                    <ModalLoader theme={props.theme}/>
                 </View>
              </Modal>
 
@@ -96,8 +96,8 @@ const EditWork = (props) => {
                     <ShortModalNavBar theme={props.theme}/>
                 </View>
                 <View className={`w-full h-[20%] px-3 items-center flex-row`}>
-                    <MaterialIcons name="work" size={getFontSize(30)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                    <Text style={{fontSize: getFontSize(25)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}> Edit Work</Text>
+                    <MaterialIcons name="work" size={fontSize * 1.6} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                    <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}> Edit Work</Text>
                 </View>
                 <View className={`w-full h-[30%] items-center justify-center relative z-20`}>
                 <View className={`w-[90%] h-[75%] rounded-[25px] shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d]" : "bg-white border-gray-200"}`}>
@@ -112,7 +112,7 @@ const EditWork = (props) => {
                                     width: "100%",
                                 },
                                 textInput: {
-                                    fontSize: getFontSize(18),
+                                    fontSize: fontSize * 0.85,
                                     height: "100%",
                                     width: "100%",
                                     fontWeight: "500",
@@ -122,13 +122,19 @@ const EditWork = (props) => {
                                 listView: {
                                     position : "absolute",
                                     zIndex: 100,
-                                    elevation: getFontSize(100),
-                                    top: getFontSize(60),
-                                    backgroundColor: "white",
-                                    borderBottomLeftRadius: getFontSize(20),
-                                    borderBottomRightRadius: getFontSize(20),
-                                    height: getFontSize(100)    
-                                }
+                                    elevation: 10,
+                                    top: 60,
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                                    borderBottomLeftRadius: 20,
+                                    borderBottomRightRadius: 20,
+                                    height: 100,    
+                                },
+                                row: {
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                                },
+                                description: {
+                                    color: props.theme === "dark" ? "white" : "black"
+                                },
                             }}
                             textInputProps={{
                                 placeholder: "Enter New Work Address",
@@ -156,14 +162,14 @@ const EditWork = (props) => {
                         />
                     </View>
                 </View>
-                <View className={`w-[90%] h-[30%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-[#222831]" : "bg-white border-gray-200"} shadow border-[0.5px] flex flex-row justify-evenly items-center`}>
-                    <TouchableOpacity className={`bg-red-700 shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center`} onPress={() => {
+                <View className={`w-[90%] h-[30%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-dark-secondary" : "bg-white border-gray-200"} shadow border-[0.5px] flex flex-row justify-evenly items-center`}>
+                    <TouchableOpacity className={`bg-red-700 shadow-sm w-[40%] h-[65%] rounded-[50px] flex justify-center items-center`} onPress={() => {
                         navigation.goBack();
                     }}>
-                        <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Cancel</Text>
+                        <Text style={{fontSize: fontSize * 0.85 }} className="font-bold tracking-tight text-white">Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity disabled={workAddress.description === "" ? true : false } onPress={handleSaveWorkAddress} className={`bg-[#186F65] shadow-lg w-[40%] h-[65%] rounded-[25px] flex justify-center items-center ${workAddress.description === "" ? "opacity-30" : "opacity-100"}`}>
-                        <Text style={{fontSize: getFontSize(18)}} className="font-bold tracking-tight text-white">Save</Text>
+                    <TouchableOpacity disabled={workAddress.description === "" ? true : false } onPress={handleSaveWorkAddress} className={`bg-[#186F65] shadow-sm w-[40%] h-[65%] rounded-[50px] flex justify-center items-center ${workAddress.description === "" ? "opacity-30" : "opacity-100"}`}>
+                        <Text style={{fontSize: fontSize * 0.85 }} className="font-bold tracking-tight text-white">Save</Text>
                     </TouchableOpacity>
                 </View>
             </View>

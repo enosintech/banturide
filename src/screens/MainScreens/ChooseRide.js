@@ -1,14 +1,17 @@
-import { View, Text, SafeAreaView, TouchableOpacity, Image, PixelRatio } from 'react-native'
-import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, Dimensions, SafeAreaView, TextInput } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import Ionicons from "@expo/vector-icons/Ionicons";
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-
-import { selectDestination, selectSeats, selectToggle, selectTravelTimeInformation, selectTripType, setSeats } from '../../../slices/navSlice';
-import { setToggle, setTripDetails, setPrice } from '../../../slices/navSlice';
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import PageLoader from '../../components/atoms/PageLoader';
-import { deliveryData, rideData } from '../../constants';
+
+import { selectDeliveryType, selectDestination, selectRecipient, selectSeats, selectToggle, selectTravelTimeInformation, selectTripType, setRecipient, setSeats } from '../../../slices/navSlice';
+import { setTripDetails, setPrice } from '../../../slices/navSlice';
+
+import { rideData } from '../../constants';
+
+const { width } = Dimensions.get("window");
 
 const ChooseRide = (props) => {
   
@@ -20,29 +23,28 @@ const ChooseRide = (props) => {
   const destination = useSelector(selectDestination);
   const seats = useSelector(selectSeats);
   const toggle = useSelector(selectToggle);
+  const recipient = useSelector(selectRecipient);
+  const deliveryType = useSelector(selectDeliveryType)
 
   const [ selected, setSelected ] = useState(null);
 
-  const fontScale = PixelRatio.getFontScale();
-
-  const getFontSize = size => size / fontScale;
+  const fontSize = width * 0.05;
   
-
   const SURGE_CHARGE_RATE = 1.5;
 
   return (
     <SafeAreaView className={`relative h-full w-full ${props.theme === "dark" ? "bg-[#0e1115]" : ""}`}>
       <View className={`w-full h-[12%] flex-row items-center border-b-[0.25px] justify-center`}>
-          <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{toggle === "ride" ? "Select A Ride" : "Specify Recipient"} - </Text>
+          <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{toggle === "ride" ? "Select A Ride" : "Specify Recipient"} - </Text>
           {tripType === "normal"
           ?
             travelTimeInformation  
             ?
-                <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
+                <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{travelTimeInformation.length > 1 ? (parseFloat(travelTimeInformation[0].distance.text) + parseFloat(travelTimeInformation[1].distance.text)).toFixed(1) : parseFloat(travelTimeInformation[0].distance.text)} KM</Text>
             :
                 <PageLoader theme={props.theme} width={"15%"} height={"50%"}/>
           :
-            <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Chaffeur</Text>
+            <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Chaffeur</Text>
           }
       </View>
       {
@@ -52,7 +54,7 @@ const ChooseRide = (props) => {
               {
                 rideData.map((data, index) => (
                     <View key={data.id} index={index} {...data} className={`w-full h-1/3 flex items-center justify-center`}>
-                        <TouchableOpacity className={`w-[95%] h-[95%] rounded-[20px] flex flex-row ${selected ? selected === data ? "opacity-100" : "opacity-60"  : "opacity-100" } ${selected === data && props.theme === "dark" ? "bg-[#3b434e]" : selected === data && props.theme !== "dark" ? "bg-white" : "" }`} onPress={() => {
+                        <TouchableOpacity className={`w-[95%] h-[95%] rounded-[25px] shadow-sm flex flex-row ${selected ? selected === data ? "opacity-100" : "opacity-60"  : "opacity-100" } ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"}`} onPress={() => {
                             setSelected(data)
                             dispatch(setSeats("4"));
                             dispatch(setTripDetails(data))
@@ -68,20 +70,20 @@ const ChooseRide = (props) => {
                                     source={data.image}
                                     style={{
                                         objectFit: "contain",
-                                        width : getFontSize(65),
-                                        height: getFontSize(65),
+                                        width : 85,
+                                        height: 85,
                                     }}
                                 />
                             </View>
                             <View className={`w-[50%] h-full flex`}>
                                 <View className={`w-full h-1/2 flex items-center justify-center`}>
-                                    <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{data.title}</Text>
+                                    <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{data.title}</Text>
                                 </View>
                                 <View className={`w-full h-1/2 flex-row items-center justify-evenly`}>
                                     <TouchableOpacity disabled={selected === data ? false : true} className={`px-3 py-2 ${seats === "4" && selected === data ? "bg-[#186f65]" : "bg-white shadow border border-gray-100"} rounded-full ${selected === data ? "opacity-100" : "opacity-30"}`} onPress={() => {
                                         dispatch(setSeats("4"));
                                     }}>
-                                        <Text style={{fontSize: getFontSize(14)}} className={`${seats === "4" && selected === data ? "text-white" : "text-black"} font-light`}>4 seats</Text>
+                                        <Text style={{fontSize: fontSize * 0.65}} className={`${seats === "4" && selected === data ? "text-white" : "text-black"} font-light`}>4 seats</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity disabled={selected === data ? false : true} className={`py-2 px-3 ${seats !== "4" && selected === data ? "bg-[#186f65]" : "bg-white shadow border border-gray-100"} rounded-full ${selected === data ? "opacity-100" : "opacity-30"}`} onPress={() => {
                                         if(data.id === "BantuEconomy"){
@@ -90,7 +92,7 @@ const ChooseRide = (props) => {
                                             dispatch(setSeats("6 - 12"))
                                         }
                                     }}>
-                                        <Text style={{fontSize: getFontSize(14)}} className={`${seats !== "4" && selected === data ? "text-white" : "text-black"} font-light`}>{data.id === "BantuEconomy" ? "6 seats" : "6 - 12 seats"}</Text>
+                                        <Text style={{fontSize: fontSize * 0.65}} className={`${seats !== "4" && selected === data ? "text-white" : "text-black"} font-light`}>{data.id === "BantuEconomy" ? "6 seats" : "6 - 12 seats"}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -100,7 +102,7 @@ const ChooseRide = (props) => {
                                         ?
                                             travelTimeInformation  
                                             ?
-                                                <Text style={{fontSize: getFontSize(20)}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-gray-700"}`}>
+                                                <Text style={{fontSize: fontSize}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-gray-700"}`}>
                                                     {
                                                         new Intl.NumberFormat("en-zm", {
                                                             style: "currency",
@@ -113,10 +115,10 @@ const ChooseRide = (props) => {
                                             :
                                                 <PageLoader theme={props.theme} width={"80%"} height={"70%"}/>
                                         :
-                                            <Text style={{fontSize: getFontSize(20)}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-gray-700"}`}>{"K 0.01"}</Text>
+                                            <Text style={{fontSize: fontSize}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-gray-700"}`}>{"K 0.01"}</Text>
                                     }
                                 </View>
-                                <View className={`w-[85%] h-0 border-t ${selected === data ? "block" : "hidden"} ${props.theme === "dark" ? "border-black" : "border-gray-300"}`}></View>
+                                <View className={`w-[85%] h-0 border-t ${selected === data ? "block" : "hidden"} ${props.theme === "dark" ? "border-white" : "border-gray-300"}`}></View>
                                 <View className={`w-full h-1/2 flex items-center justify-center`}>
                                     {tripType === "normal"
                                         ?
@@ -139,39 +141,64 @@ const ChooseRide = (props) => {
           </View>
           :
           <View className={`w-full h-[76%] flex-col`}>
-            <View className="w-full h-1/2 flex flex-row">
-              {deliveryData.map((item, index) => (
-                <View key={item.id} className={`w-1/3 h-full flex items-center justify-center`}>
-                    <TouchableOpacity className="w-[85%] h-[85%] bg-white rounded-[20px]" onPress={() => {
-                        setSelected(item);
-                        dispatch(setTripDetails(item));
-                    }}></TouchableOpacity>
+            <View className="w-full h-full flex items-center justify-center">
+                <View className={`${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} px-3 w-[90%] h-[90%] rounded-[40px] shadow-sm flex items-center`}>
+                    <View className={`w-full h-1/3 flex flex-row items-center justify-between`}>
+                        <Text style={{fontSize: fontSize }} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Recipient Name</Text>
+                        <TextInput 
+                            style={{ fontSize: fontSize * 0.9}}
+                            className={`w-1/2 h-full font-medium tracking-tight text-right ${props.theme === "dark" ? "text-white" : "text-black"}`}
+                            placeholder={"Enter Name"}
+                            placeholderTextColor={"#d1d5db"}
+                            defaultValue={recipient?.recipientFullName}
+                            onChangeText={(x) => dispatch(setRecipient({
+                                ...recipient,
+                                recipientFullName: x
+                            }))}
+                        />
+                    </View>
+                    <View className={`w-full h-0 border-[0.5px] ${props.theme === "dark" ? "border-white" : "border-gray-300"} `}></View>
+                    <View className={`w-full h-1/3 flex flex-row items-center justify-between`}>
+                        <Text style={{fontSize: fontSize }} className={`font-extrabold tracking-tight w-1/2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>Contact Number</Text>
+                        <TextInput 
+                            style={{ fontSize: fontSize * 0.9}}
+                            className={`w-1/2 h-full font-medium tracking-tight text-right ${props.theme === "dark" ? "text-white" : "text-black"}`}
+                            placeholder={"Enter Number"}
+                            placeholderTextColor={"#d1d5db"}
+                            defaultValue={recipient?.recipientContact}
+                            onChangeText={(x) => dispatch(setRecipient({
+                                ...recipient,
+                                recipientContact: x
+                            }))}
+                            keyboardType={"numeric"}
+                        />
+                    </View>
+                    <View className={`w-full h-0 border-[0.5px] ${props.theme === "dark" ? "border-white" : "border-gray-300"} `}></View>
+                    <View className={`w-full h-[32%] flex items-center justify-center`}>
+                        <View className={`w-[40%] h-[50%] bg-neutral-100 shadow-sm rounded-full flex flex-row items-center`}>
+                            <Image 
+                                source={deliveryType.image}
+                                style={{
+                                    width: 45,
+                                    height: 45,
+                                    resizeMode: 'contain',
+                                }}
+                            />
+                            <Text style={{fontSize: fontSize * 0.6}} className={`font-bold tracking-tighter`}>{deliveryType.title}</Text>
+                        </View>
+                    </View>
                 </View>
-              ))}                      
             </View>
-            <View className="w-full h-1/2 flex px-2">
-                <View className="w-full h-1/2 flex flex-row items-center justify-between">
-                    <Ionicons name="location-sharp" size={getFontSize(40)} color="#8B0000"/>
-                    <Text style={{fontSize: getFontSize(30)}} className="truncate font-semibold tracking-tight">{destination.description.split(",").shift()}</Text>
-                </View>
-                <View className="w-full h-1/2 flex flex-row items-center justify-between">
-                    <Text style={{fontSize: getFontSize(24)}} className="font-bold text-gray-800">Recipient</Text>
-                    <TouchableOpacity className="flex-row items-center gap-2">
-                        <Text style={{fontSize: getFontSize(20)}} className="font-semibold tracking-tight text-gray-500">Enos</Text>
-                        <Ionicons name="chevron-forward" size={getFontSize(30)} color={"rgb(107,114,128)"} />
-                    </TouchableOpacity>
-                </View>
-            </View>  
           </View>
       }
       <View className={`absolute bottom-7 border-t-[0.25px] w-full h-[12%] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"} items-center`}>
           <View className={`h-full w-[50%] flex-row items-center justify-center`}>
               
           </View>
-          <TouchableOpacity className={`absolute right-5 top-[20%] h-[35px] rounded-full w-[35px] ${props.theme === "dark" ? "bg-white" : "bg-black"} ${travelTimeInformation && selected ? "opacity-100" : "opacity-25"} flex items-center justify-center`} disabled={travelTimeInformation && selected ? false : true} onPress={() => {
+          <TouchableOpacity className={`absolute right-5 top-[20%] h-[35px] rounded-full w-[35px] ${props.theme === "dark" ? "bg-white" : "bg-black"} flex items-center justify-center ${toggle === "delivery" ? Object.values(recipient ? recipient : {}).includes("") || !recipient?.recipientFullName || !recipient?.recipientContact ? " opacity-25" : "opacity-100" : travelTimeInformation && selected ? "opacity-100" : "opacity-25" }`}  disabled={toggle === "delivery" ? Object.values(recipient ? recipient : {} ).includes("") ? true : false : travelTimeInformation && selected ? false : true } onPress={() => {
             navigation.navigate("confirmscreen")
           }}>
-              <Ionicons name="md-checkmark-sharp" size={getFontSize(20)} color={`${props.theme === "dark" ? "black" : "white"}`} />
+              <Ionicons name="md-checkmark-sharp" size={fontSize} color={`${props.theme === "dark" ? "black" : "white"}`} />
           </TouchableOpacity>
       </View>
     </SafeAreaView>

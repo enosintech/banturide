@@ -1,12 +1,14 @@
-import { useEffect, useRef  } from 'react'
-import { View, Text, PixelRatio, Image } from 'react-native';
-import { useSelector } from 'react-redux';
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { View, Text, Image, Dimensions } from 'react-native';
+import { useEffect, useRef  } from 'react'
+import { useSelector } from 'react-redux';
 import MapViewDirections from 'react-native-maps-directions';
 import LottieView from "lottie-react-native";
 
 import { selectBooking, selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
 import { lightModeMapStyle, darkModeMapStyle } from '../../../assets/styles/MapStyles.js';
+
+const { width } = Dimensions.get("window")
 
 const Map = (props) => {
   const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
@@ -17,9 +19,7 @@ const Map = (props) => {
   const destination = useSelector(selectDestination); 
   const booking = useSelector(selectBooking);
 
-  const fontScale = PixelRatio.getFontScale();
-
-  const getFontSize = size => size / fontScale;
+  const fontSize = width * 0.05;
 
   useEffect(() => {
 
@@ -95,8 +95,8 @@ const Map = (props) => {
                   source={require("../../../assets/images/driver.png")}
                   style={{
                       objectFit: "contain",
-                      width : getFontSize(55),
-                      height: getFontSize(55),
+                      width : 55,
+                      height: 55,
                   }}
                 />
               </Marker>
@@ -114,7 +114,7 @@ const Map = (props) => {
               identifier="origin"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
-                <Text style={{fontSize: getFontSize(12)}} className={`text-black font-light tracking-tight`}>1</Text>
+                <Text style={{fontSize: fontSize * 0.4}} className={`text-black font-light tracking-tight`}>1</Text>
               </View>
             </Marker>
           )}
@@ -130,7 +130,7 @@ const Map = (props) => {
               identifier="stop"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-[#186f65] flex items-center justify-center`}>
-                <Text style={{fontSize: getFontSize(12)}} className={`text-white font-light tracking-tight`}>2</Text>
+                <Text style={{fontSize: fontSize * 0.4}} className={`text-white font-light tracking-tight`}>2</Text>
               </View>
             </Marker>
           )}
@@ -146,7 +146,7 @@ const Map = (props) => {
                 identifier="destination"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-black border-black flex items-center justify-center`}>
-                <Text style={{fontSize: getFontSize(12)}} className={`text-white font-light tracking-tight`}>{passThrough ? 3 : 2}</Text>
+                <Text style={{fontSize: fontSize * 0.4}} className={`text-white font-light tracking-tight`}>{passThrough ? 3 : 2}</Text>
               </View>
             </Marker>
         )}

@@ -1,18 +1,18 @@
+import { StyleSheet, View, Text, Dimensions } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View, Text, PixelRatio } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import HomeNavigator from "./HomeNavigator.js";
 import FavoriteNavigator from "./FavoriteNavigator.js";
 import ProfileNavigator from "./ProfileNavigator.js";
 
+const { width } = Dimensions.get("window")
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = (props) => {
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     return (
         <Tab.Navigator initialRouteName="HomeNav"
@@ -40,7 +40,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Home</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Home</Text>
                     </View>
                 )
             }}>
@@ -55,7 +55,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Favorites</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Favorites</Text>
                     </View>
                 )
                  }}>
@@ -70,7 +70,7 @@ const TabNavigator = (props) => {
                             size={size}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: getFontSize(10)}}>Profile</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Profile</Text>
                     </View>
                 )
                 }}>

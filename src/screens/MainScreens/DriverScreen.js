@@ -1,30 +1,32 @@
-import { View, Text, ScrollView, Dimensions, TouchableOpacity, PixelRatio } from 'react-native'
+import { View, Text, ScrollView, Dimensions, TouchableOpacity, Share } from 'react-native'
+import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import { useEffect, useRef, useState } from 'react';
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Entypo from "@expo/vector-icons/Entypo";
 
 import RequestMap from '../../components/atoms/RequestMap';
-import { selectBooking, selectDestination, selectDriver, selectHasArrived, selectLocationUpdatedRan, selectOnTheWay, selectOrigin, selectPassThrough, selectPaymentMethod, selectRemaingTripDistance, selectRemainingTripTime, selectTripType, setLocationUpdatedRan, setPassThrough, setRemainingTripDistance, setRemainingTripTime } from '../../../slices/navSlice';
 import PageLoader from '../../components/atoms/PageLoader';
+
+import { selectBooking, selectDestination, selectDriver, selectLocationUpdatedRan, selectOrigin, selectPassThrough, selectPaymentMethod, selectPaymentMethodUpdated, selectRemaingTripDistance, selectRemainingTripTime, selectTripType, setBooking, setBookingRequested, setDestination, setDriver, setLocationUpdatedRan, setOrigin, setPassThrough, setPaymentMethodUpdated, setPrice, setRemainingTripDistance, setRemainingTripTime, setSearchComplete, setSearchPerformed, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
 import { selectToken } from '../../../slices/authSlice';
+
+const  { width } = Dimensions.get("window");
 
 const DriverScreen = (props) => {
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const mapRef = useRef();
+  const routes = useRoute();
   const height = Dimensions.get("window").height;
 
   const api="AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
-  const fontScale = PixelRatio.getFontScale();
-
-  const getFontSize = size => size / fontScale;
+  const fontSize = width * 0.05;
 
   const origin = useSelector(selectOrigin);
   const passThrough = useSelector(selectPassThrough);
@@ -36,6 +38,9 @@ const DriverScreen = (props) => {
   const locationUpdateRan = useSelector(selectLocationUpdatedRan);
   const tokens = useSelector(selectToken);
   const remainingTripDistance = useSelector(selectRemainingTripTime);
+  const paymentMethodUpdated = useSelector(selectPaymentMethodUpdated);
+
+  const { updatedPaymentMessage } = routes.params ? routes.params : "";
 
   const [ min, setMin ] = useState();
 
@@ -55,6 +60,28 @@ const DriverScreen = (props) => {
       edgePadding: {top: 100, right: 200, bottom: 100, left: 200}
     })
   }
+
+  const formatTripDetails = (bookingDetails) => {
+    return `
+    🚗 *Trip Details* 🚗
+
+    🛫 *Pickup Location:* ${bookingDetails?.pickUpLocation}
+    🛬 *Dropoff Location:* ${bookingDetails?.dropOffLocation}
+    `;
+  };
+
+  const shareTripDetails = async () => {
+    const message = formatTripDetails(booking);
+
+    try {
+        await Share.share({
+            message: message,
+            title: "My Trip Details"
+        });
+    } catch (error) {
+        console.error('Error sharing trip details:', error);
+    }
+  };
 
   const updateBookingLocation = async () => {
       console.log("trying");
@@ -80,12 +107,6 @@ const DriverScreen = (props) => {
   }
 
   useEffect(() => {
-    if(booking?.status === "confirmed"){
-      fitMarkers();
-    }
-  }, [booking])
-
-  useEffect(() => {
     if(!booking || booking?.status !== "confirmed") return ;
 
     const getDriverTime = async () => {
@@ -103,7 +124,6 @@ const DriverScreen = (props) => {
   }, [booking, api])
 
   useEffect(() => {
-    if(!booking || booking?.status !== "ongoing") return;
 
     const getTripTime = async () => {
       fetch(
@@ -117,20 +137,77 @@ const DriverScreen = (props) => {
       }) 
     }
 
-    getTripTime();
+    if(booking?.status === "ongoing"){
+      console.log("called")
+      getTripTime();
+    }
 
   }, [booking, api])
 
   useEffect(() => {
-    if(!locationUpdateRan){
+    if(!locationUpdateRan && booking?.status === "confirmed"){
       updateBookingLocation();
       dispatch(setLocationUpdatedRan(true))
     }
-  }, [locationUpdateRan])
+  }, [locationUpdateRan, booking])
+
+  useEffect(() => {
+    setTimeout(() => {
+        dispatch(setPaymentMethodUpdated(false))
+    }, 5000)
+}, [paymentMethodUpdated])
+
+useEffect(() => {
+  if(booking?.status !== "completed"){
+    return
+  }
+
+  if(booking?.rated === false) {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0, 
+        routes: [
+          { name: 'rateDriver' },
+        ],
+      })
+    );
+  } else {
+    dispatch(setBooking(null))
+    dispatch(setDriver(null))
+    dispatch(setDestination(null))
+    dispatch(setOrigin(null))
+    dispatch(setPrice(null))
+    dispatch(setTravelTimeInformation(null))
+    dispatch(setTripDetails(null))
+    dispatch(setPassThrough(null))
+    dispatch(setBookingRequested(false))
+    dispatch(setSearchPerformed(false))
+    dispatch(setSearchComplete(false))
+    dispatch(setLocationUpdatedRan(false))
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0, 
+        routes: [
+          { name: 'Home' },
+        ],
+      })
+    );
+  }
+
+
+}, [booking])
 
   return (
     <View className={`w-full h-full`}>
-      <View className={`w-full h-full flex`}>
+      <View className={`w-full h-full relative flex ${props.theme === "dark" ? "bg-dark-main" : ""}`}>
+          {paymentMethodUpdated &&
+                <View className={`w-full h-[6%] absolute z-20 top-20 flex items-center justify-center`}>
+                    <View className={`w-[65%] h-[90%] bg-black rounded-[50px] flex items-center justify-center px-2`}>
+                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{updatedPaymentMessage}</Text>
+                    </View>
+                </View>
+            }
+
         <ScrollView contentContainerStyle={{
           display: "flex",
           flexDirection: "column"
@@ -138,87 +215,94 @@ const DriverScreen = (props) => {
           <View style={{
             height: 0.7 * height
           }} className={`w-full relative`}>
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
                     navigation.navigate("Home")
                 }}>
-                <Ionicons name="chevron-down" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                <Ionicons name="chevron-down" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
             </TouchableOpacity>
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrentLocation()}>
-                    <MaterialIcons name="my-location" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrentLocation()}>
+                    <MaterialIcons name="my-location" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[18%] rounded-2xl shadow-xl ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => fitMarkers()}>
-                    <MaterialCommunityIcons name="arrow-expand" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[18%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => fitMarkers()}>
+                    <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
             <RequestMap mapRef={mapRef} theme={props.theme}/>
           </View>
           <View style={{
             height: 0.8 * height
-          }} className={`w-full flex items-center justify-start gap-y-4 border-t-4 ${props.theme === "dark" ? "bg-[#0e1115] border-white" : "bg-gray-100 border-gray-200"}`}>
-            <View className={`w-[95%] h-[20%] rounded-[20px] flex flex-row items-center ${props.theme === "dark" ? "bg-[#202227]" : "bg-white"}`}>
+          }} className={`w-full flex items-center justify-start gap-y-4 border-t-4 ${props.theme === "dark" ? "bg-dark-main border-white" : "bg-gray-100 border-gray-200"}`}>
+            <View className={`w-[95%] h-[20%] rounded-[40px] shadow-sm flex flex-row items-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
               <View className={`w-2/3 h-full flex-row`}>
                 <View className={`w-1/3 h-full flex items-center justify-start pt-7`}>
-                  <View className={`w-14 h-14 ${props.theme === "dark" ? "" : "bg-white"} rounded-full shadow-md`}></View>
+                  <View className={`w-14 h-14 ${props.theme === "dark" ? "" : "bg-white"} rounded-full bg-black`}></View>
                 </View>
                 <View className={`w-2/3 h-full flex items-start justify-center`}>
-                  <Text style={{fontSize: getFontSize(20)}} className={`font-extrabold ${props.theme === "dark" ? "text-white" : "text-black "} tracking-tight`}>{driver?.firstname} {driver?.lastname}</Text>
-                  <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Red Toyota Prius</Text>
-                  <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>BAE 3155</Text>
+                  <Text style={{fontSize: fontSize}} className={`font-extrabold ${props.theme === "dark" ? "text-white" : "text-black "} tracking-tight`}>{driver?.firstname} {driver?.lastname}</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Red Toyota Prius</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>BAE 3155</Text>
                   <View className={`w-[95%] h-[20%] mt-2 rounded-[20px] bg-[#186f65] flex items-center justify-center overflow-hidden`}>
                     {min 
                     ?
-                      <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>{booking?.status === "ongoing" ? "You're on the way" : booking?.driverArrivedAtPickup ? "Driver has Arrived" : min > 2  ? `Arriving in ${min} mins` : "Arriving Soon"}</Text>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`text-white font-bold tracking-tight`}>{booking?.status === "ongoing" ? "You're on the way" : booking?.driverArrivedAtPickup ? "Driver has Arrived" : min > 2  ? `Arriving in ${min} mins` : "Arriving Soon"}</Text>
                     :
-                    booking.status === "ongoing"
+                    booking?.status === "ongoing"
                     ?
-                      <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>{remainingTripDistance} Minutes Left</Text>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`text-white font-bold tracking-tight`}>{remainingTripDistance} Minutes Left</Text>
                     :
-                    booking.status === "arrived"
+                    booking?.status === "arrived"
                     ?
-                      <Text style={{fontSize: getFontSize(14)}} className={`text-white font-bold tracking-tight`}>You have arrived</Text>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`text-white font-bold tracking-tight`}>You have arrived</Text>
                     :
-                      <PageLoader />
+                      <PageLoader theme={props.theme} />
                     }
                   </View>
                 </View>
               </View>
               <View className={`w-0 h-[80%] border-l-[0.5px] flex ${props.theme === "dark" ? "border-white" : "border-gray-300"}` }></View>
               <View className={`w-1/3 h-full flex items-center justify-center`}>
-                <TouchableOpacity className={`w-[85%] h-[85%] flex items-center justify-center rounded-[20px] shadow border-[0.5px] ${props.theme === "dark" ? "" : "bg-white border-gray-100"}`} onPress={() => {
-                  booking?.status === "ongoing" 
+                <TouchableOpacity disabled={booking?.rated === true ? true : false} className={`w-[85%] h-[85%] flex items-center justify-center rounded-[30px] shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`} onPress={() => {
+                  booking?.status === "ongoing" || booking?.status === "arrived" 
                   ? 
-                    console.log("You're on the way")
+                    navigation.navigate("rateDriver")
                   :
                   navigation.navigate("chat");
                 }}>
                   {
-                    booking?.status === "ongoing" || booking.status === "arrived"
+                    booking?.status === "ongoing" || booking?.status === "arrived"
                     ?
+                    booking?.rated === true ?
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
-                      <MaterialIcons name="star-rate" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
-                      <Text style={{fontSize: getFontSize(14)}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Rate Ride</Text>
+                      <MaterialIcons name="star-rate" size={fontSize * 1.75} color={props.theme === "dark" ? "white" : "black"}/>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.driverRating}</Text>
                     </View>
                     :
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
-                      <Ionicons name="chatbubbles" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
-                      <Text style={{fontSize: getFontSize(14)}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Contact Driver</Text>
+                      <MaterialIcons name="star-rate" size={fontSize * 1.75} color={props.theme === "dark" ? "white" : "black"}/>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Rate Ride</Text>
+                    </View>
+                    :
+                    <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
+                      <Ionicons name="chatbubbles" size={fontSize * 1.75} color={props.theme === "dark" ? "white" : "black"}/>
+                      <Text style={{fontSize: fontSize * 0.65}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Contact Driver</Text>
                     </View>
                   }
                 </TouchableOpacity>
               </View>
             </View>
-            <View className={`w-[95%] h-[40%] rounded-[20px] flex items-center justify-center ${props.theme === "dark" ? "bg-[#202227]" : "bg-white"}`}>
+            <View className={`w-[95%] h-[40%] rounded-[40px] shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
               <View className={`w-[90%] flex items-center justify-between h-[90%]`}>
-                <View className={`w-full h-1/3 flex-row items-center rounded-[16px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
-                  <View className={`w-[20%] h-full flex items-center justify-center`}>
-                    <MaterialIcons name="trip-origin" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
+                <View className={`w-full h-1/3 flex-row items-center rounded-[50px] shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`}>
+                  <View className={`w-[20%] h-full flex items-center justify-center translate-x-1`}>
+                    <MaterialIcons name="trip-origin" size={fontSize * 1.65} color={props.theme === "dark" ? "white" : "black"}/>
                   </View>
                   <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-700" : "border-gray-200"}`}></View>
-                  <View className={`w-[80%] h-full flex pr-5`}>
+                  <View className={`w-[80%] h-full flex items-center pr-8`}>
                     <View className={`w-full h-1/2 flex flex-row items-center justify-end`}>
-                      <Text style={{fontSize: getFontSize(25)}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Origin</Text>
+                      <Text style={{fontSize: fontSize * 1.3}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Origin</Text>
                     </View>
                     <View className={`w-full h-1/2 flex flex-row items-start justify-end`}>
-                      <Text style={{fontSize: getFontSize(22)}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
+                      <Text style={{fontSize: fontSize * 0.9}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{origin?.description.split(",")[0]}</Text>
                     </View>
                   </View>
                 </View>
@@ -230,58 +314,50 @@ const DriverScreen = (props) => {
                         passThrough 
                         ?
                         <View className={`w-full h-1/2 flex-row`}>
-                          <View className={`w-[60%] h-full flex items-center justify-center`}>
+                          <View className={`w-full h-full flex items-center justify-center`}>
                             <View className={`w-full h-1/2 flex flex-row items-center justify-center`}>
-                              <MaterialIcons name="keyboard-arrow-right" size={getFontSize(25)} color={props.theme === "dark" ? "white" : "black"}/>
-                              <Text style={{fontSize: getFontSize(18)}} className={`tracking-tight font-extrabold ${props.theme === "dark" ? "text-white" : "text-black"}`}>Stop</Text>
-                              <MaterialIcons name="keyboard-arrow-right" size={getFontSize(25)} color={props.theme === "dark" ? "white" : "black"}/>
+                              <MaterialIcons name="keyboard-arrow-right" size={fontSize * 1.3} color={props.theme === "dark" ? "white" : "black"}/>
+                              <Text style={{fontSize: fontSize * 0.85}} className={`tracking-tight font-black ${props.theme === "dark" ? "text-white" : "text-black"}`}>Stop</Text>
+                              <MaterialIcons name="keyboard-arrow-right" size={fontSize * 1.3} color={props.theme === "dark" ? "white" : "black"}/>
                             </View>
                             <View className={`w-[80%] h-0 border-t-[0.5px] ${props.theme === "dark" ? "border-gray-100" : "border-gray-300"}`}></View>
-                            <Text style={{fontSize: getFontSize(16)}} className={`tracking-tight text-center w-[80%] mt-1 h-1/2 truncate ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
-                          </View>
-                          <View className={`w-[40%] h-full flex items-end justify-center pr-5`}>
-                            <TouchableOpacity disabled={true} className={`p-2 opacity-50 rounded-full border-[0.5px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white shadow border-gray-100"}`} onPress={() => {
-                              dispatch(setPassThrough(null))
-                            }}>
-                              <Text style={{fontSize: getFontSize(14)}} className={`text-[15px] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Remove</Text>
-                            </TouchableOpacity>
+                            <Text numberOfLines={1} style={{fontSize: fontSize * 0.65}} className={`tracking-tight text-center w-[80%] mt-1 h-1/2 truncate ${props.theme === "dark" ? "text-white" : "text-black"}`}>{passThrough.description.split(",")[0]}</Text>
                           </View>
                         </View>
                         :
                         <View className={`w-full h-1/2 flex items-center justify-center`}>
-                          <TouchableOpacity disabled={true} className={`p-2 rounded-full opacity-50 border-[0.5px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white shadow border-gray-100"}`} onPress={() => {
-                            navigation.navigate("addStop")
-                          }}>
-                            <Text style={{fontSize: getFontSize(15)}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Add Stop</Text>
-                          </TouchableOpacity>
+                          <View className={`p-3 opacity-30 rounded-full ${props.theme === "dark" ? "bg-dark-secondary border-gray-700" : "bg-white border-[0.5px] shadow-sm border-gray-100"}`}>
+                            <Text style={{fontSize: fontSize * 0.65}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>No Stop</Text>
+                          </View>
                         </View>
                       }
-                      <View className={`w-full h-1/2 flex-row items-center rounded-[16px] ${props.theme === "dark" ? "bg-[#414953] border-gray-700" : "bg-white border-gray-100"} shadow border-[0.5px]`}>
+                      <View className={`w-full h-1/2 flex-row items-center rounded-[40px] ${props.theme === "dark" ? "bg-dark-secondary border-gray-700" : "bg-white border-[0.5px] border-gray-100"} shadow-sm`}>
                         <View className={`w-[20%] h-full flex items-center justify-center`}>
-                          <FontAwesome name="flag-checkered" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
+                          <FontAwesome name="flag-checkered" size={fontSize * 1.65} color={props.theme === "dark" ? "white" : "black"}/>
                         </View>
                         <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-700" : "border-gray-200"}`}></View>
-                        {booking?.status === "confirmed" 
-                        ?
-                          <View className={`w-[80%] h-full flex pr-5`}>
+                        {/* {booking?.status === "confirmed" || booking?.status === "arrived"
+                        ? */}
+                          <View className={`w-[80%] h-full flex items-center pr-8`}>
                             <View className={`w-full h-1/2 flex flex-row items-center justify-end`}>
-                              <Text style={{fontSize: getFontSize(25)}} className={`font-extrabold tracking-tight mr-1 ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
+                              <Text style={{fontSize: fontSize * 1.3}} className={`font-extrabold tracking-tight mr-1 ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
                             </View>
                             <View className={`w-full h-1/2 flex flex-row items-start justify-end`}>
-                              <Text style={{fontSize: getFontSize(22)}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
+                              <Text style={{fontSize: fontSize * 0.9}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
                             </View>
                           </View>
-                        :
-                          <TouchableOpacity className={`w-[80%] h-full flex pr-5`}>
+                        
+                          {/* <TouchableOpacity className={`w-[80%] h-full flex items-center pr-8`} onPress={() => {
+                            navigation.navigate("updateDestination")
+                          }}>
                             <View className={`w-full h-1/2 flex flex-row items-center justify-end`}>
-                              <Text style={{fontSize: getFontSize(25)}} className={`font-extrabold tracking-tight mr-1 ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
-                              <Ionicons name="chevron-forward" size={getFontSize(25)} color={props.theme === "dark" ? "white" : "black"} />
+                              <Text style={{fontSize: fontSize * 1.3}} className={`font-extrabold tracking-tight mr-1 ${props.theme === "dark" ? "text-white" : "text-black"}`}>Destination</Text>
+                              <Ionicons name="chevron-forward" size={fontSize * 1.1} color={props.theme === "dark" ? "white" : "black"} />
                             </View>
                             <View className={`w-full h-1/2 flex flex-row items-start justify-end`}>
-                              <Text style={{fontSize: getFontSize(22)}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
+                              <Text style={{fontSize: fontSize * 0.9}} className={`tracking-tight ml-2 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{destination?.description.split(",")[0]}</Text>
                             </View>
-                          </TouchableOpacity>
-                        }
+                          </TouchableOpacity> */}
                       </View>
                     </View>
                     :
@@ -294,57 +370,61 @@ const DriverScreen = (props) => {
                 <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={() => {
                   navigation.navigate("changePayment")
                 }}>
-                  <View className={`w-[65px] h-[65px] rounded-full flex items-center justify-center ${props.theme === "dark" ? "bg-[#202227]" : "bg-white"}`}>
-                    {paymentMethod === "cash" 
+                  <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
+                    {booking?.paymentMethod === "cash" 
                     ?
-                    <Ionicons name="cash" size={30} color="green"/>
+                    <Ionicons name="cash" size={fontSize * 1.6} color="green"/>
                     :
-                    <Entypo name="wallet" size={30} color="black" />
+                    <Entypo name="wallet" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"} />
                     }
                   </View>
                 </TouchableOpacity>
                 <View className={`w-fit text-center flex flex-col items-center relative`}>
-                  <Text style={{fontSize: getFontSize(14)}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Payment</Text>
-                  <Text style={{fontSize: getFontSize(10)}} className={`text-neutral-700 absolute -translate-y-1`}>{paymentMethod === "cash" ? "Cash" : "Mobile Money"}</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Payment</Text>
+                  <Text style={{fontSize: fontSize * 0.5}} className={`text-neutral-700 absolute -translate-y-1`}>{booking?.paymentMethod === "cash" ? "Cash" : "Mobile Money"}</Text>
                 </View>
               </View>
               <View className={`flex flex-col items-center`}>
-                <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`}>
-                  <View className={`w-[65px] h-[65px] rounded-full flex items-center justify-center ${props.theme === "dark" ? "bg-[#202227]" : "bg-white"}`}>
-                    <Ionicons name="share" size={30} color={props.theme === "dark" ? "white" : "black"}/>
+                <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={shareTripDetails}>
+                  <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
+                    <Ionicons name="share" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"}/>
                   </View>
                 </TouchableOpacity>
                 <View className={`w-fit text-center flex flex-col items-center justify-start`}>
-                  <Text style={{fontSize: getFontSize(14)}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Share trip</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Share trip</Text>
                 </View>
               </View>
-              {
-                booking?.status === "ongoing" || booking.status === "arrived"
+              
+                {/* booking?.status === "ongoing" || booking?.status === "arrived"
                 ?
                 <View className={`flex flex-col items-center`}>
-                  <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`}>
-                    <View className={`w-[65px] h-[65px] rounded-full flex items-center justify-center ${props.theme === "dark" ? "bg-[#202227]" : "bg-white"}`}>
-                      <MaterialIcons name="report" size={35} color={props.theme === "dark" ? "white" : "black"}/>
-                    </View>
-                  </TouchableOpacity>
-                  <View className={`w-fit text-center flex flex-col items-center justify-start`}>
-                    <Text style={{fontSize: getFontSize(14)}} className={` mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Report Driver</Text>
-                  </View>
-                </View>
-                :
-                <View className={`flex flex-col items-center`}>
                   <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={() => {
-                    navigation.navigate("cancel");
+                    navigation.navigate('reportDriver')
                   }}>
-                    <View className={`w-[65px] h-[65px] rounded-full flex items-center justify-center bg-red-100`}>
-                      <Entypo name="cross" size={30} color={"rgb(239,68,68)"}/>
+                    <View className={`w-[65px] h-[65px] rounded-full flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
+                      <MaterialIcons name="report" size={fontSize * 1.8} color={props.theme === "dark" ? "white" : "black"}/>
                     </View>
                   </TouchableOpacity>
                   <View className={`w-fit text-center flex flex-col items-center justify-start`}>
-                    <Text style={{fontSize: getFontSize(14)}} className={` mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Cancel Ride</Text>
+                    <Text style={{fontSize: fontSize * 0.65}} className={` mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Report Driver</Text>
                   </View>
                 </View>
-              }
+                : */}
+                {booking?.status === "confirmed" && 
+                  <View className={`flex flex-col items-center`}>
+                    <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={() => {
+                      navigation.navigate("cancel");
+                    }}>
+                      <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center bg-red-100`}>
+                        <Entypo name="cross" size={fontSize * 1.6} color={"rgb(239,68,68)"}/>
+                      </View>
+                    </TouchableOpacity>
+                    <View className={`w-fit text-center flex flex-col items-center justify-start`}>
+                      <Text style={{fontSize: fontSize * 0.65}} className={` mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Cancel Ride</Text>
+                    </View>
+                  </View>
+                }
+              
             </View>
           </View>
         </ScrollView>

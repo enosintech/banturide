@@ -3,7 +3,7 @@ import LottieView from "lottie-react-native";
 
 const PageLoader = (props) => {
   return (
-    <View className={`rounded-[10px] overflow-hidden flex items-center justify-center`} style={{
+    <View className={`rounded-[25px] overflow-hidden flex items-center justify-center`} style={{
         width: props.width,
         height: props.height
     }}>

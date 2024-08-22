@@ -1,18 +1,19 @@
+import {Text, View, Dimensions, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import {Text, View, SafeAreaView, PixelRatio, TouchableOpacity } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
+
+const { width } = Dimensions.get("window");
 
 const AboutScreen = (props) => {
     const navigation = useNavigation();
 
     const [ aboutToggle, setAboutToggle ] = useState("tncs");
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     return(
         <SafeAreaView className={`${props.theme === "dark"? "bg-[#222831]" : ""} w-full h-full`}>
@@ -24,8 +25,8 @@ const AboutScreen = (props) => {
             </View>
 
             <View className="w-full h-[15%] flex flex-col items-center justify-center">
-                <Text style={{fontSize: getFontSize(24)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Banturide</Text>
-                <Text style={{fontSize: getFontSize(18)}} className={`mt-2 font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Version 1.0.0 Released TBD</Text>
+                <Text style={{fontSize: fontSize * 1.2}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Banturide</Text>
+                <Text style={{fontSize: fontSize * 0.8}} className={`mt-2 font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-neutral-700"}`}>Version 1.0.0 Released TBD</Text>
             </View>
 
             <View className={`w-full h-[60%]`}>
@@ -34,12 +35,12 @@ const AboutScreen = (props) => {
                         <TouchableOpacity onPress={() => {
                             setAboutToggle("tncs")
                         }} className={`w-1/2 h-full rounded-[25px] flex items-center justify-center ${aboutToggle === "tncs" ? "bg-[#186f65]" : "bg-white"}`}>
-                            <Text style={{fontSize: getFontSize(13)}} className={`${aboutToggle === "tncs" ? "text-white" : "text-black"} font-medium tracking-tight`}>Terms & Conditions</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className={`${aboutToggle === "tncs" ? "text-white" : "text-black"} font-medium tracking-tight`}>Terms & Conditions</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => {
                             setAboutToggle("pp")
                         }} className={`w-1/2 h-full rounded-[25px] flex items-center justify-center ${aboutToggle === "tncs" ? "bg-white" : "bg-[#186f65]"}`}>
-                            <Text style={{fontSize: getFontSize(13)}} className={`${aboutToggle === "tncs" ? "text-black" : "text-white"} font-medium tracking-tight`}>Privacy Policy</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className={`${aboutToggle === "tncs" ? "text-black" : "text-white"} font-medium tracking-tight`}>Privacy Policy</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -60,8 +61,8 @@ const AboutScreen = (props) => {
 
             <View className={`w-full h-[10%] flex items-center justify-center`}>
                 <TouchableOpacity className={`w-[35%] h-[60%] bg-[#186f65] rounded-full flex flex-row items-center justify-center`}>
-                    <Feather name="globe" size={getFontSize(25)} color="white" />
-                    <Text style={{fontSize: getFontSize(15)}} className={`ml-2 text-white font-bold tracking-tight`}>Visit Website</Text>
+                    <Feather name="globe" size={fontSize * 1.25} color="white" />
+                    <Text style={{fontSize: fontSize * 0.7}} className={`ml-2 text-white font-bold tracking-tight`}>Visit Website</Text>
                 </TouchableOpacity> 
             </View>
 

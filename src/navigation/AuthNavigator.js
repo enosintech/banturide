@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 
 import TabNavigator from "./TabNavigator";
 
-import { WebSocketProvider } from "../components/atoms/WebSocket";
+import { SocketProvider } from "../components/atoms/Socket";
 import LoadingBlur from "../components/atoms/LoadingBlur";
 
 import WelcomeScreen from "../screens/AuthScreens/WelcomeScreen";
@@ -22,13 +22,13 @@ const AuthNavigator = (props) => {
 
     if(user === true){
         return (
-            <WebSocketProvider>
+            <SocketProvider>
                 <Stack.Navigator initialRouteName="Tab">
                     <Stack.Screen name="Tab" options={{headerShown: false}}>
                         {() => <TabNavigator handleLayout={props.handleLayout} theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
                     </Stack.Screen>
                 </Stack.Navigator>
-            </WebSocketProvider>
+            </SocketProvider>
         )
     } else if(user === false) {
         return (

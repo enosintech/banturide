@@ -52,7 +52,7 @@ export function useAuth() {
         dispatch(setUserInfo(null));
         setUser(false);
       } else {
-        dispatch(setUserInfo(data));
+        dispatch(setUserInfo(data.userData));
         setUser(true);
       }
     } catch (error) {

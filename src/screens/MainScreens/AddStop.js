@@ -1,11 +1,16 @@
-import { View, Text, StyleSheet, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Dimensions, PixelRatio, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Dimensions, TouchableOpacity } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import Octicons from "@expo/vector-icons/Octicons";
 
-import { GOOGLE_API_KEY } from "@env";
-import { useDispatch, useSelector } from 'react-redux';
 import { selectBooking, selectToggle, setPassThrough } from '../../../slices/navSlice';
-import { useNavigation } from '@react-navigation/native';
+
+import ListLoadingComponent from '../../components/atoms/ListLoadingComponent';
+
+import { GOOGLE_API_KEY } from "@env";
+
+const { width } = Dimensions.get("window");
 
 const AddStop = (props) => {
 
@@ -18,9 +23,7 @@ const AddStop = (props) => {
     const booking = useSelector(selectBooking);
     const toggle = useSelector(selectToggle);
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
   return (
     <KeyboardAvoidingView
@@ -29,17 +32,17 @@ const AddStop = (props) => {
         keyboardVerticalOffset={10}
     >
         <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
-            <View style={{height: 0.3 * height}} className={`w-full bg-white rounded-t-[20px] flex px-3`}>
+            <View style={{height: 0.3 * height}} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} rounded-t-[40px] flex px-3`}>
                 <View className="w-full h-[100px] flex flex-row items-center">
-                    <Text style={{fontSize: getFontSize(30)}} className="font-bold tracking-tight">
+                    <Text style={{fontSize: fontSize * 1.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>
                         Add Stop
                     </Text>
                 </View>
                 <View className="w-full h-0 border-[0.5px] border-gray-400"></View>
                 <View className={`flex-row items-center justify-center w-full h-[65px] shadow-2xl relative z-50 flex `}>
                     <View className={`w-[15%] items-center h-full justify-center`}>
-                        <TouchableOpacity className={`w-8 h-8 rounded-full shadow border items-center justify-center ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`}>
-                            <Octicons className="rotate-[90deg]" name="arrow-switch" size={getFontSize(19)} color={props.theme === "dark" ? "white" : "black"} />
+                        <TouchableOpacity className={`w-8 h-8 rounded-full shadow border rotate-90 items-center justify-center ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`}>
+                            <Octicons name="arrow-switch" size={fontSize * 0.95} color={props.theme === "dark" ? "white" : "black"} />
                         </TouchableOpacity>
                     </View>
                     <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-white" : "border-gray-800"}`}></View>
@@ -54,7 +57,7 @@ const AddStop = (props) => {
                                 width: "100%",
                             },
                             textInput: {
-                                fontSize: 18,
+                                fontSize: fontSize * 0.85,
                                 height: "100%",
                                 width: "100%",
                                 fontWeight: "bold",
@@ -65,8 +68,19 @@ const AddStop = (props) => {
                                 position : "absolute",
                                 zIndex: 100,
                                 elevation: 100,
-                                top: 56   
-                            }
+                                top: 56,
+                                backgroundColor: props.theme === "dark" ? "#222831" : "white",  
+                            },
+                            description: {
+                                color: props.theme === "dark" ? "white" : "black"
+                            },
+                            loader: {
+                                height: "100%",
+                                width: "100%"
+                            },
+                            row: {
+                                backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                            },
                         }}
                         textInputProps={{
                             placeholder: toggle === "ride" ? "Going Through?" : "Pick-Up/ Drop-Off",
@@ -93,7 +107,9 @@ const AddStop = (props) => {
                         enablePoweredByContainer={false}
                         minLength={2}
                         nearbyPlacesAPI="GooglePlacesSearch"
-                        debounce={200}
+                        debounce={100}
+                        listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                        listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}
                     />
                 </View>
             </View>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef } from "react"; 
 import { useDispatch, useSelector } from "react-redux";
-import { addDriver, setDriver, setBooking } from "../../../slices/navSlice";
+import { addDriver, setDriver, setBooking, decrementTime, removeDriver } from "../../../slices/navSlice";
 import { selectUserInfo } from "../../../slices/authSlice";
 import { addNotification } from "../../../slices/notificationSlice";
 
@@ -14,7 +14,7 @@ export const WebSocketProvider = ({ children }) => {
 
     const userInfo = useSelector(selectUserInfo);
 
-    const connectWebSocket = () => {
+    const connectWebSocket = (userInfoParam) => {
         if (socket.current && socket.current.readyState !== WebSocket.CLOSED) {
             return; // Avoid creating a new connection if one already exists
         }
@@ -23,8 +23,12 @@ export const WebSocketProvider = ({ children }) => {
             return; // Avoid multiple connection attempts
         }
 
+        if(!userInfoParam){
+            return;
+        }
+
         isConnecting.current = true;
-        const userId = userInfo?.userId;
+        const userId = userInfoParam?.userId;
         if (!userId) return;
 
         socket.current = new WebSocket(`wss://banturide-api.onrender.com?userId=${encodeURIComponent(userId)}`);
@@ -58,7 +62,20 @@ export const WebSocketProvider = ({ children }) => {
             
                 case "driverFound":
                     const driver = JSON.parse(data.driver);
+                    console.log("driver Found in real time")
                     dispatch(addDriver(driver));
+
+                    // Start a countdown timer for the driver
+                    const intervalId = setInterval(() => {
+                        dispatch(decrementTime({ driverId: driver?.driverId }));
+                    }, 1000);
+
+                    // Schedule removal of the driver after 25 seconds
+                    setTimeout(() => {
+                        dispatch(removeDriver(driver?.driverId));
+                        clearInterval(intervalId); // Stop the countdown
+                    }, 25000);
+
                     dispatch(addNotification({
                         id: data.notificationId,
                         title: "Driver Found",
@@ -110,6 +127,7 @@ export const WebSocketProvider = ({ children }) => {
                     break;
             
                 case "locationUpdated":
+                    console.log(data)
                     dispatch(setBooking(JSON.parse(data.booking)));
                     break;   
             
@@ -126,10 +144,12 @@ export const WebSocketProvider = ({ children }) => {
         socket.current.onclose = () => {
             console.log('WebSocket connection closed');
             isConnecting.current = false;
-            if (retries.current < 5) {
+            if (retries.current < 5 && userInfoParam !== null) {
                 retries.current += 1;
                 console.log(`Reconnection attempt ${retries.current}`);
-                setTimeout(connectWebSocket, 1000 * retries.current);
+                setTimeout(function(){
+                    connectWebSocket(userInfo)
+                }, 1000 * retries.current);
             } else {
                 console.log('Maximum reconnection attempts reached. Giving up.');
             }
@@ -143,7 +163,9 @@ export const WebSocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (userInfo) {
-            connectWebSocket();
+            connectWebSocket(userInfo);
+        } else {
+            console.log("User currently Signed out")
         }
 
         return () => {

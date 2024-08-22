@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Dimensions, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard, PixelRatio } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Dimensions, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -10,6 +10,8 @@ import { selectUser } from '../../../slices/authSlice';
 
 import BackButton from '../../components/atoms/BackButton';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
+
+const { width } = Dimensions.get("window");
 
 const SetPassword = (props) => {
 
@@ -29,9 +31,7 @@ const SetPassword = (props) => {
 
     const height = Dimensions.get('window').height;
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     const userForm = {
         firstname: user?.firstName,
@@ -120,7 +120,7 @@ const SetPassword = (props) => {
     >
         <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
             <SafeAreaView style={[{height: height}]} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : ""} relative flex flex-col items-center`}>
-                <LoadingBlur loading={loading}/>
+                <LoadingBlur loading={loading} theme={props.theme}/>
                 <View className={`w-full h-[8%] flex justify-center px-6`}>
                     <BackButton theme={props.theme} value="Back" handlePress={() => {
                         navigation.goBack();
@@ -128,22 +128,22 @@ const SetPassword = (props) => {
                 </View>
                 <View className={`w-full h-[30%] flex items-center justify-center`}>
                     <View className={`w-[80%] h-[70%] flex items-center justify-center`}>
-                        <Text style={{fontSize: getFontSize(24)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Create Password</Text>
-                        <Text style={{fontSize: getFontSize(14)}} className={`text-gray-500 mt-2 font-semibold tracking-tight`}>Please create a strong password</Text>
-                        <View className={`${props.theme === "dark" ? "border-gray-900 border-[0.25px]" : "border-gray-400 border-[0.25px]"} ${error ? "border-red-600 border-2" : ""}  mt-3 flex items-center p-4 rounded-2xl`}>
-                            <Text style={{fontSize: getFontSize(14)}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 8 Characters</Text>
-                            <Text style={{fontSize: getFontSize(14)}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 1 Symbol</Text>
-                            <Text style={{fontSize: getFontSize(14)}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 1 Number</Text>
-                            <Text style={{fontSize: getFontSize(14)}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Confirm Password must match</Text>
+                        <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Create Password</Text>
+                        <Text style={{fontSize: fontSize * 0.7}} className={`text-gray-500 mt-2 font-semibold tracking-tight`}>Please create a strong password</Text>
+                        <View className={`${props.theme === "dark" ? "border-gray-900 border-[0.25px]" : "border-gray-400 border-[0.25px]"} ${error ? "border-red-600 border-2" : ""}  mt-3 flex items-center p-4 rounded-[25px]`}>
+                            <Text style={{fontSize: fontSize * 0.7}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 8 Characters</Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 1 Symbol</Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Minimum 1 Number</Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className={`font-thin tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} ${error ? "text-red-600" : ""}`}>Confirm Password must match</Text>
                         </View>
                     </View>
                 </View>
-                <View className={`w-[90%] mx-auto h-[25%] rounded-[40px] ${props.theme === "dark" ? "border-gray-900" : "bg-white"} flex items-center justify-center`}>
-                    <View className={`h-[35%] ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} w-[90%] border-[0.25px] text-[15px] border-solid rounded-[25px] flex-row items-center p-2 px-4`}>
+                <View className={`shadow-sm mx-auto h-[25%] rounded-[40px] ${props.theme === "dark" ? "border-gray-900 w-full"  : "bg-white w-[90%]"} flex items-center justify-center`}>
+                    <View className={`h-[35%] ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} w-[90%] border-[0.25px] text-[15px] border-solid rounded-[30px] flex-row items-center p-2 px-4`}>
                         <TextInput
                             className={`w-[90%] h-full ${props.theme === "dark" ? "text-white" : " text-black"} font-semibold tracking-tight`}
                             placeholder="Enter Password"
-                            style={{fontSize: getFontSize(14)}}
+                            style={{fontSize: fontSize * 0.7}}
                             placeholderTextColor="rgb(156 163 175)"
                             secureTextEntry={visible_1}
                             defaultValue={password}
@@ -152,14 +152,14 @@ const SetPassword = (props) => {
                         <TouchableOpacity onPress={() => {
                             setVisible_1(!visible_1);
                         }}>
-                            <MaterialIcons name={`${visible_1 === true ? "visibility-off": "visibility"}`} size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                            <MaterialIcons name={`${visible_1 === true ? "visibility-off": "visibility"}`} size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                         </TouchableOpacity>
                     </View>
-                    <View className={`h-[35%] mt-4 ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} w-[90%] border-[0.25px] text-[15px] border-solid rounded-[25px] flex-row items-center p-2 px-4`}>
+                    <View className={`h-[35%] mt-4 ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} w-[90%] border-[0.25px] text-[15px] border-solid rounded-[30px] flex-row items-center p-2 px-4`}>
                         <TextInput
                             className={`w-[90%] h-full ${props.theme === "dark" ? "text-white" : " text-black"} font-semibold tracking-tight`}
                             placeholder="Confirm Password"
-                            style={{fontSize: getFontSize(14)}}
+                            style={{fontSize: fontSize * 0.7}}
                             placeholderTextColor="rgb(156 163 175)"
                             secureTextEntry={visible_2}
                             defaultValue={confirmPassword}
@@ -168,28 +168,28 @@ const SetPassword = (props) => {
                         <TouchableOpacity onPress={() => {
                             setVisible_2(!visible_2)
                         }}>
-                            <MaterialIcons name={`${visible_2 === true ? "visibility-off": "visibility"}`} size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                            <MaterialIcons name={`${visible_2 === true ? "visibility-off": "visibility"}`} size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View className={`w-[90%] ${errorVisible ? "h-[27%]" : "h-[25%]"} bg-white rounded-[40px] shadow mt-5 flex items-center justify-center`}>
-                    <Text style={{fontSize: getFontSize(14)}} className={`w-[85%] h-[20%] ${errorVisible ? "block" : "hidden"} text-red-700 text-center font-semibold tracking-tight text-wrap overflow-hidden`}>{serverError}</Text>
+                <View className={`w-[90%] ${errorVisible ? "h-[27%]" : "h-[25%]"} ${props.theme === "dark" ? "bg-[#353d4a]" : "bg-white"} rounded-[40px] shadow-sm mt-5 flex items-center justify-center`}>
+                    <Text style={{fontSize: fontSize * 0.7}} className={`w-[85%] h-[20%] ${errorVisible ? "block" : "hidden"} text-red-700 text-center font-semibold tracking-tight text-wrap overflow-hidden`}>{serverError}</Text>
                     <TouchableOpacity className={`bg-[#186F65] mt-1 shadow-2xl w-[85%] ${errorVisible ? "h-[30%]" : "h-[40%]"} rounded-[50px] flex justify-center items-center`} onPress={handleSignUp}>
-                        <Text style={{fontSize: getFontSize(20)}} className="text-white font-bold tracking-tight">Complete Sign Up</Text>
+                        <Text style={{fontSize: fontSize}} className="text-white font-bold tracking-tight">Complete Sign Up</Text>
                     </TouchableOpacity>
                     <View className="w-[85%] mt-4 pl-1 flex-row items-center flex-wrap">
-                        <Ionicons name="checkmark-circle-outline" size={20} color="#186F65"/>
-                        <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> By completing Sign Up, you agree to the </Text> 
+                        <Ionicons name="checkmark-circle-outline" size={fontSize} color="#186F65"/>
+                        <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> By completing Sign Up, you agree to the </Text> 
                         <TouchableOpacity onPress={() => {
                             navigation.navigate("TnCs", {toggle: "tncs"});
                         }}>
-                            <Text style={{fontSize: getFontSize(14)}} className="text-[#186F65] font-bold tracking-tight">Terms of Service</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className="text-[#186F65] font-bold tracking-tight">Terms of Service</Text>
                         </TouchableOpacity>
-                        <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> and </Text> 
+                        <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> and </Text> 
                         <TouchableOpacity onPress={() => {
                             navigation.navigate("TnCs", {toggle: "pp"});
                         }}>
-                            <Text style={{fontSize: getFontSize(14)}} className="text-[#186F65] font-bold tracking-tight">Privacy Policy</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className="text-[#186F65] font-bold tracking-tight">Privacy Policy</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

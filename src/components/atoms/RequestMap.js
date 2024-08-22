@@ -124,7 +124,7 @@ const RequestMap = (props) => {
                   longitude: booking?.pickUpLocation?.longitude,
                 }}
                 title="Origin"
-                description={origin.description}
+                description={origin?.description}
                 identifier="origin"
               >
                 <View className={`w-14 h-14 shadow-md rounded-full bg-white flex items-center justify-center`}>
@@ -138,10 +138,10 @@ const RequestMap = (props) => {
           <>
             <MapViewDirections 
                 origin={{
-                    latitude: booking.driverCurrentLocation[0],
-                    longitude: booking.driverCurrentLocation[1]
+                    latitude: booking?.driverCurrentLocation[0],
+                    longitude: booking?.driverCurrentLocation[1]
                 }}
-                destination={destination.description}
+                destination={destination?.description}
                 waypoints={[passThrough ? passThrough?.description : ""]}
                 apikey={api}
                 strokeWidth={3}
@@ -150,8 +150,8 @@ const RequestMap = (props) => {
 
             <Marker 
                 coordinate={{
-                  latitude: booking.driverCurrentLocation[0],
-                  longitude: booking.driverCurrentLocation[1]
+                  latitude: booking?.driverCurrentLocation[0],
+                  longitude: booking?.driverCurrentLocation[1]
                 }}
                 title="Driver"
                 description={"Driver Marker"}

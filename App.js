@@ -8,8 +8,6 @@ import { Provider } from "react-redux";
 
 import { store } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
-import { isLoaded } from 'expo-font';
-import { WebSocketProvider } from './src/components/atoms/WebSocket';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,7 +64,7 @@ export default function App() {
       <AnimatedSplash
         translucent={true}
         isLoaded={loading}
-        logoImage={require("./assets/icons/logo.png")}
+        logoImage={require("./assets/icons/BantuRide-White.png")}
         backgroundColor={"#186F65"}
         logoHeight={350}
         logoWidth={350}

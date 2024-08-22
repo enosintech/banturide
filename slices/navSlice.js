@@ -12,6 +12,7 @@ const initialState = {
     seats: "4",
     booking: null,
     tripType: "normal",
+    deliveryType: null,
     schoolPickup: false,
     driver: null,
     hasArrived: false,
@@ -21,10 +22,14 @@ const initialState = {
     bookingRequestLoading: false,
     favAddressChanged: false,
     favAddressUpdated: false,
+    paymentMethodUpdated: false,
     profileUpdated: false,
     bookingRequested: false, 
     searchPerformed: false,
     searchComplete: false,
+    newDriverCalled: false,
+    findNewDriver: false,
+    chatMessages: [],
     favoriteHomeAddress: {
         description: "",
         location: "",
@@ -36,6 +41,9 @@ const initialState = {
     wsClientId: null,
     driverArray: [],
     locationUpdateRan: false,
+    recipient : {
+        recipientCovers: false,
+    },
 }
 
 export const navSlice = createSlice({
@@ -68,6 +76,9 @@ export const navSlice = createSlice({
         },
         setSeats : (state, action) => {
             state.seats = action.payload;
+        },
+        setDeliveryType: (state, action) =>{
+            state.deliveryType = action.payload;
         },
         setBooking : (state, action) => {
             state.booking = action.payload;
@@ -102,6 +113,12 @@ export const navSlice = createSlice({
         setFavoriteHomeAddress: (state, action) => {
             state.favoriteHomeAddress = action.payload;
         },
+        setFindNewDriver: (state, action ) => {
+            state.findNewDriver = action.payload;
+        },
+        setPaymentMethodUpdated : (state, action) => {
+            state.paymentMethodUpdated = action.payload;
+        },
         setFavoriteWorkAddress: (state, action) => {
             state.favoriteWorkAddress = action.payload;
         },
@@ -117,6 +134,9 @@ export const navSlice = createSlice({
         setSearchComplete(state, action){
             state.searchComplete = action.payload;
         },
+        setNewDriverCalled(state, action){
+            state.newDriverCalled = action.payload;
+        },
         setLocationUpdatedRan: (state, action) => {
             state.locationUpdateRan = action.payload;
         },
@@ -129,22 +149,42 @@ export const navSlice = createSlice({
         resetSearch(state) {
             state.searchPerformed = false;
         },
+        setDriverArray: (state, action) => {
+            state.driverArray = action.payload;
+        },
+        addChatMessage: (state, action) => {
+            state.chatMessages.push(action.payload);
+        },
         addDriver: (state, action) => {
             const newDriver = action.payload;
             const isDriverPresent = state.driverArray.some(driver => driver.driverId === newDriver.driverId);
 
             if (!isDriverPresent) {
-                state.driverArray.push(newDriver);
+                const driverWithTimer = {
+                    ...newDriver,
+                    timeRemaining: 25,
+                };
+                state.driverArray.push(driverWithTimer);
+            }
+        },
+        decrementTime: (state, action) => {
+            const { driverId } = action.payload;
+            const driver = state.driverArray.find(driver => driver.driverId === driverId);
+            if (driver && driver.timeRemaining > 0) {
+                driver.timeRemaining -= 1;
             }
         },
         removeDriver: (state, action) => {
             const driverIdToRemove = action.payload;
             state.driverArray = state.driverArray.filter(driver => driver.driverId !== driverIdToRemove);
-          }
+        },
+        setRecipient : (state, action) => {
+            state.recipient = action.payload;
+        },
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addDriver, removeDriver, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addChatMessage, addDriver, removeDriver, decrementTime, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setNewDriverCalled, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime, setDeliveryType, setRecipient, setPaymentMethodUpdated, setDriverArray, setFindNewDriver } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -171,5 +211,10 @@ export const selectPaymentMethod = (state) => state.nav.paymentMethod;
 export const selectLocationUpdatedRan = (state) => state.nav.locationUpdateRan;
 export const selectRemainingTripTime = (state) => state.nav.remainingTripTime;
 export const selectRemaingTripDistance = (state) => state.nav.remainingTripDistance;
+export const selectDeliveryType = (state) => state.nav.deliveryType;
+export const selectRecipient = (state) => state.nav.recipient;
+export const selectPaymentMethodUpdated = (state) => state.nav.paymentMethodUpdated;
+export const selectFindNewDriver = (state) => state.nav.findNewDriver;
+export const selectChatMessages = (state) => state.nav.chatMessages;
 
 export default navSlice.reducer;

@@ -1,25 +1,25 @@
-import { useEffect, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
-import {Text, View, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, TouchableOpacity, StyleSheet, Dimensions, Platform, PixelRatio, Image } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Octicons from "@expo/vector-icons/Octicons";
+import {Text, View, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, TouchableOpacity, StyleSheet, Dimensions, Platform, Image } from "react-native";
+import { useEffect, useRef, useState } from "react";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Octicons from "@expo/vector-icons/Octicons";
+import Entypo from "@expo/vector-icons/Entypo";
 
 import { GOOGLE_API_KEY } from "@env";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
-import { setOrigin, setDestination, selectTripType, selectToggle, setSchoolPickup, selectSchoolPickup, selectPassThrough, setPassThrough, selectPaymentMethod, setPaymentMethod } from "../../../slices/navSlice";
-import { selectDestination, selectOrigin, setTripType } from "../../../slices/navSlice";
-import { useState } from "react";
-import { deliveryData } from "../../constants";
+import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
+
+import { setOrigin, setDestination, selectTripType, selectToggle, setSchoolPickup, selectSchoolPickup, selectPassThrough, setPassThrough, selectPaymentMethod, setPaymentMethod, selectDestination, selectOrigin, setTripType, selectDeliveryType, setDeliveryType } from "../../../slices/navSlice";
 import { selectUserInfo } from "../../../slices/authSlice";
+
+import { deliveryData } from "../../constants";
+
+const { width } = Dimensions.get("window");
 
 const SearchModal = (props) => {
 
@@ -33,12 +33,11 @@ const SearchModal = (props) => {
     const schoolPickup = useSelector(selectSchoolPickup);
     const userInfo = useSelector(selectUserInfo);
     const paymentMethod = useSelector(selectPaymentMethod);
+    const deliveryType = useSelector(selectDeliveryType);
 
     const height = Dimensions.get("window").height;
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     const navigation = useNavigation();
 
@@ -78,23 +77,21 @@ const SearchModal = (props) => {
         <KeyboardAvoidingView
             style={containerStyles.container}
             behavior={Platform.OS === "ios" ? "padding" : "height"} 
-            keyboardVerticalOffset={getFontSize(10)}
+            keyboardVerticalOffset={fontSize * 0.45}
         >
         <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
-            <View style={{height: 0.5 * height}} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"} items-center rounded-t-2xl`}>
+            <View style={{height: toggle === "ride" ? 0.53 * height : 0.6 * height}} className={`w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"} items-center rounded-t-[40px]`}>
                 <View className={`h-[3%] w-full items-center justify-center border-b-[0.25px]`}>
-                    <ShortModalNavBar />
+                    <ShortModalNavBar theme={props.theme} />
                 </View>
                 <View className={`h-[10%] w-full border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"} items-center justify-center`}>
-                    <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{greeting + " " + userInfo?.firstname}</Text>
+                    <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{greeting + " " + userInfo?.firstname}</Text>
                 </View>
-                <View className={`w-[84.8%] rounded-[25px] h-[13.5%] mt-2 bg-white flex-row ${toggle !== "ride" ? "hidden" : "flex"}`}>
-                    <TouchableOpacity className={`w-1/2 rounded-[25px] ${tripType !== "normal" ? "bg-white" : "bg-[#186f65]"} h-full flex items-center justify-center`} onPress={() => {
-                        dispatch(setTripType("normal"))
-                    }}>
-                        <Text style={{fontSize: getFontSize(20)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-black" :"text-white"}`}>Single Trip</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity disabled={true} className={`w-1/2 rounded-[40px] opacity-20 ${tripType !== "normal" ? "bg-[#186f65]" : "bg-white"} h-full flex items-center justify-center`} onPress={() => {
+                <View className={`w-[84.8%] rounded-[50px] p-1 shadow-sm h-[13.5%] mt-2 ${props.theme === "dark" ? "bg-neutral-400" : "bg-white"} flex-row ${toggle !== "ride" ? "hidden" : "flex"}`}>
+                    <View className={`w-full rounded-[50px] ${tripType !== "normal" ? props.theme === "dark" ? "" : "bg-white" : "bg-[#406b66]"} h-full flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-black" :"text-white"}`}>Single Trip</Text>
+                    </View>
+                    {/* <TouchableOpacity disabled={true} className={`w-1/2 opacity-20 rounded-[50px] ${tripType !== "normal" ? "bg-[#186f65]" : props.theme === "dark" ? "" : "bg-white"} h-full flex items-center justify-center`} onPress={() => {
                         dispatch(setTripType("allday"))
                         dispatch(setOrigin(null))
                         dispatch(setPassThrough(null))
@@ -105,25 +102,13 @@ const SearchModal = (props) => {
                         setSelected(false)
                         setStopAdded(false)
                     }}>
-                        <Text style={{fontSize: getFontSize(16)}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Trip</Text>
-                        <Text tyle={{fontSize: getFontSize(14)}} className={`font-light tracking-tight`}>Coming Soon</Text>
-                    </TouchableOpacity>
+                        <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${tripType !== "normal" ? "text-white" : "text-black"}`}>All-day Trip</Text>
+                    </TouchableOpacity> */}
                 </View>
-                {/* <View className={`w-[85%] h-[7%] mt-2 flex-row items-center justify-between ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} rounded-[14px] px-3 ${tripType !== "normal" || toggle !== "ride" ? "hidden" : "flex"}`}>
-                        <View className={`flex-row items-center gap-x-2`}>
-                            <MaterialCommunityIcons name="bus-school" size={getFontSize(22)} color={props.theme === "dark" ? "white" : "black"}/>
-                            <Text style={{fontSize: getFontSize(14)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>School Pick-up/ Drop-off</Text>
-                        </View>
-                        <TouchableOpacity onPress={() => {
-                            setSelected(!selected)
-                        }}>
-                            <FontAwesome name={schoolPickup ? "toggle-on" : "toggle-off"} size={getFontSize(30)} color={props.theme === "dark" ? "white" : "#186f65"}/>
-                        </TouchableOpacity>
-                </View> */}
-                <View className={`w-[85%] h-fit mt-2 rounded-[25px] relative z-10 flex justify-between ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"}`}>
-                    <View className={`flex-row items-center justify-center w-full h-[60px] shadow-2xl relative z-[60]`}>
-                        <View className={`w-[15%] items-center h-full justify-center `}>
-                            <MaterialIcons name="trip-origin" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                <View className={`w-[85%] h-fit mt-2 rounded-[40px] relative z-10 flex justify-between shadow-sm ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"}`}>
+                    <View className={`flex-row items-center justify-center w-full h-[60px] relative z-[60]`}>
+                        <View className={`w-[15%] items-center h-full justify-center translate-x-1`}>
+                            <MaterialIcons name="trip-origin" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`} />
                         </View>
                         <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-800" : "border-gray-300"}`}></View>
                         <GooglePlacesAutocomplete 
@@ -136,7 +121,7 @@ const SearchModal = (props) => {
                                     backgroundColor: "transparent"
                                 },
                                 textInput: {
-                                    fontSize: 18,
+                                    fontSize: fontSize * 0.9,
                                     height: "100%",
                                     fontWeight: "bold",
                                     width : "100%",
@@ -149,7 +134,18 @@ const SearchModal = (props) => {
                                     elevation: 100,
                                     top: 56,
                                     borderBottomLeftRadius: 20,
-                                    borderBottomRightRadius: 20,   
+                                    borderBottomRightRadius: 20, 
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",  
+                                },
+                                description: {
+                                    color: props.theme === "dark" ? "white" : "black"
+                                },
+                                loader: {
+                                    height: "100%",
+                                    width: "100%"
+                                },
+                                row: {
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",
                                 }
                             }}
                             textInputProps={{
@@ -173,14 +169,16 @@ const SearchModal = (props) => {
                             enablePoweredByContainer={false}
                             minLength={2}
                             nearbyPlacesAPI="GooglePlacesSearch"
-                            debounce={200}
+                            debounce={100}
+                            listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                            listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}
                         />
                     </View>
                     <View className={`w-full h-[35px] items-center justify-center ${tripType === "normal" && !stopAdded ? "flex" : "hidden"}`}>
-                        <TouchableOpacity className={`rounded-full w-[25%] h-[90%] items-center justify-center shadow border ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`} onPress={() => {
+                        <TouchableOpacity className={`rounded-full w-[25%] h-[90%] items-center justify-center shadow-sm border ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white border-gray-100"}`} onPress={() => {
                             setStopAdded(!stopAdded);
                         }}>
-                            <Text style={{fontSize: getFontSize(14)}} className={`font-extralight tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Add Stop</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className={`tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Add Stop</Text>
                         </TouchableOpacity>
                     </View>
                     {
@@ -188,18 +186,18 @@ const SearchModal = (props) => {
                         &&
                         <View className={`flex-row items-center justify-center w-full h-[65px] shadow-2xl relative z-50 ${stopAdded === false ? "hidden" : "flex"} `}>
                             <View className={`w-[15%] items-center h-full justify-center`}>
-                                <TouchableOpacity className={`  w-8 h-8 rounded-full shadow border items-center justify-center ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`} onPress={handleSwitch}>
-                                    <Octicons name="arrow-switch" size={19} color={props.theme === "dark" ? "white" : "black"} />
+                                <TouchableOpacity className={`w-8 h-8 rotate-90 rounded-full shadow border items-center justify-center ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white border-gray-100"}`} onPress={handleSwitch}>
+                                    <Octicons name="arrow-switch" size={fontSize} color={props.theme === "dark" ? "white" : "black"} />
                                 </TouchableOpacity>
                             </View>
                             <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-white" : "border-gray-800"}`}></View>
                             <View className={`absolute w-[25%] h-full right-0 z-50 flex items-center justify-center`}>
-                                <TouchableOpacity className={`rounded-full w-[85%] -translate-x-1 h-[50%] items-center justify-center shadow border ${props.theme === "dark" ? "bg-[#5a626e] border-gray-700" : "bg-white border-gray-100"}`} onPress={() => {
+                                <TouchableOpacity className={`rounded-full w-[85%] -translate-x-1 h-[50%] items-center justify-center shadow border ${props.theme === "dark" ? "bg-dark-tertiary border-gray-700" : "bg-white border-gray-100"}`} onPress={() => {
                                     setStopAdded(!stopAdded);
                                     dispatch(setPassThrough(null));
                                     passThroughRef?.current.clear();
                                 }}> 
-                                    <Text style={{fontSize: getFontSize(10)}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Remove Stop</Text>
+                                    <Text style={{fontSize: fontSize * 0.45}} className={`tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Remove Stop</Text>
                                 </TouchableOpacity>
                             </View>
                             <GooglePlacesAutocomplete 
@@ -227,7 +225,18 @@ const SearchModal = (props) => {
                                         elevation: 100,
                                         top: 56,
                                         borderBottomLeftRadius: 20,
-                                        borderBottomRightRadius: 20,    
+                                        borderBottomRightRadius: 20,
+                                        backgroundColor: props.theme === "dark" ? "#222831" : "white",  
+                                    },
+                                    description: {
+                                        color: props.theme === "dark" ? "white" : "black"
+                                    },
+                                    loader: {
+                                        height: "100%",
+                                        width: "100%"
+                                    },
+                                    row: {
+                                        backgroundColor: props.theme === "dark" ? "#222831" : "white",
                                     }
                                 }}
                                 textInputProps={{
@@ -249,14 +258,16 @@ const SearchModal = (props) => {
                                 enablePoweredByContainer={false}
                                 minLength={2}
                                 nearbyPlacesAPI="GooglePlacesSearch"
-                                debounce={200}
+                                debounce={100}
+                                listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                                listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}
                             />
                         </View>
                     }
 
                     <View className={`flex-row items-center justify-center w-full h-[65px] shadow-2xl relative z-40 ${tripType !== "normal" ? "hidden" : "flex"}`}>
-                        <View className={`w-[15%] items-center h-full justify-center`}>
-                            <FontAwesome name="flag-checkered" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                        <View className={`w-[15%] items-center h-full justify-center translate-x-1`}>
+                            <FontAwesome name="flag-checkered" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`} />
                         </View>
                         <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-gray-800" : "border-gray-300"}`}></View>
                         <GooglePlacesAutocomplete 
@@ -271,7 +282,7 @@ const SearchModal = (props) => {
                                     width: "100%",
                                 },
                                 textInput: {
-                                    fontSize: 18,
+                                    fontSize: fontSize * 0.9,
                                     height: "100%",
                                     width: "100%",
                                     fontWeight: "bold",
@@ -284,7 +295,18 @@ const SearchModal = (props) => {
                                     elevation: 100,
                                     top: 56,
                                     borderBottomLeftRadius: 20,
-                                    borderBottomRightRadius: 20,    
+                                    borderBottomRightRadius: 20,
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",  
+                                },
+                                description: {
+                                    color: props.theme === "dark" ? "white" : "black"
+                                },
+                                loader: {
+                                    height: "100%",
+                                    width: "100%"
+                                },
+                                row: {
+                                    backgroundColor: props.theme === "dark" ? "#222831" : "white",
                                 }
                             }}
                             textInputProps={{
@@ -306,56 +328,79 @@ const SearchModal = (props) => {
                             enablePoweredByContainer={false}
                             minLength={2}
                             nearbyPlacesAPI="GooglePlacesSearch"
-                            debounce={200}
+                            debounce={100}
+                            listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                            listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme}/>}
                         />
                     </View>
                 </View>
                 <View className={`${toggle === "ride" ? "hidden" : "flex"} flex-row items-center justify-between mt-2 w-[85%] h-[20%]`}>
                     {deliveryData.map((item, index) => (
-                        <TouchableOpacity key={item.id} className={`w-[31.5%] h-[97%] rounded-[20px] bg-white`}></TouchableOpacity>
+                        <TouchableOpacity key={item.id} className={`w-[31.5%] h-[97%] relative ${deliveryType ? deliveryType.title === item.title ? "opacity-100" : "opacity-30" : "opacity-100"} rounded-[30px] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} shadow-sm px-2 flex justify-evenly`} onPress={() => {
+                            dispatch(setDeliveryType(item))
+                        }}>
+                            <Image 
+                                source={item.image}
+                                style={{
+                                    position: "absolute",
+                                    top: -1,
+                                    left: 8,
+                                    objectFit: "contain",
+                                    width : 70,
+                                    height: 70,
+                                    opacity: 0.85
+                                }}
+                            />
+                            <View></View>
+                            <View className="translate-y-2 translate-x-1">
+                                <Text style={{fontSize : fontSize * 0.5}} className={`font-black tracking-tighter ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.title}</Text>
+                                <Text style={{fontSize : fontSize * 0.4}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.description}</Text>
+                                <Text style={{fontSize : fontSize * 0.45}} className={`mt-1 font-bold ${props.theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>{item.example}</Text>
+                            </View>
+                        </TouchableOpacity>
                     ))}
                 </View>
                 <View className={`w-[85%] h-[18%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} ${tripType === "normal" ? "hidden" : "flex"} mt-2 rounded-[40px] `}>
 
                 </View>
-                <View className={`w-[85%] h-[18%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} mt-2 rounded-[25px] flex relative ${paymentVisible ? "z-20" : "z-5"}`}>
+                <View className={`w-[85%] h-[18%] ${props.theme === "dark" ? "bg-[#3b434e]" : "bg-white"} mt-2 rounded-[50px] shadow-sm flex relative ${paymentVisible ? "z-20" : "z-5"}`}>
                     <View className={`w-full h-full flex flex-row relative`}>
                     {
                         paymentVisible && 
 
-                        <View className={`w-full h-[100px] bg-white shadow absolute bottom-[100%] rounded-[25px] flex flex-col z-[100] px-3`}>
+                        <View className={`w-full h-[100px] ${props.theme === "dark" ? "bg-[#464f5d]" : "bg-white"} shadow-sm absolute bottom-[100%] rounded-[20px] flex flex-col z-[100] px-3`}>
                             <TouchableOpacity className="w-full h-1/2 flex flex-row items-center" onPress={() => {
                                 dispatch(setPaymentMethod("cash"))
                                 setPaymentVisible(false);
                             }}>
-                                <Ionicons name="cash" color={"green"} size={25}/>
-                                <Text style={{fontSize: getFontSize(16)}} className="ml-2">Cash</Text>
+                                <Ionicons name="cash" color={"green"} size={fontSize}/>
+                                <Text style={{fontSize: fontSize * 0.7}} className={`ml-2 ${props.theme === "dark" ? "text-white" : "text-black" }`}>Cash</Text>
                             </TouchableOpacity>
                             <View className="w-full h-0 border-[0.5px] border-gray-200"></View>
                             <TouchableOpacity className="w-full h-1/2 flex flex-row items-center" onPress={() => {
                                 dispatch(setPaymentMethod("mobileMoney"))
                                 setPaymentVisible(false);
                             }}>
-                                <Entypo name="wallet" color={"black"} size={25} />
-                                <Text style={{fontSize: getFontSize(16)}} className="ml-2">Mobile Money</Text>
+                                <Entypo name="wallet" color={props.theme === "dark" ? "white" : "black"} size={fontSize} />
+                                <Text style={{fontSize: fontSize * 0.7}} className={`ml-2 ${props.theme === "dark" ? "text-white" : "text-black" }`}>Mobile Money</Text>
                             </TouchableOpacity>
                         </View>
 
                     }
 
-                        <TouchableOpacity className={`w-[18%] h-full flex items-center justify-center`} onPress={() => setPaymentVisible(!paymentVisible)}>
+                        <TouchableOpacity className={`w-[18%] h-full flex items-center justify-center translate-x-1`} onPress={() => setPaymentVisible(!paymentVisible)}>
                             {paymentMethod === "cash" ? 
-                                <Ionicons name="cash" size={getFontSize(30)} color="green" />
+                                <Ionicons name="cash" size={fontSize * 1.4} color="green" />
                             :
-                                <Entypo name="wallet" color={"black"} size={getFontSize(30)} />
+                                <Entypo name="wallet" color={props.theme === "dark" ? "white" : "black"} size={fontSize * 1.4} />
                             }
                         </TouchableOpacity>
                         <View className={`w-[82%] h-full flex items-center justify-center`}>
-                            <TouchableOpacity className={`w-[97%] h-[90%] rounded-[25px] shadow-2xl bg-[#186f65] ${!destination && tripType === "normal" || !origin && tripType !== "normal" ? "opacity-25" : destination && tripType === "normal" || origin && tripType !== "normal" ? "opacity-100" : ""} items-center justify-center`} disabled={tripType === "normal" ? !destination : !origin} onPress={() => {
+                            <TouchableOpacity className={`w-[97%] h-[90%] rounded-[50px] bg-[#186f65] ${toggle === "ride" ? origin === null || destination === null ? "opacity-30" : "opacity-100" : origin === null || destination === null || deliveryType === null ? "opacity-30" : "opacity-100" } items-center justify-center`} disabled={toggle === "ride" ? destination === null || origin === null ? true : false : destination === null || origin === null || deliveryType === null ? true : false} onPress={() => {
                                 navigation.goBack()
                                 navigation.navigate("BookNavigator")
                             }}>
-                                <Text style={{fontSize: getFontSize(20)}} className={`font-semibold tracking-tight text-white`}>{toggle === "ride" ? "Choose Ride" : "Specify Recipient"}</Text>
+                                <Text style={{fontSize: fontSize}} className={`font-semibold tracking-tight text-white`}>{toggle === "ride" ? "Choose Ride" : "Specify Recipient"}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

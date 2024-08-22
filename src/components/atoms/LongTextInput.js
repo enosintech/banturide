@@ -1,10 +1,10 @@
-import { TextInput, PixelRatio } from "react-native";
+import { TextInput, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 const LongTextInput = (props) => {
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     return (
         <TextInput
@@ -13,7 +13,7 @@ const LongTextInput = (props) => {
             onChangeText={props.handleTextChange}
             onPressIn={props.dismissGenderToggle}
             defaultValue={props.text}
-            style={{fontSize: getFontSize(15)}}
+            style={{fontSize: fontSize * 0.8}}
             placeholderTextColor={"rgb(156 163 175)"}
             textContentType={props.type}
         />

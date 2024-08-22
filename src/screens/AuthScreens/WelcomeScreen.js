@@ -19,7 +19,7 @@ const WelcomeScreen = (props) => {
                     style={styles.image}
                 />
             </View>
-            <View className="h-[40%] bg-[#186f65] rounded-[40px] shadow w-[90%] flex justify-center items-center translate-y-6">
+            <View className="h-[40%] bg-[#186f65] rounded-[40px] shadow-sm w-[90%] flex justify-center items-center translate-y-6">
                 <LongWhiteBtn value="Create an account" handlePress={() => {
                     navigation.navigate("Signup")
                 }}/>

@@ -1,20 +1,16 @@
-import { useEffect, useRef } from "react";
-import { View, Dimensions, PixelRatio } from "react-native";
+import { View, Dimensions, Image, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Onboarding from "react-native-onboarding-swiper";
 import LottieView from "lottie-react-native";
-import { useNavigation } from "@react-navigation/native";
 
 import { setItem } from "../../components/lib/asyncStorage";
 
+const { width } = Dimensions.get("window")
+
 const OnboardingScreen = (props) => {
     const navigation = useNavigation();
-    const animation = useRef(null)
 
-    const { width } = Dimensions.get("window")
-
-    useEffect(() => {
-        animation.current?.play()
-    }, [])
+    const fontSize = width * 0.05;
 
     const handleDone = () => {
         navigation.navigate("Auth")
@@ -35,26 +31,27 @@ const OnboardingScreen = (props) => {
                     {
                         backgroundColor: "#186F65",
                         image: <View className="items-center justify-center">
-                                    <LottieView 
-                                        ref={animation}
-                                        source={require("../../../assets/animations/welcome.json")}  
-                                        loop
-                                        autoPlay
-                                        speed={1}
-                                        style={{
-                                            width: width*0.8,
-                                            height: width*0.9,
-                                        }}
+                                    <Image 
+                                        source={require("../../../assets/icons/BantuRide.png")}
+                                        style={styles.image}
                                     />
                                 </View>,
                         title: "Welcome to Bantu Ride",
-                        subtitle: "A transport app for the people"
+                        subtitle: "a ride-hailing app for the people",
+                        titleStyles: {
+                            fontWeight: "900",
+                            fontSize: fontSize * 1.4,
+                        },
+                        subTitleStyles: {
+                            fontWeight: "400",
+                            color: "gray",
+                            fontSize: fontSize * 0.8
+                        }
                     },
                     {
                         backgroundColor: "#22a394",
                         image: <View className="items-center justify-center">
                                     <LottieView 
-                                        ref={animation}
                                         source={require("../../../assets/animations/anywhere.json")} 
                                         autoPlay
                                         loop
@@ -66,13 +63,21 @@ const OnboardingScreen = (props) => {
                                     />
                                 </View>,
                         title: "Anywhere you are",
-                        subtitle: "Find your way"
+                        subtitle: "Find your way",
+                        titleStyles: {
+                            fontWeight: "900",
+                            fontSize: fontSize * 1.4,
+                        },
+                        subTitleStyles: {
+                            fontWeight: "400",
+                            color: "gray",
+                            fontSize: fontSize * 0.8
+                        }
                     },
                     {
                         backgroundColor: "#78faeb",
                         image: <View className="items-center justify-center">
                                     <LottieView 
-                                        ref={animation}
                                         source={require("../../../assets/animations/anytime.json")} 
                                         autoPlay 
                                         loop
@@ -83,13 +88,21 @@ const OnboardingScreen = (props) => {
                                     />
                                 </View>,
                         title: "At anytime",
-                        subtitle: "Even at midnight"
+                        subtitle: "Even at midnight",
+                        titleStyles: {
+                            fontWeight: "900",
+                            fontSize: fontSize * 1.4,
+                        },
+                        subTitleStyles: {
+                            fontWeight: "400",
+                            color: "gray",
+                            fontSize: fontSize * 0.8
+                        }
                     },
                     {
                         backgroundColor: "#fff",
                         image: <View className="items-center justify-center">
-                                    <LottieView
-                                        ref={animation} 
+                                    <LottieView 
                                         source={require("../../../assets/animations/bookcar.json")} 
                                         autoPlay 
                                         loop
@@ -100,7 +113,16 @@ const OnboardingScreen = (props) => {
                                     />
                                 </View>,
                         title: "Book your ride",
-                        subtitle: "And get to wherever"
+                        subtitle: "And get to wherever",
+                        titleStyles: {
+                            fontWeight: "900",
+                            fontSize: fontSize * 1.4,
+                        },
+                        subTitleStyles: {
+                            fontWeight: "400",
+                            color: "gray",
+                            fontSize: fontSize * 0.8
+                        }
                     },
                 ]}
             />
@@ -109,3 +131,11 @@ const OnboardingScreen = (props) => {
 }
 
 export default OnboardingScreen;
+
+const styles = StyleSheet.create({
+    image: {
+        width: width * 0.85,
+        height: width * 0.7,
+        resizeMode: 'contain', 
+    },
+});

@@ -1,34 +1,35 @@
-import { useNavigation } from "@react-navigation/native";
-import { Text, View, SafeAreaView, TouchableOpacity, Image, PixelRatio, Modal } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Feather from "@expo/vector-icons/Feather";
-import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { Text, View, TouchableOpacity, Image, Modal, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 
-import { safeViewAndroid } from "../AuthScreens/WelcomeScreen";
 import { selectToken, selectUserInfo } from "../../../slices/authSlice";
 import { selectProfileUpdated, setProfileUpdated } from "../../../slices/navSlice";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur";
 
+const { width } = Dimensions.get("window");
+
 const EditProfile = (props) => {
+
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
     const userInfo = useSelector(selectUserInfo);
+    const tokens = useSelector(selectToken);
+    const profileUpdated = useSelector(selectProfileUpdated);
 
     const [ modalVisible, setModalVisible ] = useState(false);
     const [ loadingModal, setLoadingModal ] = useState(false);
     const [ image, setImage ] = useState()
     const [ loading, setLoading ] = useState(false)
-    const tokens = useSelector(selectToken);
-    const profileUpdated = useSelector(selectProfileUpdated);
 
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+    const fontSize = width * 0.05;
 
     const uploadImage = async (mode) => {
         try {
@@ -141,10 +142,10 @@ const EditProfile = (props) => {
     }
 
     return(
-        <SafeAreaView style={safeViewAndroid.AndroidSafeArea} className={`${props.theme === "dark"? "bg-[#222831]" : "bg-white"} w-full h-full relative`}>
+        <SafeAreaView className={`${props.theme === "dark"? "bg-[#222831]" : "bg-white"} w-full h-full relative`}>
 
             <Modal visible={loadingModal} onRequestClose={() => {setLoadingModal(false)}} animationType="fade" presentationStyle="overFullScreen" transparent={true}>
-                <LoadingBlur loading={loading} />
+                <LoadingBlur loading={loading} theme={props.theme} />
             </Modal>
 
             <Modal visible={modalVisible} onRequestClose={() => {setModalVisible(false)}} animationType="fade" presentationStyle="overFullScreen" transparent={true}>
@@ -153,21 +154,21 @@ const EditProfile = (props) => {
                         <TouchableOpacity onPress={() => {
                             setModalVisible(false)
                         }} className={`w-14 h-14 flex items-center justify-center bg-red-700 rounded-full shadow`}>
-                            <Ionicons name="close" size={getFontSize(30)} color="white"/>
+                            <Ionicons name="close" size={fontSize * 1.6} color="white"/>
                         </TouchableOpacity>
                     </View>
-                    <View className={`w-[90%] h-[30%] ${props.theme === "dark" ? "" : "bg-white"} rounded-[35px] flex flex-row items-center justify-evenly`}>
+                    <View className={`w-[90%] h-[30%] rounded-[35px] flex flex-row items-center justify-evenly`}>
                         <TouchableOpacity onPress={uploadImage} className={`w-[22%] h-[32%] ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"} border-2 shadow rounded-[25px] flex items-center justify-center`}>
-                            <MaterialIcons name="add-a-photo" size={getFontSize(30)} color={props.theme === "dark" ? "white" : "black"}/>
-                            <Text style={{fontSize: getFontSize(11)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight mt-1`}>Take Photo</Text>
+                            <MaterialIcons name="add-a-photo" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"}/>
+                            <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight mt-1`}>Take Photo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => uploadImage("gallery")} className={`w-[22%] h-[32%] ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"} border-2 shadow rounded-[25px] flex items-center justify-center`}>
-                            <MaterialIcons name="add-photo-alternate" size={getFontSize(35)} color={props.theme === "dark" ? "white" : "black"}/>
-                            <Text style={{fontSize: getFontSize(11)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight mt-1`}>Gallery</Text>
+                            <MaterialIcons name="add-photo-alternate" size={fontSize * 1.8} color={props.theme === "dark" ? "white" : "black"}/>
+                            <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight mt-1`}>Gallery</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={removeImage} className={`w-[22%] h-[32%] ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"} border-2 shadow rounded-[25px] flex items-center justify-center`}>
-                            <MaterialIcons name="delete" size={getFontSize(35)} color={"gray"}/>
-                            <Text style={{fontSize: getFontSize(11)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>Remove</Text>
+                            <MaterialIcons name="delete" size={fontSize * 1.8} color={"gray"}/>
+                            <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>Remove</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -177,10 +178,10 @@ const EditProfile = (props) => {
                 <TouchableOpacity className="flex-row items-center gap-2 w-[40%]" onPress={() => {
                     navigation.goBack()
                 }}>
-                    <Ionicons name="chevron-back" size={getFontSize(35)} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                    <Ionicons name="chevron-back" size={fontSize * 1.8} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                     <View className={`flex-row items-center`}>
-                        <Feather name="edit" size={getFontSize(25)} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                        <Text style={{fontSize: getFontSize(20)}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium`}> Edit Profile</Text>
+                        <Feather name="edit" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                        <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium`}> Edit Profile</Text>
                     </View>
                 </TouchableOpacity>
             </View>
@@ -191,7 +192,7 @@ const EditProfile = (props) => {
                         <TouchableOpacity onPress={() => {
                             setModalVisible(true)
                         }} className={`w-14 h-14 rounded-full absolute bottom-0 right-0 shadow-sm border flex items-center justify-center ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"}`}>
-                            <Ionicons name="camera" size={getFontSize(30)} color={props.theme === "dark" ? "white" : "black"} />
+                            <Ionicons name="camera" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -202,10 +203,10 @@ const EditProfile = (props) => {
                     navigation.navigate("changeName");
                 }} className={`w-full h-1/4 flex flex-row items-center justify-between px-5`}>
                     <View className={`flex h-full justify-center gap-y-2`}>
-                        <Text style={{fontSize: getFontSize(22)}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Name</Text>
-                        <Text style={{fontSize: getFontSize(16)}} className={`tracking-tight font-light ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>
+                        <Text style={{fontSize: fontSize * 1.1}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Name</Text>
+                        <Text style={{fontSize: fontSize * 0.75}} className={`tracking-tight font-light ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={getFontSize(28)} color={props.theme === "dark" ? "white" : "black"}/>       
+                    <Ionicons name="chevron-forward" size={fontSize * 1.4} color={props.theme === "dark" ? "white" : "black"}/>       
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

@@ -1,14 +1,10 @@
-import { View, PixelRatio, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 
-const ModalLoader = () => {
-
-    const fontScale = PixelRatio.getFontScale();
-
-    const getFontSize = size => size / fontScale;
+const ModalLoader = (props) => {
 
   return (
-    <View className={`w-[75%] h-[30%] bg-white shadow rounded-[10px] items-center justify-center`}>
-        <ActivityIndicator size={"large"} color="#000000" />
+    <View className={`w-[75%] h-[30%] ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} shadow-sm rounded-[40px] items-center justify-center`}>
+        <ActivityIndicator size={"large"} color={props.theme === "dark" ? "#ffffff" : "#000000"}/>
     </View>
   )
 }
