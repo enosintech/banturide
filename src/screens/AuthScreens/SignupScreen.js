@@ -28,15 +28,26 @@ const SignupScreen = (props) => {
 
     const handleSignUpPress = () => {
         if(Object.values(user).includes("")) {
-            setError("All fields are required");
             setErrorVisible(true);
+            setError("All fields are required");
             setTimeout(() => {
                 setErrorVisible(false)
             }, 4000)
             return;
-        } else {
-            navigation.navigate("setpassword");
+        } 
+        
+        const emailRegex = /\S+@\S+\.\S+/;
+
+        if (!emailRegex.test(user.email)) {
+            setErrorVisible(true);
+            setError("Please enter a valid email address");
+            setTimeout(() => {
+                setErrorVisible(false)
+            }, 4000);
+            return;
         }
+        
+        navigation.navigate("setpassword");
     }
 
     return (
@@ -45,7 +56,8 @@ const SignupScreen = (props) => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={-250}>
             <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
-                <SafeAreaView style={[{height: height}]} className={`${props.theme === "dark" ? "bg-[#222831]" : ""} w-full flex-col items-center justify-between`}>
+                <SafeAreaView style={[{height: height}]} className={`${props.theme === "dark" ? "bg-dark-primary" : ""} w-full flex-col items-center justify-between relative`}>
+
                     <View className="w-full h-[10%]">
                         <View className="w-full pl-5 pt-2">
                             <BackButton theme={props.theme} value="Back" handlePress={() => {
@@ -119,14 +131,14 @@ const SignupScreen = (props) => {
                                 <Text style={{fontSize: fontSize * 0.7}} className={`text-red-600 font-bold tracking-tight mb-2`}>{error}</Text>
                             }
                             <TouchableOpacity className="bg-[#186F65] shadow-sm w-[85%] h-[40%] rounded-[50px] flex justify-center items-center" onPress={handleSignUpPress}>
-                                <Text style={{fontSize: fontSize * 1.2}} className="text-white font-bold tracking-tight">Sign up</Text>
+                                <Text style={{fontSize: fontSize * 1.2}} className="text-white font-extrabold tracking-tight">Sign up</Text>
                             </TouchableOpacity>
                             <View className="flex-row items-center mt-4">
-                                <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>Already have an account?</Text>
+                                <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Already have an account?</Text>
                                 <TouchableOpacity onPress={() => {
                                     navigation.navigate("Signin")
                                 }}>
-                                    <Text style={{fontSize: fontSize * 0.7}} className=" ml-1 text-[#186F65] font-bold tracking-tight">Sign in</Text>
+                                    <Text style={{fontSize: fontSize * 0.7}} className=" ml-1 text-[#186F65] font-extrabold tracking-tight">Sign in</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

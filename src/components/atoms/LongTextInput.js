@@ -16,6 +16,12 @@ const LongTextInput = (props) => {
             style={{fontSize: fontSize * 0.8}}
             placeholderTextColor={"rgb(156 163 175)"}
             textContentType={props.type}
+            keyboardType={props.type === "emailAddress" ? "email-address" : "default"}
+            autoComplete={props.type === "emailAddress" ? "email" : "name"}
+            autoCapitalize={props.type === "emailAddress" ? "none" : "words"}
+            autoCorrect={false}
+            accessibilityLabel={props.type === "emailAddress" ? "Email Input" : "Name Input"}
+            accessibilityHint={props.type === "emailAddress" ? "Enter your email" : "Enter your name"}
         />
     )
 }

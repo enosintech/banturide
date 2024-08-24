@@ -5,6 +5,7 @@ import AnimatedSplash from "react-native-animated-splash-screen";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Provider } from "react-redux";
+import { Appearance, useColorScheme } from "react-native";
 
 import { store } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
@@ -13,16 +14,12 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 
-  const [theme, setTheme] = useState("light");
+  const colorScheme = Appearance.getColorScheme()
+
+  const [theme, setTheme] = useState(colorScheme);
   const [darkMode, setDarkMode] = useState(false);
 
-  useEffect(() => {
-    if(darkMode){
-      setToDark()
-    } else {
-      setToLight()
-    }
-  }, [darkMode])
+  console.log(colorScheme)
 
   const [isLoaded] = useFonts({
     "os-italic" : require("./assets/fonts/OpenSans-Italic.ttf"),
@@ -34,14 +31,6 @@ export default function App() {
     "os-xb" : require("./assets/fonts/OpenSans-ExtraBold.ttf"),
     "mic-400" : require("./assets/fonts/Michroma-Regular.ttf"),
   })
-
-  const setToLight = () => {
-    setTheme("light");
-  }
-
-  const setToDark = () => {
-    setTheme("dark");
-  }
 
   const onLayoutRootView = useCallback(async () => {
     if(isLoaded){

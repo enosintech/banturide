@@ -2,9 +2,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 
-import { selectIsSignedIn, selectToken, selectTokenFetched, setToken, setTokenFetched, setUserInfo } from "../../slices/authSlice";
-
-import { selectProfileUpdated } from "../../slices/navSlice";
+import { selectIsSignedIn, selectToken, selectTokenFetched, setGlobalLoginError, setToken, setTokenFetched, setUserInfo, setUserDataFetched, setUserDataSet, selectUserDataSet, selectUserDataFetched, setGlobalAuthLoading } from "../../slices/authSlice";
+import { getItem, setItem } from "../components/lib/asyncStorage";
 
 export function useAuth() {
 
@@ -14,27 +13,50 @@ export function useAuth() {
 
   const token = useSelector(selectToken);
   const isSignedIn = useSelector(selectIsSignedIn);
-  const profileUpdated = useSelector(selectProfileUpdated);
-  const tokenFetched = useSelector(selectTokenFetched)
+  const tokenFetched = useSelector(selectTokenFetched);
+  const userDataSet = useSelector(selectUserDataSet);
+  const userDataFetched = useSelector(selectUserDataFetched);
 
   const retrieveTokens = async () => {
     try {
       const result = await SecureStore.getItemAsync('tokens');
       if (result) {
         const resultData = JSON.parse(result);
+        console.log("even here")
         dispatch(setToken({
           idToken: resultData.idToken,
           refreshToken: resultData.refreshToken,
         }));
       } else {
-        console.log('No token found');
+        dispatch(setGlobalAuthLoading(false))
+        setUser(false)
       }
       dispatch(setTokenFetched(true))
     } catch (error) {
-      console.log('Error retrieving token', error);
+      dispatch(setGlobalAuthLoading(false))
+      dispatch(setGlobalLoginError("An error occured while logging in"))
       dispatch(setTokenFetched(true))
+      setUser(false)
     }
   };
+
+  const fetchUserData = async () => {
+    await getItem("userInfo").then( async (data) => {
+      if(data) {
+        console.log("in async")
+        dispatch(setUserInfo(JSON.parse(data)));
+        dispatch(setUserDataFetched(true))
+      } else {
+        console.log("going online")
+        await getUserProfile();
+      }
+    })
+    .catch((error) => {
+      dispatch(setGlobalAuthLoading(false))
+      dispatch(setGlobalLoginError("An error occured while logging in"))
+      setUser(false)
+    })
+  }
 
   const getUserProfile = async () => {
     try {
@@ -46,17 +68,19 @@ export function useAuth() {
           'x-refresh-token': token.refreshToken,
         }
       });
+
       const data = await response.json();
-      
-      if (data.error) {
-        dispatch(setUserInfo(null));
-        setUser(false);
-      } else {
-        dispatch(setUserInfo(data.userData));
-        setUser(true);
+
+      if(data.success === false) {
+        dispatch(setGlobalAuthLoading(false))
+        dispatch(setGlobalLoginError(data.message))
+        setUser(false)
+      } else {   
+        await setItem("userInfo", JSON.stringify(data.userData));
+        dispatch(setUserDataSet(true))  
       }
+
     } catch (error) {
-      console.log("There was an error while fetching User Profile:", error);
       if(!user){
         setUser(false)
       }
@@ -64,7 +88,9 @@ export function useAuth() {
   };
 
   useEffect(() => {
+    console.log("and here")
     const fetchTokens = async () => {
+      console.log("heretoo")
       await retrieveTokens();
     };
     fetchTokens();
@@ -72,18 +98,22 @@ export function useAuth() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (token && token.refreshToken && token.idToken) {
-        await getUserProfile();
+      console.log("reached")
+      if(userDataFetched){
+        console.log("this")
+        dispatch(setGlobalAuthLoading(false))
+        setUser(true)
       } else {
-        setUser(false);
+        console.log("that")
+        await fetchUserData();
       }
     };
 
-    if(tokenFetched){
+    if(token && token.refreshToken && token.idToken) {
       fetchProfile();
     }
 
-  }, [tokenFetched, token, isSignedIn, profileUpdated]);
+  }, [ token, isSignedIn, userDataFetched, userDataSet ])
 
   return {
     user,

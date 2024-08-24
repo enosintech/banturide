@@ -17,6 +17,7 @@ import PageLoader from "../../components/atoms/PageLoader";
 import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectNotificationsArray } from "../../../slices/notificationSlice";
+import { selectUserInfo } from "../../../slices/authSlice";
 
 Geocoder.init("AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE");
 

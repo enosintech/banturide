@@ -1,34 +1,36 @@
 import {Text, View, ScrollView, TouchableOpacity, Dimensions } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 
-import { selectFavAddressChanged, selectFavAddressUpdated, setFavAddressUpdated } from "../../../slices/navSlice";
-import { selectToken } from "../../../slices/authSlice";
+import { selectFavAddressChanged, selectFavAddressUpdated } from "../../../slices/navSlice";
+import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
 const FavouriteScreen = (props) => {
 
     const navigation = useNavigation();
-    const routes = useRoute();
+    const route = useRoute();
     const dispatch = useDispatch();
 
     const tokens = useSelector(selectToken);
+    const isSignedIn = useSelector(selectIsSignedIn);
+
+    const { saveMessage } = route.params ? route.params : "";
 
     const fontSize = width * 0.05;
-
-    const { saveMessage } = routes.params ? routes.params : "No Message";
 
     const favAddressChanged = useSelector(selectFavAddressChanged);
     const favAddressUpdated = useSelector(selectFavAddressUpdated);
 
     const [favoritesData, setFavoritesData] = useState([]);
+    const [ error, setError ] = useState(false);
     const [loading, setLoading] = useState(false); 
     const [homeAdded, setHomeAdded] = useState(false);
     const [workAdded, setWorkAdded] = useState(false);
@@ -41,12 +43,6 @@ const FavouriteScreen = (props) => {
         if (a.type === "work") return b.type === "home" ? 1 : -1;
         return 0;
     });
-
-    useEffect(() => {
-        setTimeout(() => {
-            dispatch(setFavAddressUpdated(false))
-        }, 5000)
-    }, [favAddressUpdated])
 
     useEffect(() => {
         setLoading(true)
@@ -63,11 +59,25 @@ const FavouriteScreen = (props) => {
                 });
 
                 const result = await response.json();
-                setLoading(false)
-                setFavoritesData(result.favoriteLocations)
+
+                if(result.success === false){
+                    throw new Error(result.message || result.error)
+                } else {
+                    setLoading(false)
+                    setFavoritesData(result.favoriteLocations)
+                }
             } catch (error) {
                 setLoading(false)
-                console.log(error)
+                if(error === "Unauthorized"){
+                    dispatch(setUserInfo(null))
+                    dispatch(setToken(null))
+                    dispatch(setIsSignedIn(!isSignedIn))
+                    dispatch(setTokenFetched(false))
+                    dispatch(setUserDataFetched(false))
+                    dispatch(setUserDataSet(false))
+                } else {
+                    setError(true)
+                }
             }
         }
 
@@ -119,7 +129,7 @@ const FavouriteScreen = (props) => {
             <ScreenTitle theme={props.theme} iconName="favorite" title="Favorites" />
             {favAddressUpdated &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
-                    <View className={`w-[65%] h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
+                    <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
                         <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-light text-center tracking-tight">{saveMessage}</Text>
                     </View>
                 </View>
@@ -173,7 +183,11 @@ const FavouriteScreen = (props) => {
                     {
                         loading
                             ?
-                            <Text style={{ fontSize: fontSize * 0.8 }} className={`mt-2 tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Loading</Text>
+                                <Text style={{ fontSize: fontSize * 0.8 }} className={`mt-2 tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Loading...</Text>
+                            :
+                            error 
+                            ?
+                                <Text style={{ fontSize: fontSize * 0.8 }} className={`mt-2 tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Something Went Wrong</Text>
                             :
                             sortedFavorites.length > 0
                                 ?

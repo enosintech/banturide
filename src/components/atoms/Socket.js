@@ -170,7 +170,7 @@ export const SocketProvider = ({children}) => {
             socketInstance.close();
         };
       
-    }, [connected])
+    }, [connected ])
 
     return (
         <SocketContext.Provider value={{ socket, connected }}>

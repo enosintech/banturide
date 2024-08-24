@@ -1,14 +1,14 @@
 import { Text, View, Image, TouchableOpacity, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { selectProfileUpdated, setProfileUpdated } from "../../../slices/navSlice";
-import { selectToken, selectUserInfo } from "../../../slices/authSlice";
+import { selectIsSignedIn, selectToken, selectUserInfo, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { setItem } from "../../components/lib/asyncStorage";
 
 const { width } = Dimensions.get("window");
 
@@ -17,29 +17,47 @@ const ProfileScreen = (props) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
+    const userInfo = useSelector(selectUserInfo);
     const tokens = useSelector(selectToken);
-    const profileUpdated = useSelector(selectProfileUpdated);
+    const isSignedIn = useSelector(selectIsSignedIn);
 
-    const [notificationToggle, setNotificationToggle] = useState(true);
-    const [callDriverToggle, setCallDriverToggle] = useState(false);
+    const [notificationToggle, setNotificationToggle] = useState(userInfo?.notificationsEnabled);
+    const [callDriverToggle, setCallDriverToggle] = useState(userInfo?.driverShouldCall);
 
     const [ notificationAlert, setNotificationAlert ] = useState(false)
+    const [ notificationError, setNotificationError ] = useState(false);
     const [ notificationValue, setNotificationValue ] = useState(false)
 
     const [ callDriverAlert, setCallDriverAlert ] = useState(false)
+    const [ callDriverError, setCallDriverError ] = useState(false);
     const [ callDriverValue, setCallDriverValue ] = useState(false);
-
-    const userInfo = useSelector(selectUserInfo);
 
     const fontSize = width * 0.05;
 
+    const getUpdatedUserProfile = async () => {
+        const response = await fetch("https://banturide-api.onrender.com/profile/get-user-profile", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token': tokens?.refreshToken,
+            }
+        });
+
+        const data = await response.json();
+
+        if(data.success === false) {
+            throw new Error(data.message || data.error)
+        } else {
+            await setItem("userInfo", JSON.stringify(data?.userData))
+            dispatch(setUserInfo(data?.userData))
+        }
+    }
+
     const handleToggleNotifications = async () => {
 
-        if(notificationToggle === true){
-            setNotificationToggle(false)
-        } else {
-            setNotificationToggle(true)
-        }
+        const previousState = notificationToggle;
+        setNotificationToggle(!notificationToggle);
 
         try {    
             const response = await fetch("https://banturide-api.onrender.com/profile/toggle-notifications", {
@@ -55,26 +73,51 @@ const ProfileScreen = (props) => {
             })
     
             await response.json()
-            .then((data) => {
-                setNotificationAlert(!notificationAlert)
-                setNotificationValue(data.value)
-                dispatch(setProfileUpdated(!profileUpdated))
+            .then( async (data) => {
+                if(data.success === false) {
+
+                    throw new Error(data.message || data.error)
+
+                } else {
+                    await getUpdatedUserProfile()
+                    .then(() => {
+                        setNotificationAlert(true)
+                        setNotificationValue(data?.value)
+                        setTimeout(() => {
+                            setNotificationAlert(false)
+                        }, 3000)
+                    })
+                }
             })
     
         } catch (error) {
-            console.log(error)
+            if(error === "Unauthorized"){
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setNotificationToggle(previousState)
+                if(typeof error === "string"){
+                    setNotificationError(error)
+                } else {
+                    setNotificationError("Unknown error occcured")
+                }
+                setTimeout(() => {
+                    setNotificationError(false)
+                }, 4000)
+            }
         }
     }
 
     const handleToggleDriverShouldCall = async () => {
-        if(callDriverToggle === true){
-            setCallDriverToggle(false)
-        } else {
-            setCallDriverToggle(true)
-        }
+
+        const previousState = callDriverToggle;
+        setCallDriverToggle(!callDriverToggle);
 
         try {
-
             const response = await fetch("https://banturide-api.onrender.com/profile/toggle-driver-should-call", {
                 method: "POST",
                 headers: {
@@ -88,44 +131,74 @@ const ProfileScreen = (props) => {
             })
 
             await response.json()
-            .then((data) => {
-                setCallDriverAlert(!callDriverAlert)
-                setCallDriverValue(data.value)
-                dispatch(setProfileUpdated(!profileUpdated))
+            .then(async (data) => {
+                if(data.success === false) {
+                    throw new Error(data.message || data.error)
+                } else {
+                    await getUpdatedUserProfile()
+                    .then(() => {
+                        setCallDriverAlert(true)
+                        setCallDriverValue(data?.value)
+                        setTimeout(() => {
+                            setCallDriverAlert(false)
+                        }, 3000)
+                    })
+                }
             })
             
         } catch (error) {
-            console.log(error)
+            if(error === "Unauthorized"){
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setCallDriverToggle(previousState);
+                if(typeof error === "string"){
+                    setCallDriverError(error)
+                } else {
+                    setCallDriverError("Unknown error occcured")
+                }
+                setTimeout(() => {
+                    setCallDriverError(false)
+                }, 4000)
+            }
         }
     }
-
-    useEffect(() => {
-        setTimeout(() => {
-            setNotificationAlert(false)
-        }, 4000)
-    }, [notificationAlert])
-
-    useEffect(() => {
-        setTimeout(() => {
-            setCallDriverAlert(false)
-        }, 4000)
-    }, [callDriverAlert])
 
     return(
         <View className={`${props.theme === "dark" ? "bg-dark-primary" : ""} h-full w-full flex-1 relative`}>
 
             {notificationAlert &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
-                    <View className={`w-[50%] h-[80%] bg-black rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight">{notificationValue ? "Notifications Enabled" : "Notifications Disabled"}</Text>
+                    <View className={`w-fit h-[80%] px-6 bg-black rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{notificationValue ? "Notifications Enabled" : "Notifications Disabled"}</Text>
+                    </View>
+                </View>
+            }
+
+            {notificationError &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{notificationError}</Text>
                     </View>
                 </View>
             }
 
             {callDriverAlert &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
-                    <View className={`w-[50%] h-[80%] bg-black rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight">{callDriverValue ? "Driver Call Enabled" : "Driver Call Disabled"}</Text>
+                    <View className={`w-fit px-6 h-[80%] bg-black rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{callDriverValue ? "Driver will Call" : "Driver won't Call"}</Text>
+                    </View>
+                </View>
+            }
+
+            {callDriverError &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{callDriverError}</Text>
                     </View>
                 </View>
             }

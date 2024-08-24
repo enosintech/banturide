@@ -8,10 +8,10 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
 
-import { selectToken, selectUserInfo } from "../../../slices/authSlice";
-import { selectProfileUpdated, setProfileUpdated } from "../../../slices/navSlice";
+import { selectIsSignedIn, selectToken, selectUserInfo, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur";
+import { setItem } from "../../components/lib/asyncStorage";
 
 const { width } = Dimensions.get("window");
 
@@ -21,15 +21,35 @@ const EditProfile = (props) => {
     const dispatch = useDispatch();
 
     const userInfo = useSelector(selectUserInfo);
+    const isSignedIn = useSelector(selectIsSignedIn);
     const tokens = useSelector(selectToken);
-    const profileUpdated = useSelector(selectProfileUpdated);
 
     const [ modalVisible, setModalVisible ] = useState(false);
-    const [ loadingModal, setLoadingModal ] = useState(false);
+    const [ error, setError ] = useState(false);
     const [ image, setImage ] = useState()
     const [ loading, setLoading ] = useState(false)
 
     const fontSize = width * 0.05;
+
+    const getUpdatedUserProfile = async () => {
+        const response = await fetch("https://banturide-api.onrender.com/profile/get-user-profile", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token': tokens?.refreshToken,
+            }
+        });
+
+        const data = await response.json();
+
+        if(data.success === false) {
+            throw new Error(data.message || data.error)
+        } else {
+            await setItem("userInfo", JSON.stringify(data.userData))
+            dispatch(setUserInfo(data.userData))
+        }
+    }
 
     const uploadImage = async (mode) => {
         try {
@@ -56,8 +76,7 @@ const EditProfile = (props) => {
                     allowsEditing: true,
                     aspect: [1, 1],
                     quality: 1,
-                }).then((data) => {
-                } )
+                })
             }
             
             if(!result.canceled){
@@ -65,14 +84,29 @@ const EditProfile = (props) => {
             }
 
         } catch(error) {
-            console.log(error)
-            setModalVisible(false)
+            if(error === "Unauthorized"){
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setModalVisible(false)
+                if(typeof error === "string"){
+                    setError(error)
+                } else {
+                    setError("There was an error")
+                }
+                setTimeout(() => {
+                    setError(false)
+                }, 3000)
+            }
         }
     }
 
     const saveImage = async (imageParam) => {
         setModalVisible(false)
-        setLoadingModal(true)
         setLoading(true)
 
         setImage(imageParam)
@@ -83,9 +117,7 @@ const EditProfile = (props) => {
             uri: imageParam.uri,
             type: imageParam.type,
             name: imageParam.fileName
-        })
-        
-        try {
+        })      
 
             const response = await fetch(`https://banturide-api.onrender.com/profile/uploadUserProfilePicture`, {
                 method: "POST",
@@ -99,22 +131,19 @@ const EditProfile = (props) => {
 
             const responseData = await response.json();
             
-            console.log(responseData);
-
-            dispatch(setProfileUpdated(!profileUpdated))
-            setLoadingModal(false)
-            setLoading(false)
-        } catch (error) {
-            setLoadingModal(false)
-            setLoading(false)
-            console.log(error);
-        }
+            if(responseData.success === false) {
+                throw new Error(data.message || data.error)
+            } else {
+                await getUpdatedUserProfile()
+                .then(() => {
+                    setLoading(false)
+                })
+            }
     }
 
     const removeImage = async () => {
-        setLoadingModal(true)
-        setLoading(true)
         setModalVisible(false)
+        setLoading(true)
         try {
 
             const response = await fetch(`https://banturide-api.onrender.com/profile/removeUserProfilePicture`, {
@@ -128,23 +157,57 @@ const EditProfile = (props) => {
 
             const responseData = await response.json();
 
-            console.log(responseData)
+            if(responseData.success === false) {
 
-            dispatch(setProfileUpdated(!profileUpdated))
-            setLoadingModal(false)
-            setLoading(false)
+                throw new Error(data.message || data.error)
+
+            } else {
+                await getUpdatedUserProfile()
+                .then(() => {
+                    setLoading(false)
+                })
+            }
 
         } catch (error) {
-            setLoadingModal(false)
-            setLoading(false)
-            console.log(error)
+            if(error === "Unauthorized"){
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setLoading(false)
+                if(typeof error === "string"){
+                    setError(error)
+                } else {
+                    setError("There was an error")
+                }
+                setTimeout(() => {
+                    setError(false)
+                }, 3000)
+            }
         }
     }
 
     return(
         <SafeAreaView className={`${props.theme === "dark"? "bg-[#222831]" : "bg-white"} w-full h-full relative`}>
 
-            <Modal visible={loadingModal} onRequestClose={() => {setLoadingModal(false)}} animationType="fade" presentationStyle="overFullScreen" transparent={true}>
+            {error &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{error}</Text>
+                    </View>
+                </View>
+            }
+
+            <Modal visible={loading} onRequestClose={() => {
+                if(loading) {
+
+                } else {
+                    setLoading(false)
+                }
+            }} animationType="fade" presentationStyle="overFullScreen" transparent={true}>
                 <LoadingBlur loading={loading} theme={props.theme} />
             </Modal>
 

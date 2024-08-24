@@ -12,7 +12,7 @@ const WelcomeScreen = (props) => {
     const fontSize = width * 0.05
 
     return(
-        <View className={`${props.theme === "dark" ? "bg-[#222831]" : ""} h-full w-full flex-col items-center relative`} onLayout={props.handleLayout}>
+        <View className={`${props.theme === "dark" ? "bg-dark-primary" : ""} h-full w-full flex-col items-center relative`} onLayout={props.handleLayout}>
             <View className="w-full h-[30%] flex justify-start items-center translate-y-10">
                 <Image 
                     source={require("../../../assets/icons/BantuRide.png")}

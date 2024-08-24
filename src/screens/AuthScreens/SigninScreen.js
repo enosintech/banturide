@@ -1,12 +1,12 @@
 import { Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, } from "react";
+import { useState, useEffect } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SecureStore from "expo-secure-store";
 
-import { selectIsSignedIn, setIsSignedIn } from "../../../slices/authSlice";
+import { selectForgotPasswordTriggered, selectGlobalAuthLoading, selectGlobalLoginError, selectIsSignedIn, setForgotPasswordTriggered, setGlobalAuthLoading, setGlobalLoginError, setIsSignedIn } from "../../../slices/authSlice";
 
 import BackButton from "../../components/atoms/BackButton";
 import LoadingBlur from "../../components/atoms/LoadingBlur";
@@ -17,8 +17,11 @@ const SigninScreen = (props) => {
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
+    const routes = useRoute();
 
     const fontSize = width * 0.05;
+    
+    const { resetMessage } = routes?.params ? routes.params : "";
 
     const [visible, setVisible] = useState(false);
     const [ email, setEmail ] = useState("");
@@ -30,26 +33,16 @@ const SigninScreen = (props) => {
     const height = Dimensions.get("window").height;
 
     const isSignedIn = useSelector(selectIsSignedIn);
-
-    const userForm = {
-        email: email,
-        password: password
-    }
-
-    const options = {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userForm)
-    };
+    const forgotPasswordTriggered = useSelector(selectForgotPasswordTriggered);
+    const globalLoginError = useSelector(selectGlobalLoginError);
+    const globalAuthLoading = useSelector(selectGlobalAuthLoading);
 
     const handleEmailPasswordSignIn = async () => {
         Keyboard.dismiss()
-        setLoading(true)
+        dispatch(setGlobalAuthLoading(true))
 
         if(email === "" || password === ""){
-            setLoading(false)
+            dispatch(setGlobalAuthLoading(false))
             setErrorVisible(true);
             setError("No Email or Password Entered")
             setTimeout(() => {
@@ -58,30 +51,67 @@ const SigninScreen = (props) => {
             return;
         }
 
-        await fetch("https://banturide-api.onrender.com/auth/signin", options)
+        const emailRegex = /\S+@\S+\.\S+/;
+
+        if (!emailRegex.test(email)) {
+            dispatch(setGlobalAuthLoading(false))
+            setErrorVisible(true);
+            setError("Please enter a valid email address");
+            setTimeout(() => {
+                setErrorVisible(false)
+            }, 4000);
+            return;
+        }
+
+        await fetch("https://banturide-api.onrender.com/auth/signin", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        })
         .then(response => response.json())
         .then( async data => {
-            if(data.message === "Logged in successfully"){
-                await SecureStore.setItemAsync("tokens", JSON.stringify(data.userCredential._tokenResponse)).then(() => {
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    setTimeout(() => {
-                        setLoading(false)
-                    }, 5000)
-                })
-            } else {
-                setLoading(false)
+
+            if(data.success === false) {
+                dispatch(setGlobalAuthLoading(false))
                 setErrorVisible(true)
                 setError(data.message)
                 setTimeout(() => {
                     setErrorVisible(false)
                 }, 4000)
-            }1
+            } else {
+                await SecureStore.setItemAsync("tokens", JSON.stringify(data.userCredential._tokenResponse)).then(() => {
+                    console.log("reached")
+                    dispatch(setIsSignedIn(!isSignedIn))
+                })
+            }
 
         })
         .catch((err) => {
-            console.log(err);
+            dispatch(setGlobalAuthLoading(false))
+            setErrorVisible(true)
+            setError(err)
+            setTimeout(() => {
+                setErrorVisible(false)
+            }, 4000)
         })
     }
+
+    useEffect(() => {
+        setTimeout(() => {
+            dispatch(setForgotPasswordTriggered(false))
+        }, 5000)
+    }, [forgotPasswordTriggered])
+
+    useEffect(() => {
+        setTimeout(() => {
+            dispatch(setGlobalLoginError(null))
+        }, 5000)
+    }, [globalLoginError])
 
     return (
         <KeyboardAvoidingView 
@@ -91,7 +121,16 @@ const SigninScreen = (props) => {
             >
             <TouchableWithoutFeedback className={'w-full h-full'} onPress={Keyboard.dismiss} accessible={false}>
                 <SafeAreaView style={[{height: height}]} className={`${props.theme === "light" ? "" : props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full flex-col relative items-center`}>
-                    <LoadingBlur loading={loading} theme={props.theme}/>
+                    <LoadingBlur loading={globalAuthLoading} theme={props.theme}/>
+
+                    {forgotPasswordTriggered && resetMessage &&
+                        <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                            <View className={`w-fit px-4 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
+                                <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-light text-center tracking-tight">{resetMessage}</Text>
+                            </View>
+                        </View>
+                    }
+
                     <View className="w-full h-[10%]">
                         <View className="w-full pl-6 pt-2">
                             <BackButton theme={props.theme} value="Back" handlePress={() => {
@@ -111,6 +150,12 @@ const SigninScreen = (props) => {
                                 style={{ fontSize: fontSize * 0.8}}
                                 placeholderTextColor="rgb(156 163 175)"
                                 onChangeText={(x) => setEmail(x)}
+                                keyboardType={"email-address"}
+                                autoComplete="email"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                accessibilityLabel="Email Input"
+                                accessibilityHint="Enter your Email"
                             />
                             <View className={`h-[30%] mt-5 ${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} w-[90%] border-[0.25px] border-solid rounded-[25px] flex-row items-center p-2 px-4`}>
                                 <TextInput
@@ -120,6 +165,11 @@ const SigninScreen = (props) => {
                                     placeholderTextColor="rgb(156 163 175)"
                                     secureTextEntry={!visible}
                                     onChangeText={(x) => setPassword(x)}
+                                    keyboardType="default"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    accessibilityLabel="Password Input"
+                                    accessibilityHint="Enter your password"
                                 />
                                 <TouchableOpacity onPress={() => {
                                     setVisible(!visible)
@@ -137,6 +187,12 @@ const SigninScreen = (props) => {
                         </View>
                     </View>
                     <View className={`h-[30%] w-[90%] mt-4 rounded-[40px] py-5 flex items-center shadow-sm justify-evenly ${props.theme === "dark" ? "bg-[#353d4a]" : "bg-white"}`}>
+                        { globalLoginError && 
+                            <View className="w-full h-fit mt-2 flex items-center justify-center">
+                                <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} text-red-500 font-semibold tracking-tight`}>{globalLoginError}</Text>
+                            </View>
+                        }
+
                         {errorVisible && 
                             <View className="w-full h-fit mt-2 flex items-center justify-center">
                                 <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} text-red-500 font-semibold tracking-tight`}>{error}</Text>
@@ -146,11 +202,11 @@ const SigninScreen = (props) => {
                             <Text style={{fontSize: fontSize * 1.1}} className="text-white font-bold tracking-tight">Sign in</Text>
                         </TouchableOpacity>
                         <View className="mt-3 flex-row items-center justify-center">
-                            <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>Don't have an account? </Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Don't have an account? </Text>
                             <TouchableOpacity onPress={() => {
                                 navigation.navigate("Signup")
                             }}>
-                                <Text style={{fontSize: fontSize * 0.6}} className="text-[#186F65] font-bold tracking-tight">Sign up</Text>
+                                <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-extrabold tracking-tight">Sign up</Text>
                             </TouchableOpacity> 
                         </View>
                     </View>

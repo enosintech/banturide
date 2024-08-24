@@ -1,12 +1,12 @@
 import { View, Text, TextInput, TouchableOpacity, Dimensions, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { selectUser } from '../../../slices/authSlice';
+import { selectUser, setForgotPasswordTriggered } from '../../../slices/authSlice';
 
 import BackButton from '../../components/atoms/BackButton';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
@@ -16,6 +16,7 @@ const { width } = Dimensions.get("window");
 const SetPassword = (props) => {
 
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const [ visible_1, setVisible_1 ] = useState(true);
     const [ visible_2, setVisible_2 ] = useState(true);
@@ -40,14 +41,6 @@ const SetPassword = (props) => {
         email: user?.email,
         password: password,
     }
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userForm)
-    };
 
     const validatePassword = (password) => {
         const passwordRegex = /^(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*\d).{8,}$/;
@@ -87,28 +80,45 @@ const SetPassword = (props) => {
             return;
         }
 
-        await fetch('https://banturide-api.onrender.com/auth/passenger-signup', options)
+        await fetch('https://banturide-api.onrender.com/auth/passenger-signup', {
+            method: "POST",
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userForm)
+        })
         .then(response => response.json())
         .then(async data => {
 
-            if(data.message === "User created successfully"){
-                setLoading(false)
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: "Signin"}]
-                })
-            } else {
+            if(data.success === false) {
                 setLoading(false)
                 setErrorVisible(true)
-                setServerError(data.message);
+                setServerError(data.message)
                 setTimeout(() => {
                     setErrorVisible(false)
                 }, 4000)
+            } else {
+                setLoading(false)
+                navigation.reset({
+                    index: 0,
+                    routes: [{ 
+                        name: "Signin",
+                        params: { 
+                            resetMessage: "Check your email for verification link" 
+                        }
+                    }]
+                })
+                dispatch(setForgotPasswordTriggered(true))
             }
            
         })
         .catch((error) => {
-            console.log(error)
+            setLoading(false)
+            setErrorVisible(true)
+            setServerError(error)
+            setTimeout(() => {
+                setErrorVisible(false)
+            }, 4000)
         })
     }
     
@@ -119,7 +129,7 @@ const SetPassword = (props) => {
         keyboardVerticalOffset={-180}
     >
         <TouchableWithoutFeedback className="w-full h-full" onPress={Keyboard.dismiss}>
-            <SafeAreaView style={[{height: height}]} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : ""} relative flex flex-col items-center`}>
+            <SafeAreaView style={[{height: height}]} className={`w-full ${props.theme === "dark" ? "bg-dark-primary" : ""} relative flex flex-col items-center`}>
                 <LoadingBlur loading={loading} theme={props.theme}/>
                 <View className={`w-full h-[8%] flex justify-center px-6`}>
                     <BackButton theme={props.theme} value="Back" handlePress={() => {
@@ -148,6 +158,11 @@ const SetPassword = (props) => {
                             secureTextEntry={visible_1}
                             defaultValue={password}
                             onChangeText={x => setPassword(x)}
+                            keyboardType="default"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            accessibilityLabel="Password Input"
+                            accessibilityHint="Enter your password"
                         />
                         <TouchableOpacity onPress={() => {
                             setVisible_1(!visible_1);
@@ -164,6 +179,11 @@ const SetPassword = (props) => {
                             secureTextEntry={visible_2}
                             defaultValue={confirmPassword}
                             onChangeText={x => setConfirmPassword(x)}
+                            keyboardType="default"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            accessibilityLabel="Confirm Password Input"
+                            accessibilityHint="Enter your password again"
                         />
                         <TouchableOpacity onPress={() => {
                             setVisible_2(!visible_2)
@@ -175,21 +195,21 @@ const SetPassword = (props) => {
                 <View className={`w-[90%] ${errorVisible ? "h-[27%]" : "h-[25%]"} ${props.theme === "dark" ? "bg-[#353d4a]" : "bg-white"} rounded-[40px] shadow-sm mt-5 flex items-center justify-center`}>
                     <Text style={{fontSize: fontSize * 0.7}} className={`w-[85%] h-[20%] ${errorVisible ? "block" : "hidden"} text-red-700 text-center font-semibold tracking-tight text-wrap overflow-hidden`}>{serverError}</Text>
                     <TouchableOpacity className={`bg-[#186F65] mt-1 shadow-2xl w-[85%] ${errorVisible ? "h-[30%]" : "h-[40%]"} rounded-[50px] flex justify-center items-center`} onPress={handleSignUp}>
-                        <Text style={{fontSize: fontSize}} className="text-white font-bold tracking-tight">Complete Sign Up</Text>
+                        <Text style={{fontSize: fontSize}} className="text-white font-extrabold tracking-tight">Complete Sign Up</Text>
                     </TouchableOpacity>
                     <View className="w-[85%] mt-4 pl-1 flex-row items-center flex-wrap">
                         <Ionicons name="checkmark-circle-outline" size={fontSize} color="#186F65"/>
-                        <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> By completing Sign Up, you agree to the </Text> 
+                        <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}> By completing Sign Up, you agree to the </Text> 
                         <TouchableOpacity onPress={() => {
                             navigation.navigate("TnCs", {toggle: "tncs"});
                         }}>
-                            <Text style={{fontSize: fontSize * 0.6}} className="text-[#186F65] font-bold tracking-tight">Terms of Service</Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-bold tracking-tight">Terms of Service</Text>
                         </TouchableOpacity>
-                        <Text style={{fontSize: fontSize * 0.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> and </Text> 
+                        <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}> and </Text> 
                         <TouchableOpacity onPress={() => {
                             navigation.navigate("TnCs", {toggle: "pp"});
                         }}>
-                            <Text style={{fontSize: fontSize * 0.6}} className="text-[#186F65] font-bold tracking-tight">Privacy Policy</Text>
+                            <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-bold tracking-tight">Privacy Policy</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

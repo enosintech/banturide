@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 
-import { selectToken, selectUserInfo } from '../../../slices/authSlice';
-import { selectProfileUpdated, setProfileUpdated } from '../../../slices/navSlice';
+import { selectIsSignedIn, selectToken, selectUserInfo, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import ModalLoader from '../../components/atoms/ModalLoader';
+import { setItem } from '../../components/lib/asyncStorage';
 
 const width = Dimensions.get("window").width;
 
@@ -16,17 +16,38 @@ const ChangeName = (props) => {
     const dispatch = useDispatch();
 
     const userInfo = useSelector(selectUserInfo);
-    const profileUpdated = useSelector(selectProfileUpdated)
-
     const tokens = useSelector(selectToken);
+    const isSignedIn = useSelector(selectIsSignedIn);
 
     const [ loading, setLoading ] = useState(false);
+    const [ error, setError ] = useState(false);
+
     const [ firstName, setFirstName ] = useState(userInfo?.firstname);
     const [ lastName, setLastName ] = useState(userInfo?.lastname)
 
     const height = Dimensions.get("window").height;
 
     const fontSize = width * 0.05;
+
+    const getUpdatedUserProfile = async () => {
+      const response = await fetch("https://banturide-api.onrender.com/profile/get-user-profile", {
+          method: "GET",
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${tokens?.idToken}`,
+              'x-refresh-token': tokens?.refreshToken,
+          }
+      });
+
+      const data = await response.json();
+
+      if(data.success === false) {
+          throw new Error(data.message || data.error)
+      } else {
+          await setItem("userInfo", JSON.stringify(data.userData))
+          dispatch(setUserInfo(data.userData))
+      }
+    }
 
     const editUserName = async () => {
       
@@ -48,17 +69,36 @@ const ChangeName = (props) => {
   
         const result = await response.json();
 
-        if(result) {
-          dispatch(setProfileUpdated(!profileUpdated))
-          setLoading(false)
-          navigation.goBack();
+        if(result.success === false) {
+          throw new Error(result.message || result.error)
+        } else {
+            await getUpdatedUserProfile()
+            .then(() => {
+              setLoading(false)
+              navigation.goBack();
+            })
         }
 
       } catch (error) {
-        setLoading(false)
-        console.log("this is the error", error)
+        if(error === "Unauthorized"){
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+        } else {
+          setLoading(false)
+          if(typeof error === "string"){
+            setError(error)
+          } else {
+            setError("There was an error")
+          }
+          setTimeout(() => {
+            setError(false)
+          }, 3000)
+        }
       }
-      
     }
 
   return (
@@ -75,6 +115,14 @@ const ChangeName = (props) => {
             <ModalLoader theme={props.theme}/>
         </View>
       </Modal>
+
+      {error &&
+          <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+              <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                  <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{error}</Text>
+              </View>
+          </View>
+      }
 
       <View className={`w-full h-[50%] ${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} rounded-t-[22px] flex items-center justify-center gap-y-4 relative`}>
         <Text style={{fontSize: fontSize}} className={`absolute top-3 font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Edit Full Name</Text> 
