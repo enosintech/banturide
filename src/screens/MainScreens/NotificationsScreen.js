@@ -28,7 +28,7 @@ const NotificationsScreen = (props) => {
     const readNotifications = notificationsArray.filter(notification => notification.status === "read");
 
     return(
-        <SafeAreaView className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-full`}>
+        <SafeAreaView className={`${props.theme === "dark" ? "bg-[#222831]" : ""} w-full h-full`}>
             <View className={`w-full h-[18%]`}>
                 <View className={`w-full h-[50%] p-3`}>
                     <ProfileScreenTitle theme={props.theme} iconName={"notifications"} title="Notifications" handlePress={() => {
@@ -53,7 +53,7 @@ const NotificationsScreen = (props) => {
             </View>
             <View className={`w-full h-[68%] bg-inherit`}>
                 <View className={`w-full h-[8%] ${props.theme === "dark" ? "bg-[#222831] border-gray-900" : " border-gray-400"} border-b-[0.25px] border-t-[0.25px] border-solid flex-row justify-end items-center px-3`}>
-                    <TouchableOpacity className={`flex-row h-[80%] items-center rounded-[50px] p-1 ${notifToggle === "all" ? "bg-[#186f65] border-[#186f65]" : "bg-white border-white"} shadow-md border`} onPress={() => {
+                    <TouchableOpacity className={`flex-row h-[80%] items-center rounded-[50px] p-1 px-3 ${notifToggle === "all" ? "bg-[#186f65] border-[#186f65]" : "bg-white border-white"} shadow border`} onPress={() => {
                         setNotifToggle("all")
                     }}>
                         <Ionicons name="logo-stackoverflow" size={fontSize * 0.65} color={`${notifToggle === "all" ? "white" : "black"}` }/>

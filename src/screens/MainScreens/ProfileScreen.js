@@ -4,11 +4,11 @@ import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { selectIsSignedIn, selectToken, selectUserInfo, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 import { setItem } from "../../components/lib/asyncStorage";
+import { setDeliveryType, setDestination, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -91,16 +91,40 @@ const ProfileScreen = (props) => {
             })
     
         } catch (error) {
-            if(error === "Unauthorized"){
+            const errorField = error.message || error.error;
+
+            if(errorField === "Unauthorized"){
+                await SecureStore.deleteItemAsync("tokens")
+                .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
                 dispatch(setUserInfo(null))
                 dispatch(setToken(null))
                 dispatch(setIsSignedIn(!isSignedIn))
                 dispatch(setTokenFetched(false))
                 dispatch(setUserDataFetched(false))
                 dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                    dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+                })
+                .catch((error) => {
+                    setNotificationToggle(previousState)
+                    setNotificationError("Unauthorized")
+                    setTimeout(() => {
+                        setNotificationError(false)
+                    }, 3000)
+                })     
             } else {
                 setNotificationToggle(previousState)
-                setNotificationError(error)
+                setNotificationError(errorField || "Error toggling notifications")
                 setTimeout(() => {
                     setNotificationError(false)
                 }, 3000)
@@ -143,16 +167,40 @@ const ProfileScreen = (props) => {
             })
             
         } catch (error) {
-            if(error === "Unauthorized"){
+            const errorField = error.message || error.error;
+
+            if(errorField === "Unauthorized"){
+                await SecureStore.deleteItemAsync("tokens")
+                .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
                 dispatch(setUserInfo(null))
                 dispatch(setToken(null))
                 dispatch(setIsSignedIn(!isSignedIn))
                 dispatch(setTokenFetched(false))
                 dispatch(setUserDataFetched(false))
                 dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                    dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+                })
+                .catch((error) => {
+                    setCallDriverToggle(previousState);
+                    setCallDriverError("Unauthorized")
+                    setTimeout(() => {
+                        setCallDriverError(false)
+                    }, 3000)      
+                })     
             } else {
                 setCallDriverToggle(previousState);
-                setCallDriverError(error)
+                setCallDriverError(errorField || "Error toggling driver should call")
                 setTimeout(() => {
                     setCallDriverError(false)
                 }, 3000)
@@ -214,38 +262,37 @@ const ProfileScreen = (props) => {
 
             <View className={`w-full h-full flex-col justify-between`}>
                 <View className={`${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} h-[30%] w-full relative`}>
-                   <Text style={{fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight absolute top-[30%] w-full text-center`}>PROFILE</Text>
+                   <Text style={{fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight absolute top-[30%] w-full text-center`}>PROFILE</Text>
                 </View>
 
                 <View className={`h-[55%] w-full items-center`}>
                     <TouchableOpacity className={`w-[95%] h-[12%] bg-white shadow-sm rounded-[50px] flex-row items-center justify-center`} onPress={() => {
                         navigation.navigate("EditProfile")
                     }}>
-                        <Feather name="edit" size={fontSize * 1.5} color="black"/>
-                        <Text style={{fontSize: fontSize * 0.9}} className="text-black font-semibold tracking-tight"> Edit Profile</Text>
+                        <Text style={{fontSize: fontSize}} className="text-black font-extrabold tracking-tight"> Edit Profile</Text>
                     </TouchableOpacity>
                     <View className={`w-full border-b-[0.25px] mt-4 ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
                     <View className={`h-[12%] w-full border-t-[0.25px] border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" :"border-gray-400"} px-5 flex-row items-center justify-between`}>
                         <View className="flex-row items-center">
-                            <MaterialIcons name="notifications" size={fontSize * 1.5} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                            <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight ml-1`}> Notifications</Text>
+                            <MaterialIcons name="notifications" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                            <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tighter ml-1`}> Notifications</Text>
                         </View>
                         <TouchableOpacity onPress={handleToggleNotifications}>
-                            <FontAwesome name={`${notificationToggle ? "toggle-on" : "toggle-off"}`} size={fontSize * 1.5} color={`${ props.theme === "dark" ? "white" : "black"}`}/>
+                            <FontAwesome name={`${notificationToggle ? "toggle-on" : "toggle-off"}`} size={fontSize * 1.5} color={`#186f65`}/>
                         </TouchableOpacity>
                     </View>
-                    <View className={`h-[12%] w-full border-t-[0.25px] border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" :"border-gray-400"} px-5 flex-row items-center justify-between`}>
+                    <View className={`h-[12%] w-full border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" :"border-gray-400"} px-5 flex-row items-center justify-between`}>
                         <View className="flex-row items-center">
-                            <Ionicons name="call" size={fontSize * 1.5} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                            <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight ml-1`}> Driver Should Call</Text>
+                            <Ionicons name="call" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                            <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tighter ml-1`}> Driver Should Call</Text>
                         </View>
                         <TouchableOpacity onPress={handleToggleDriverShouldCall}>
-                            <FontAwesome name={`${callDriverToggle ? "toggle-on" : "toggle-off"}`} size={fontSize * 1.5} color={`${ props.theme === "dark" ? "white" : "black"}`}/>
+                            <FontAwesome name={`${callDriverToggle ? "toggle-on" : "toggle-off"}`} size={fontSize * 1.5} color={`#186f65`}/>
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity className={`h-[12%] w-full border-t-[0.25px] border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" :"border-gray-400"} px-5 flex-row items-center`}>
-                        <FontAwesome name="drivers-license" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                        <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight ml-1`}> Become A Driver</Text>
+                        <FontAwesome name="drivers-license" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                        <Text style={{fontSize: fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tighter ml-1`}> Become A Driver</Text>
                     </TouchableOpacity>
                 </View>
             </View>

@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 
-import { selectIsSignedIn, selectToken, selectTokenFetched, setGlobalLoginError, setToken, setTokenFetched, setUserInfo, setUserDataFetched, setUserDataSet, selectUserDataSet, selectUserDataFetched, setGlobalAuthLoading } from "../../slices/authSlice";
+import { selectIsSignedIn, selectToken, setGlobalLoginError, setToken, setTokenFetched, setUserInfo, setUserDataFetched, setUserDataSet, selectUserDataSet, selectUserDataFetched, setGlobalAuthLoading } from "../../slices/authSlice";
 import { getItem, setItem } from "../components/lib/asyncStorage";
 
 export function useAuth() {
@@ -13,7 +13,6 @@ export function useAuth() {
 
   const token = useSelector(selectToken);
   const isSignedIn = useSelector(selectIsSignedIn);
-  const tokenFetched = useSelector(selectTokenFetched);
   const userDataSet = useSelector(selectUserDataSet);
   const userDataFetched = useSelector(selectUserDataFetched);
 
@@ -22,7 +21,6 @@ export function useAuth() {
       const result = await SecureStore.getItemAsync('tokens');
       if (result) {
         const resultData = JSON.parse(result);
-        console.log("even here")
         dispatch(setToken({
           idToken: resultData.idToken,
           refreshToken: resultData.refreshToken,
@@ -35,6 +33,9 @@ export function useAuth() {
     } catch (error) {
       dispatch(setGlobalAuthLoading(false))
       dispatch(setGlobalLoginError("An error occured while logging in"))
+      setTimeout(() => {
+        dispatch(setGlobalLoginError(null))
+      }, 5000)
       dispatch(setTokenFetched(true))
       setUser(false)
     }
@@ -43,22 +44,24 @@ export function useAuth() {
   const fetchUserData = async () => {
     await getItem("userInfo").then( async (data) => {
       if(data) {
-        console.log("in async")
         dispatch(setUserInfo(JSON.parse(data)));
         dispatch(setUserDataFetched(true))
       } else {
-        console.log("going online")
         await getUserProfile();
       }
     })
     .catch((error) => {
       dispatch(setGlobalAuthLoading(false))
       dispatch(setGlobalLoginError("An error occured while logging in"))
+      setTimeout(() => {
+        dispatch(setGlobalLoginError(null))
+      }, 5000)
       setUser(false)
     })
   }
 
   const getUserProfile = async () => {
+    console.log("emaail verified finna come now")
     try {
       const response = await fetch("https://banturide-api.onrender.com/profile/get-user-profile", {
         method: "GET",
@@ -72,25 +75,24 @@ export function useAuth() {
       const data = await response.json();
 
       if(data.success === false) {
-        dispatch(setGlobalAuthLoading(false))
-        dispatch(setGlobalLoginError(data.message))
-        setUser(false)
+        throw new Error(data.message || data.error)
       } else {   
         await setItem("userInfo", JSON.stringify(data.userData));
         dispatch(setUserDataSet(true))  
       }
 
     } catch (error) {
-      if(!user){
-        setUser(false)
-      }
+      dispatch(setGlobalAuthLoading(false))
+      dispatch(setGlobalLoginError(error.message || error.error || "There was a problem logging in"))
+      setTimeout(() => {
+        dispatch(setGlobalLoginError(null))
+      }, 5000)
+      setUser(false)
     }
   };
 
   useEffect(() => {
-    console.log("and here")
     const fetchTokens = async () => {
-      console.log("heretoo")
       await retrieveTokens();
     };
     fetchTokens();
@@ -98,13 +100,10 @@ export function useAuth() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      console.log("reached")
       if(userDataFetched){
-        console.log("this")
         dispatch(setGlobalAuthLoading(false))
         setUser(true)
       } else {
-        console.log("that")
         await fetchUserData();
       }
     };

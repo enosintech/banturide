@@ -127,8 +127,7 @@ const FavouriteScreen = (props) => {
     }, [favoritesData])
 
     return (
-        <SafeAreaView className={`w-full h-full ${props.theme === "dark" ? "bg-dark-primary" : " bg-white"} relative`}>
-            <ScreenTitle theme={props.theme} iconName="favorite" title="Favorites" />
+        <SafeAreaView className={`w-full h-full ${props.theme === "dark" ? "bg-dark-primary" : ""} relative`}>
             {favAddressUpdated &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
@@ -144,47 +143,34 @@ const FavouriteScreen = (props) => {
                     </View>
                 </View>
             }
+            <ScreenTitle theme={props.theme} iconName="favorite" title="Favorites" />
             <View className={`w-full px-5 h-[6%]`}>
-                <Text style={{ fontSize: fontSize * 0.7 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>Add your frequent destinations to easily access them when booking</Text>
+                <Text style={{ fontSize: fontSize * 0.7 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tighter`}>Add your frequent destinations to easily access them when booking</Text>
             </View>
-            <View className={`w-full border-b-[0.5px] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
-            <TouchableOpacity disabled={loading || homeAdded ? true : false} className={`h-[8%] w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} ${homeAdded || loading ? "opacity-30" : "opacity-100"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
-                navigation.navigate("addhome")
-            }}>
-                <View className="flex-row items-center">
-                    <MaterialIcons name="home-filled" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                    <Text style={{ fontSize: fontSize * 0.8 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}> Add Home</Text>
-                </View>
-                <View>
-                    <MaterialIcons name="add" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity disabled={loading || workAdded} className={`h-[8%] w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} ${workAdded || loading ? "opacity-30" : "opacity-100"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
-                navigation.navigate("addwork")
-            }}>
-                <View className="flex-row items-center">
-                    <MaterialIcons name="work" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                    <Text style={{ fontSize: fontSize * 0.8 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight ml-[1px]`}> Add Work</Text>
-                </View>
-                <View>
-                    <MaterialIcons name="add" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity className={`h-[8%] w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} flex-row items-center justify-between px-3 shadow-2xl`} onPress={() => {
-                navigation.navigate("addlocation")
-            }}>
-                <View className="flex-row items-center">
-                    <MaterialIcons name="add-location" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                    <Text style={{ fontSize: fontSize * 0.8 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight`}> Add Location</Text>
-                </View>
-                <View>
-                    <MaterialIcons name="add" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                </View>
-            </TouchableOpacity>
+            <View className={`w-full h-[15%] flex flex-row items-center justify-evenly`}>
+                <TouchableOpacity disabled={loading || homeAdded ? true : false}  className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow ${homeAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
+                    navigation.navigate("addhome")
+                }}>
+                    <MaterialIcons name="home-filled" size={fontSize * 1.5} color={`white`} />
+                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                </TouchableOpacity>
+                <TouchableOpacity disabled={loading || workAdded ? true : false} className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow ${workAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
+                    navigation.navigate("addwork")
+                }}>
+                    <MaterialIcons name="work" size={fontSize * 1.3} color={`white`} />
+                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                </TouchableOpacity>
+                <TouchableOpacity className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow flex flex-row items-center justify-center`} onPress={() => {
+                    navigation.navigate("addlocation")
+                }}>
+                    <MaterialIcons name="add-location" size={fontSize * 1.3} color={`white`} />
+                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                </TouchableOpacity>
+            </View>
             <View className={`border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
-            <View className={`h-[52.2%] w-full shadow-2xl`}>
-                <View className={`w-full ${props.theme === "dark" ? "bg-dark-primary border-gray-900" : "bg-white border-gray-200"} p-3 border-b-[0.25px] border-solid`}>
-                    <Text style={{ fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tighter`}>Saved Places</Text>
+            <View className={`h-[60%] w-full`} style={{ overflow: "visible"}}>
+                <View className={`w-full p-3`}>
+                    <Text style={{ fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tighter`}>Saved Places</Text>
                 </View>
                 <ScrollView className="w-full" contentContainerStyle={{
                     alignItems: "center",

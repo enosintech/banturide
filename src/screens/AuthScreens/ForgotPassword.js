@@ -56,20 +56,19 @@ const ForgotPassword = (props) => {
         .then(response => response.json())
         .then( async data => {
             if(data.success === false){
-                setLoading(false)
-                setError(data.message)
-                setTimeout(() => {
-                    setError("")
-                }, 4000)
+                throw new Error(data.message || data.error)
             } else {
                 setLoading(false)
                 navigation.navigate('Signin', { resetMessage: "Check provided email address"})
                 dispatch(setForgotPasswordTriggered(true))
+                setTimeout(() => {
+                    dispatch(setForgotPasswordTriggered(false))
+                }, 5000)
             }
         })
         .catch((error) => {
             setLoading(false)
-            setError(error)
+            setError(error.message || error.error || "There wa a problem sending recovery link")
             setTimeout(() => {
                 setError("")
             }, 4000)
@@ -92,10 +91,10 @@ const ForgotPassword = (props) => {
             </Modal>
 
             <View className={`w-full h-[10%] flex flex-row items-center justify-center px-2`}>
-                <Text style={{fontSize: fontSize * 1.1}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Forgot Password</Text>
+                <Text style={{fontSize: fontSize * 1.1}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Forgot Password</Text>
             </View>
             <View className="w-full h-[10%] p-5 flex items-center justify-center">
-                <Text style={{fontSize: fontSize * 0.7}} className={`font-regular tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Please Enter your Email Address Below. We will send you a link that you can use to change your password</Text>
+                <Text style={{fontSize: fontSize * 0.7}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Please Enter your Email Address Below. We will send you a link that you can use to change your password</Text>
             </View>
             <View className={`w-[90%] h-[30%] shadow ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} rounded-[40px] flex items-center justify-evenly`}>
                 <TextInput 
@@ -115,14 +114,14 @@ const ForgotPassword = (props) => {
                     </View>
                 }
                 <TouchableOpacity onPress={handleGetRecovery} className={`w-[85%] h-[25%] bg-[#186f65] rounded-full flex items-center justify-center`}>
-                    <Text style={{fontSize: fontSize * 0.85}} className="text-white font-extrabold tracking-tight">Get Recovery Email</Text>
+                    <Text style={{fontSize: fontSize * 0.85}} className="text-white font-black tracking-tight">Get Recovery Email</Text>
                 </TouchableOpacity>
             </View>
             <View className="absolute bottom-10 w-full h-[10%] flex flex-row items-center justify-center">
                 <Text style={{fontSize: fontSize * 0.75}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Here Accidentally? </Text>
                 <TouchableOpacity onPress={() => {
                     navigation.goBack();
-                }}><Text style={{fontSize: fontSize * 0.75}} className={`font-bold tracking-tight text-[#186f65]`}>Sign-In</Text></TouchableOpacity>
+                }}><Text style={{fontSize: fontSize * 0.75}} className={`font-black tracking-tight text-[#186f65]`}>Sign-In</Text></TouchableOpacity>
             </View>
         </View>
     )

@@ -16,7 +16,7 @@ const WelcomeScreen = (props) => {
     const globalUnauthorizedEror = useSelector(selectGlobalUnauthorizedError);
 
     return(
-        <View className={`${props.theme === "dark" ? "bg-dark-primary" : ""} h-full w-full flex-col items-center relative`} onLayout={props.handleLayout}>
+        <View className={`${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} h-full w-full flex-col items-center relative`} onLayout={props.handleLayout}>
 
             {globalUnauthorizedEror &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
@@ -32,16 +32,16 @@ const WelcomeScreen = (props) => {
                     style={styles.image}
                 />
             </View>
-            <View className="h-[40%] bg-[#186f65] rounded-[40px] shadow-sm w-[90%] flex justify-center items-center translate-y-6">
-                <LongWhiteBtn value="Create an account" handlePress={() => {
+            <View className="h-[40%] bg-[#186f65] rounded-[25px] shadow w-[90%] flex justify-center items-center mt-6">
+                <LongWhiteBtn value="Create account" handlePress={() => {
                     navigation.navigate("Signup")
                 }}/>
-                <View className="mt-3"></View>
+                <View className="mt-4"></View>
                 <LongWhiteBtn value="Sign in" handlePress={() => {
                     navigation.navigate("Signin")
                 }}/>
             </View>
-            <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-neutral-800"} font-medium tracking-tight absolute bottom-10 opacity-80`}>©{new Date().getFullYear()} All Rights Reserved</Text>
+            <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-neutral-800"} font-semibold tracking-tighter absolute bottom-10 opacity-80`}>©{new Date().getFullYear()} All Rights Reserved</Text>
         </View>
     )
 }

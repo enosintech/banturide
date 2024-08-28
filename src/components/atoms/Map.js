@@ -47,110 +47,13 @@ const Map = (props) => {
             mapRef.current = el;
             props.mapRef.current = el;
           }}
-          initialRegion={booking?.status !== "ongoing" && booking?.status !== "arrived" ? props.initialRegion : {
-            latitude: booking?.driverCurrentLocation[0],
-            longitude: booking?.driverCurrentLocation[1],
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01
-          }}
+          initialRegion={props.initialRegion}
           provider={PROVIDER_GOOGLE}
           className="flex-1" 
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         > 
-          {origin && destination && ( !booking?.status === "confirmed" || !booking?.status === "ongoing" || !booking?.status === "arrived" ) &&
-            <MapViewDirections 
-                origin={origin.description}
-                destination={destination.description}
-                waypoints={[passThrough ? passThrough?.description : ""]}
-                apikey={api}
-                strokeWidth={3}
-                strokeColor= {props.theme === "dark" ? "white" : "black"}
-            />
-          }
 
-          {(booking?.status === "ongoing" || booking?.status === "arrived") &&
-          <>
-            <MapViewDirections 
-                origin={{
-                    latitude: booking?.driverCurrentLocation[0],
-                    longitude: booking?.driverCurrentLocation[1]
-                }}
-                destination={destination?.description}
-                waypoints={[passThrough ? passThrough?.description : ""]}
-                apikey={api}
-                strokeWidth={3}
-                strokeColor= {props.theme === "dark" ? "white" : "#186f65"}
-            />
-
-            <Marker 
-                coordinate={{
-                  latitude: booking?.driverCurrentLocation[0],
-                  longitude: booking?.driverCurrentLocation[1]
-                }}
-                title="Driver"
-                description={"Driver Marker"}
-                identifier="driver"
-              >
-                <Image 
-                  source={require("../../../assets/images/driver.png")}
-                  style={{
-                      objectFit: "contain",
-                      width : 55,
-                      height: 55,
-                  }}
-                />
-              </Marker>
-              </>
-          }
-
-          {origin?.location && (!booking?.status === "ongoing" || !booking?.status === "arrived" ) && (
-            <Marker 
-              coordinate={{
-                latitude: origin?.location.lat,
-                longitude: origin?.location.lng,
-              }}
-              title="Origin"
-              description={origin?.description}
-              identifier="origin"
-            >
-              <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
-                <Text style={{fontSize: fontSize * 0.4}} className={`text-black font-light tracking-tight`}>1</Text>
-              </View>
-            </Marker>
-          )}
-          
-          {passThrough?.location && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) &&  (
-            <Marker
-              coordinate={{
-                latitude: passThrough.location.lat,
-                longitude: passThrough.location.lng,
-              }}
-              title="1st Stop"
-              description={passThrough.description}
-              identifier="stop"
-            >
-              <View className={`w-5 h-5 shadow-md rounded-full bg-[#186f65] flex items-center justify-center`}>
-                <Text style={{fontSize: fontSize * 0.4}} className={`text-white font-light tracking-tight`}>2</Text>
-              </View>
-            </Marker>
-          )}
-
-          {destination?.location &&  (
-            <Marker
-                coordinate={{
-                    latitude: destination.location.lat,
-                    longitude: destination.location.lng,
-                }}
-                title="Destination"
-                description={destination.description}
-                identifier="destination"
-            >
-              <View className={`w-5 h-5 shadow-md rounded-full bg-black border-black flex items-center justify-center`}>
-                <Text style={{fontSize: fontSize * 0.4}} className={`text-white font-light tracking-tight`}>{passThrough ? 3 : 2}</Text>
-              </View>
-            </Marker>
-        )}
         </MapView> 
       ) : 
       <View className="flex-1">

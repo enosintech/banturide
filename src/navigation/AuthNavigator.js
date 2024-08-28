@@ -1,5 +1,5 @@
 import { createStackNavigator, TransitionPresets } from "@react-navigation/stack";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useState } from "react";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -18,6 +18,14 @@ import SearchModal from "../screens/MainScreens/SearchModal";
 import RequestScreen from "../screens/MainScreens/RequestScreen";
 import BookNavigator from "./BookNavigator";
 import RequestNavigator from "./RequestNavigator";
+import BurgerMenu from "../screens/MainScreens/BurgerMenu";
+import ChangeName from "../screens/MainScreens/ChangeName";
+import AddLocation from "../screens/MainScreens/AddLocation";
+import AddHome from "../screens/MainScreens/AddHome";
+import AddWork from "../screens/MainScreens/AddWork";
+import EditHome from "../screens/MainScreens/EditHome";
+import EditWork from "../screens/MainScreens/EditWork";
+import EditLocation from "../screens/MainScreens/EditLocation";
 
 const Stack = createStackNavigator();
 
@@ -25,15 +33,17 @@ const AuthNavigator = (props) => {
 
     const { user } = useAuth();
 
+    const [initialRegion, setInitialRegion ] = useState(null);
+
     if(user === true){
         return (
             <SocketProvider>
                 <Stack.Navigator initialRouteName="Tab">
                     <Stack.Screen name="Tab" options={{headerShown: false}}>
-                        {() => <TabNavigator handleLayout={props.handleLayout} theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
+                        {() => <TabNavigator initialRegion={initialRegion} setInitialRegion={setInitialRegion} handleLayout={props.handleLayout} theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
                     </Stack.Screen>
                     <Stack.Screen name="BookNavigator" options={{headerShown: false}}>
-                        {() => <BookNavigator theme={props.theme} />}
+                        {() => <BookNavigator initialRegion={initialRegion} theme={props.theme} />}
                     </Stack.Screen>
                     <Stack.Group screenOptions={{
                         presentation: "fullScreenModal", 
@@ -66,6 +76,30 @@ const AuthNavigator = (props) => {
                     })  }}>
                         <Stack.Screen name="Search" options={{headerShown: false }}>
                             {() => <SearchModal  theme={props.theme} />}
+                        </Stack.Screen>
+                        <Stack.Screen name="BurgerMenu" options={{headerShown: false}}>
+                            {() => <BurgerMenu theme={props.theme} />}
+                        </Stack.Screen>
+                        <Stack.Screen name="changeName" options={{headerShown: false}}>
+                            {() => <ChangeName theme={props.theme} />}
+                        </Stack.Screen>
+                        <Stack.Screen name="addlocation" options={{headerShown: false}}>
+                            {() => <AddLocation theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="addhome" options={{headerShown: false}}>
+                            {() => <AddHome theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="addwork" options={{headerShown: false}}>
+                            {() => <AddWork theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="edithome" options={{headerShown: false}}>
+                            {() => <EditHome theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="editwork" options={{headerShown: false}}>
+                            {() => <EditWork theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="editlocation" options={{headerShown: false}}>
+                            {() => <EditLocation theme={props.theme}/>}
                         </Stack.Screen>
                     </Stack.Group>
                 </Stack.Navigator>

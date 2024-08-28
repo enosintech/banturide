@@ -24,16 +24,6 @@ const ProfileNavigator = (props) => {
                     {() => <AboutScreen theme={props.theme}/>}
                 </Stack.Screen>
             </Stack.Group>
-            <Stack.Group screenOptions={{presentation: "modal", contentStyle: {
-                backgroundColor: "transparent"
-            }}}>
-                <Stack.Screen name="BurgerMenu" options={{headerShown: false}}>
-                    {() => <BurgerMenu theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
-                </Stack.Screen>
-                <Stack.Screen name="changeName" options={{headerShown: false}}>
-                    {() => <ChangeName theme={props.theme} />}
-                </Stack.Screen>
-            </Stack.Group>
         </Stack.Navigator>
     )
 }

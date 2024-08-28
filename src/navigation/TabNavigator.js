@@ -43,7 +43,7 @@ const TabNavigator = (props) => {
                     </View>
                 )
             }}>
-                {() => <HomeNavigator handleLayout={props.handleLayout} theme={props.theme} />}
+                {() => <HomeNavigator initialRegion={props.initialRegion} setInitialRegion={props.setInitialRegion} handleLayout={props.handleLayout} theme={props.theme} />}
             </Tab.Screen>
             <Tab.Screen name="Favourite"  options={{
                 headerShown: false,

@@ -13,7 +13,7 @@ const ProfileScreenTitle = (props) => {
             <Ionicons name="chevron-back" size={fontSize * 1.8} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             <View className={`flex-row items-center`}>
                 <MaterialIcons name={props.iconName} size={fontSize * 2} color={`${props.theme === "dark" ? "white" : "#186f65"}`} />
-                <Text style={{fontSize: fontSize}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}> {props.title}</Text>
+                <Text style={{fontSize: fontSize}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}> {props.title}</Text>
             </View>
         </TouchableOpacity>
     )

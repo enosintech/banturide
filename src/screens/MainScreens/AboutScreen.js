@@ -2,7 +2,6 @@ import {Text, View, Dimensions, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import Feather from "@expo/vector-icons/Feather";
 
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 
@@ -25,7 +24,7 @@ const AboutScreen = (props) => {
             </View>
 
             <View className="w-full h-[15%] flex flex-col items-center justify-center">
-                <Text style={{fontSize: fontSize * 1.2}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Banturide</Text>
+                <Text style={{fontSize: fontSize * 1.2}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Banturide</Text>
                 <Text style={{fontSize: fontSize * 0.8}} className={`mt-2 font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-neutral-700"}`}>Version 1.0.0 Released TBD</Text>
             </View>
 
@@ -57,13 +56,6 @@ const AboutScreen = (props) => {
                         </View>
                     }
                 </View>
-            </View>
-
-            <View className={`w-full h-[10%] flex items-center justify-center`}>
-                <TouchableOpacity className={`w-[35%] h-[60%] bg-[#186f65] rounded-full flex flex-row items-center justify-center`}>
-                    <Feather name="globe" size={fontSize * 1.25} color="white" />
-                    <Text style={{fontSize: fontSize * 0.7}} className={`ml-2 text-white font-bold tracking-tight`}>Visit Website</Text>
-                </TouchableOpacity> 
             </View>
 
         </SafeAreaView>

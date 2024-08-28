@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, Keyboard, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -67,7 +67,7 @@ const SignupScreen = (props) => {
                     </View>
                     <View className="h-[90%] w-full flex items-center">
                         <View className="h-[15%]">
-                            <Text style={{fontSize: fontSize * 1.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Registration</Text>
+                            <Text style={{fontSize: fontSize * 1.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Create account</Text>
                         </View>
                         <View className={`relative z-20 h-[40%] ${props.theme === "dark" ? "border-gray-900 w-[90%] bg-dark-secondary" : "bg-white w-[90%]"} rounded-[40px] shadow-sm flex items-center justify-evenly`}>
                             <LongTextInput text={user?.firstName} theme={props.theme} placeholder="First Name" dismissGenderToggle={() => {
@@ -111,19 +111,19 @@ const SignupScreen = (props) => {
                                 </View>
                             </View>
                         </View>
-                        <View className="w-[85%] mt-3 flex-row items-center flex-wrap">
+                        <View className="w-[85%] mt-3 flex-row items-center justify-center flex-wrap">
                             <Ionicons name="checkmark-circle-outline" size={fontSize} color="#186F65"/>
-                            <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> By signing up, you agree to the </Text> 
+                            <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}> By signing up, you agree to the </Text> 
                             <TouchableOpacity onPress={() => {
                                 navigation.navigate("TnCs", {toggle: "tncs"});
                             }}>
-                                <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-bold tracking-tight">Terms of Service</Text>
+                                <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-black tracking-tight">Terms of Service</Text>
                             </TouchableOpacity>
-                            <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}> and </Text> 
+                            <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}> and </Text> 
                             <TouchableOpacity onPress={() => {
                                 navigation.navigate("TnCs", {toggle: "pp"});
                             }}>
-                                <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-bold tracking-tight">Privacy Policy</Text>
+                                <Text style={{fontSize: fontSize * 0.7}} className="text-[#186F65] font-black tracking-tight">Privacy Policy</Text>
                             </TouchableOpacity>
                         </View>
                         <View className={`w-[90%] py-3 h-[30%] ${props.theme === "dark" ? "bg-[#353d4a]" : "bg-white"} shadow-sm rounded-[40px] flex items-center justify-evenly mt-5`}>
@@ -131,14 +131,14 @@ const SignupScreen = (props) => {
                                 <Text style={{fontSize: fontSize * 0.7}} className={`text-red-600 font-bold tracking-tight mb-2`}>{error}</Text>
                             }
                             <TouchableOpacity className="bg-[#186F65] shadow-sm w-[85%] h-[40%] rounded-[50px] flex justify-center items-center" onPress={handleSignUpPress}>
-                                <Text style={{fontSize: fontSize * 1.2}} className="text-white font-extrabold tracking-tight">Sign up</Text>
+                                <Text style={{fontSize: fontSize * 1.2}} className="text-white font-black tracking-tight">Sign up</Text>
                             </TouchableOpacity>
                             <View className="flex-row items-center mt-4">
                                 <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Already have an account?</Text>
                                 <TouchableOpacity onPress={() => {
                                     navigation.navigate("Signin")
                                 }}>
-                                    <Text style={{fontSize: fontSize * 0.7}} className=" ml-1 text-[#186F65] font-extrabold tracking-tight">Sign in</Text>
+                                    <Text style={{fontSize: fontSize * 0.7}} className=" ml-1 text-[#186F65] font-black tracking-tight">Sign in</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

@@ -33,7 +33,6 @@ const HomeScreen = (props) => {
     const destination = useSelector(selectDestination);
     const toggle = useSelector(selectToggle);
     const booking = useSelector(selectBooking);
-    const driver = useSelector(selectDriver);
     const tripDetails = useSelector(selectTripDetails);
     const tripType = useSelector(selectTripType);
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
@@ -48,27 +47,11 @@ const HomeScreen = (props) => {
     const [currentStreet, setCurrentStreet] = useState(null)
     const mapRef = useRef(null);
 
+    const [ error, setError ] = useState(false);
+
     const fontSize = width * 0.05;
 
     const unreadNotifications = notificationsArray.filter(notification => notification.status === "unread");
-
-    const getLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-
-        if (status !== "granted"){
-            console.log("Permission to access location was denied")
-            return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-
-        dispatch(setUserCurrentLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.010,
-            longitudeDelta: 0.010
-        }))
-    };
 
     const goToCurrent = () => {
         mapRef.current.animateToRegion(currentLocation, 1 * 1000)
@@ -91,6 +74,30 @@ const HomeScreen = (props) => {
         })
     }
 
+    const getLocation = async () => {
+        try {
+
+            let { status } = await Location.requestForegroundPermissionsAsync();
+
+            if (status !== "granted"){
+                setError("Location access not granted")
+                return;
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+
+            dispatch(setUserCurrentLocation({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.010,
+                longitudeDelta: 0.010
+            }))
+
+        } catch (error) {
+            setError(error.error || error.message || "Failed to get current location")
+        }
+    };
+
     useEffect(() => {
         getLocation();
     }, [])
@@ -105,8 +112,9 @@ const HomeScreen = (props) => {
         .then(json => {
             const location = json.results[1].address_components[0].long_name;
             setCurrentStreet(location);
+            setError(false)
         })
-        .catch(error => console.warn(error))
+        .catch(error => setError(error.error || error.message || "Problem fetching currrent street"))
         }
     }, [currentLocation])
 
@@ -269,26 +277,26 @@ const HomeScreen = (props) => {
                 </View>
             }
             
-            <TouchableOpacity className={`absolute z-[9999] top-[7%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+            <TouchableOpacity className={`absolute z-[9999] top-[7%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} p-[3%] items-center justify-center`} onPress={() => {
                 navigation.navigate("Notifications")
             }}>
-                <Ionicons name="notifications" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                <View className={`w-5 h-5 rounded-full bg-red-600 flex items-center justify-center absolute -top-[6px] -left-[6px]`}>
+                <Ionicons name="notifications" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <View style={{ width: fontSize, height: fontSize}} className={`rounded-full bg-red-600 flex items-center justify-center absolute -top-[6px] -left-[6px]`}>
                     <Text className={`text-white`}>{unreadNotifications?.length}</Text>
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
-                <MaterialIcons name="my-location" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} p-[3%] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
+                <MaterialIcons name="my-location" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[27%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } h-[40px] w-[40px] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
+            <TouchableOpacity className={`absolute bottom-[27%] left-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } p-[3%] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
                 <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
-            <View className="absolute top-[8%] w-full">
-                <Text style={{fontSize: fontSize * 0.85}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>You are currently on</Text>
-                <Text style={{fontSize: fontSize}} className={`mx-auto text-lg tracking-wide uppercase ${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{currentStreet ? currentStreet : "Searching..."}</Text>
+            <View className="absolute top-[13%] w-full">
+                <Text style={{fontSize: fontSize * 0.85}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>{error ? "Hmmm..." : "You are on"}</Text>
+                <Text style={{fontSize: fontSize * 1.2}} className={`mx-auto text-lg tracking-wide uppercase ${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}>{currentStreet ? currentStreet : error ? error : "Searching..."}</Text>
             </View>
         </View> 
     )

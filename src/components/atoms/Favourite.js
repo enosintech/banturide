@@ -6,11 +6,12 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as SecureStore from "expo-secure-store";
 
 import ModalLoader from "./ModalLoader";
 
-import { selectFavAddressChanged, setFavAddressChanged, setFavoriteAddressDeleted } from "../../../slices/navSlice";
-import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { selectFavAddressChanged, setDeliveryType, setDestination, setFavAddressChanged, setFavoriteAddressDeleted, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -57,18 +58,41 @@ const Favorite = (props) => {
             }
 
         } catch (error) {
-            if(error === "Unauthorized"){
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
+            const errorField = error.message || error.error;
+
+            if(errorField === "Unauthorized"){
+                await SecureStore.deleteItemAsync("tokens")
+                .then(() => {
+                    dispatch(setDestination(null))
+                    dispatch(setOrigin(null))
+                    dispatch(setPassThrough(null))
+                    dispatch(setPrice(null))
+                    dispatch(setTravelTimeInformation(null))
+                    dispatch(setTripDetails(null))
+                    dispatch(setDeliveryType(null))
+                    dispatch(setRecipient(null))
+                    dispatch(setUserInfo(null))
+                    dispatch(setToken(null))
+                    dispatch(setIsSignedIn(!isSignedIn))
+                    dispatch(setTokenFetched(false))
+                    dispatch(setUserDataFetched(false))
+                    dispatch(setUserDataSet(false))
+                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                    setTimeout(() => {
+                        dispatch(setGlobalUnauthorizedError(false))
+                    }, 5000)
+                })
+                .catch((error) => {
+                    setError("Unauthorized")
+                    setTimeout(() => {
+                        setError(false)
+                    }, 3000)
+                })     
             } else {
-                setError(error)
+                setError(errorField || "Failed to delete Favorite location")
                 setTimeout(() => {
                     setError(false)
-                }, 4000)
+                }, 3000)
             }
         } finally {
             setLoading(false)
@@ -76,7 +100,7 @@ const Favorite = (props) => {
     }
 
     return(
-        <View className={`${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} w-[95%] h-[85px] mb-1 mt-1 flex justify-center rounded-[20px] shadow-sm`}>
+        <View className={`${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} w-[95%] h-[85px] mb-1 mt-1 flex justify-center rounded-[15px] shadow-sm`}>
             
             <Modal visible={modalVisible} onRequestClose={() => {
                 if(loading === true){
@@ -117,11 +141,11 @@ const Favorite = (props) => {
             <View className={`flex-row items-center justify-between px-3 py-2`}>
                 <View className="flex-row items-center -translate-y-1">
                     {props.iconName ? 
-                    <MaterialIcons name={props.iconName} size={fontSize * 0.85} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                    <MaterialIcons name={props.iconName} size={fontSize * 0.7} color={`#186f65`}/>
                     : 
-                    <Ionicons name="location" size={fontSize * 0.85} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                    <Ionicons name="location" size={fontSize * 0.7} color={`#186f65`}/>
                     }
-                    <Text style={{fontSize: fontSize * 0.85}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}> {props.addName}</Text>
+                    <Text style={{fontSize: fontSize * 0.85}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}> {props.addName}</Text>
                 </View>
                 <View className="flex flex-row gap-x-1 -translate-y-2 -translate-x-1">
                     <TouchableOpacity onPress={() => {
@@ -139,17 +163,17 @@ const Favorite = (props) => {
                             })
                         }
                     }}>
-                        <MaterialCommunityIcons name="circle-edit-outline" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                        <MaterialCommunityIcons name="circle-edit-outline" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "#186f65"}`}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
                         setModalVisible(true)
                     }}>
-                        <Entypo name="circle-with-minus" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                        <Entypo name="circle-with-minus" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "#186f65"}`}/>
                     </TouchableOpacity>
                 </View>
             </View>
             <View className="px-4 -translate-y-1">
-                <Text style={{fontSize: fontSize * 0.5}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address}</Text>
+                <Text style={{fontSize: fontSize * 0.5}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address}</Text>
             </View>
         </View>
     )

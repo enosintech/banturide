@@ -7,11 +7,13 @@ import * as ImagePicker from "expo-image-picker";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
+import * as SecureStore from "expo-secure-store";
 
-import { selectIsSignedIn, selectToken, selectUserInfo, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur";
 import { setItem } from "../../components/lib/asyncStorage";
+import { setDeliveryType, setDestination, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -120,16 +122,40 @@ const EditProfile = (props) => {
             }
 
         } catch(error) {
-            if(error === "Unauthorized"){
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
+            const errorField = error.message || error.error;
+
+            if(errorField === "Unauthorized"){
+                await SecureStore.deleteItemAsync("tokens")
+                .then(() => {
+                    dispatch(setDestination(null))
+                    dispatch(setOrigin(null))
+                    dispatch(setPassThrough(null))
+                    dispatch(setPrice(null))
+                    dispatch(setTravelTimeInformation(null))
+                    dispatch(setTripDetails(null))
+                    dispatch(setDeliveryType(null))
+                    dispatch(setRecipient(null))
+                    dispatch(setUserInfo(null))
+                    dispatch(setToken(null))
+                    dispatch(setIsSignedIn(!isSignedIn))
+                    dispatch(setTokenFetched(false))
+                    dispatch(setUserDataFetched(false))
+                    dispatch(setUserDataSet(false))
+                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                    setTimeout(() => {
+                        dispatch(setGlobalUnauthorizedError(false))
+                    }, 5000)
+                })
+                .catch((error) => {
+                    setModalVisible(false)
+                    setError("Unauthorized")
+                    setTimeout(() => {
+                        setError(false)
+                    }, 3000)
+                })     
             } else {
                 setModalVisible(false)
-                setError(error)
+                setError(errorField || "Failed to upload Image")
                 setTimeout(() => {
                     setError(false)
                 }, 3000)
@@ -165,16 +191,40 @@ const EditProfile = (props) => {
             }
 
         } catch (error) {
-            if(error === "Unauthorized"){
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
+            const errorField = error.message || error.error;
+
+            if(errorField === "Unauthorized"){
+                await SecureStore.deleteItemAsync("tokens")
+                .then(() => {
+                    dispatch(setDestination(null))
+                    dispatch(setOrigin(null))
+                    dispatch(setPassThrough(null))
+                    dispatch(setPrice(null))
+                    dispatch(setTravelTimeInformation(null))
+                    dispatch(setTripDetails(null))
+                    dispatch(setDeliveryType(null))
+                    dispatch(setRecipient(null))
+                    dispatch(setUserInfo(null))
+                    dispatch(setToken(null))
+                    dispatch(setIsSignedIn(!isSignedIn))
+                    dispatch(setTokenFetched(false))
+                    dispatch(setUserDataFetched(false))
+                    dispatch(setUserDataSet(false))
+                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                    setTimeout(() => {
+                        dispatch(setGlobalUnauthorizedError(false))
+                    }, 5000)
+                })
+                .catch((error) => {
+                    setModalVisible(false)
+                    setError("Unauthorized")
+                    setTimeout(() => {
+                        setError(false)
+                    }, 3000)
+                })     
             } else {
                 setLoading(false)
-                setError(error)
+                setError(errorField || "failed to remove Image")
                 setTimeout(() => {
                     setError(false)
                 }, 3000)
@@ -183,7 +233,7 @@ const EditProfile = (props) => {
     }
 
     return(
-        <SafeAreaView className={`${props.theme === "dark"? "bg-dark-primary" : "bg-white"} w-full h-full relative`}>
+        <SafeAreaView className={`${props.theme === "dark"? "bg-dark-primary" : ""} w-full h-full relative`}>
 
             {error &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
@@ -235,19 +285,18 @@ const EditProfile = (props) => {
                 }}>
                     <Ionicons name="chevron-back" size={fontSize * 1.8} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                     <View className={`flex-row items-center`}>
-                        <Feather name="edit" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
-                        <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium`}> Edit Profile</Text>
+                        <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}> Edit Profile</Text>
                     </View>
                 </TouchableOpacity>
             </View>
-            <View className={`h-[30%] ${props.theme === "dark" ? "bg-[#1e252d]" : "bg-white"} w-full items-center shadow`}>
+            <View className={`h-[30%] ${props.theme === "dark" ? "bg-dark-primary" : ""} w-full items-center shadow`}>
                 <View className={` h-full w-[95%] rounded-2xl flex items-center justify-center`}>
                     <View className={`rounded-full relative h-[68%] w-[42%] ${props.theme === "dark" ? "border-white" : "border-gray-100"} border-4 border-solid shadow`}>
                         <Image source={userInfo?.avatar !== null ? { uri: userInfo.avatar} : require("../../../assets/images/profileplaceholder.png")} className=" h-full w-full rounded-full" style={{resizeMode: "contain"}}/>
                         <TouchableOpacity onPress={() => {
                             setModalVisible(true)
-                        }} className={`w-14 h-14 rounded-full absolute bottom-0 right-0 shadow-sm border flex items-center justify-center ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"}`}>
-                            <Ionicons name="camera" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"} />
+                        }} className={`w-14 h-14 rounded-full absolute bottom-0 right-0 shadow border flex items-center justify-center ${props.theme === "dark" ? "bg-[#1e252d] border-[#1e252d]" : "bg-white border-gray-100"}`}>
+                            <Ionicons name="camera" size={fontSize * 1.4} color={props.theme === "dark" ? "white" : "#186f65"} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -258,10 +307,10 @@ const EditProfile = (props) => {
                     navigation.navigate("changeName");
                 }} className={`w-full h-1/4 flex flex-row items-center justify-between px-5`}>
                     <View className={`flex h-full justify-center gap-y-2`}>
-                        <Text style={{fontSize: fontSize * 1.1}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Name</Text>
-                        <Text style={{fontSize: fontSize * 0.75}} className={`tracking-tight font-light ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>
+                        <Text style={{fontSize: fontSize * 1.1}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Name</Text>
+                        <Text style={{fontSize: fontSize * 0.75}} className={`tracking-tight font-medium ${props.theme === "dark" ? "text-white" : "text-black"}`}>{userInfo?.firstname + " " + userInfo?.lastname}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={fontSize * 1.4} color={props.theme === "dark" ? "white" : "black"}/>       
+                    <Ionicons name="chevron-forward" size={fontSize * 1.5} color={props.theme === "dark" ? "white" : "black"}/>       
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

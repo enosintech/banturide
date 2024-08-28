@@ -9,8 +9,8 @@ const ScreenTitle = (props) => {
 
     return(
         <View className="flex-row items-center p-5 w-full h-[10%]">
-            <MaterialIcons name={props.iconName} size={fontSize * 1.6} color="#186F65"/>
-            <Text style={{fontSize: fontSize * 1.6}} className={`${props.theme === "dark" ? "text-white" : "text-black"} ml-2 font-bold tracking-tight`}>{props.title}</Text>
+            <MaterialIcons name={props.iconName} size={fontSize * 1.1} color={props.theme === "dark" ? "white" : "black"}/>
+            <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} ml-2 font-medium tracking-tighter`}>{props.title}</Text>
         </View>
     )
 }
