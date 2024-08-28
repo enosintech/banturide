@@ -2,6 +2,8 @@ import { Text, View, Image, Dimensions, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import LongWhiteBtn from "../../components/atoms/LongWhiteBtn";
+import { useSelector } from "react-redux";
+import { selectGlobalUnauthorizedError } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -11,8 +13,19 @@ const WelcomeScreen = (props) => {
 
     const fontSize = width * 0.05
 
+    const globalUnauthorizedEror = useSelector(selectGlobalUnauthorizedError);
+
     return(
         <View className={`${props.theme === "dark" ? "bg-dark-primary" : ""} h-full w-full flex-col items-center relative`} onLayout={props.handleLayout}>
+
+            {globalUnauthorizedEror &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{globalUnauthorizedEror}</Text>
+                    </View>
+                </View>
+            }
+            
             <View className="w-full h-[30%] flex justify-start items-center translate-y-10">
                 <Image 
                     source={require("../../../assets/icons/BantuRide.png")}

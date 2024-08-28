@@ -1,8 +1,8 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createStackNavigator } from "@react-navigation/stack";
 
 import RideSelect from '../screens/MainScreens/RideSelect';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const BookNavigator = (props) => {
   return (

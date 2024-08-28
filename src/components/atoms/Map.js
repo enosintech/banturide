@@ -53,11 +53,12 @@ const Map = (props) => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01
           }}
+          provider={PROVIDER_GOOGLE}
           className="flex-1" 
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         > 
-          {origin && destination && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) &&
+          {origin && destination && ( !booking?.status === "confirmed" || !booking?.status === "ongoing" || !booking?.status === "arrived" ) &&
             <MapViewDirections 
                 origin={origin.description}
                 destination={destination.description}
@@ -75,7 +76,7 @@ const Map = (props) => {
                     latitude: booking?.driverCurrentLocation[0],
                     longitude: booking?.driverCurrentLocation[1]
                 }}
-                destination={destination.description}
+                destination={destination?.description}
                 waypoints={[passThrough ? passThrough?.description : ""]}
                 apikey={api}
                 strokeWidth={3}
@@ -103,14 +104,14 @@ const Map = (props) => {
               </>
           }
 
-          {origin?.location && (booking?.status !== "ongoing" || booking?.status !== "arrived" ) && (
+          {origin?.location && (!booking?.status === "ongoing" || !booking?.status === "arrived" ) && (
             <Marker 
               coordinate={{
-                latitude: origin.location.lat,
-                longitude: origin.location.lng,
+                latitude: origin?.location.lat,
+                longitude: origin?.location.lng,
               }}
               title="Origin"
-              description={origin.description}
+              description={origin?.description}
               identifier="origin"
             >
               <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>

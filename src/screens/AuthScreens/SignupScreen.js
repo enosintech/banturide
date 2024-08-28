@@ -69,7 +69,7 @@ const SignupScreen = (props) => {
                         <View className="h-[15%]">
                             <Text style={{fontSize: fontSize * 1.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Registration</Text>
                         </View>
-                        <View className={`relative z-20 h-[40%] ${props.theme === "dark" ? "border-gray-900 w-full" : "bg-white w-[90%]"} rounded-[40px] shadow-sm flex items-center justify-evenly`}>
+                        <View className={`relative z-20 h-[40%] ${props.theme === "dark" ? "border-gray-900 w-[90%] bg-dark-secondary" : "bg-white w-[90%]"} rounded-[40px] shadow-sm flex items-center justify-evenly`}>
                             <LongTextInput text={user?.firstName} theme={props.theme} placeholder="First Name" dismissGenderToggle={() => {
                                 setVisible(false)
                             }} handleTextChange={(x) => {

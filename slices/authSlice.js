@@ -7,6 +7,7 @@ const initialState = {
         email: "",
         gender: "",
     },
+    userCurrentLocation: null,
     isSignedIn: false,
     token: null,
     userInfo: null,
@@ -14,6 +15,7 @@ const initialState = {
     forgotPasswordTriggered: false,
     globalLoginError: null,
     globalAuthLoading: false,
+    globalUnauthorizedError: false,
     userDataSet: false,
     userDataFetched: false,
 }
@@ -24,6 +26,9 @@ export const authSlice = createSlice({
     reducers: {
         setUser: (state, action) => {
             state.user = action.payload;
+        },
+        setUserCurrentLocation: (state, action) => {
+            state.userCurrentLocation = action.payload;
         },
         setIsSignedIn: (state, action) => {
             state.isSignedIn = action.payload;
@@ -46,6 +51,9 @@ export const authSlice = createSlice({
         setGlobalAuthLoading: (state, action) => {
             state.globalAuthLoading = action.payload;
         },
+        setGlobalUnauthorizedError: (state, action) => {
+            state.globalUnauthorizedError = action.payload;
+        },
         setUserDataFetched: (state, action) => {
             state.userDataFetched = action.payload;
         },
@@ -55,9 +63,10 @@ export const authSlice = createSlice({
     }
 })
 
-export const { setUser, setIsSignedIn, setToken, setUserInfo, setTokenFetched, setForgotPasswordTriggered, setGlobalLoginError, setGlobalAuthLoading, setUserDataSet, setUserDataFetched } = authSlice.actions;
+export const { setUser, setUserCurrentLocation, setIsSignedIn, setToken, setUserInfo, setTokenFetched, setForgotPasswordTriggered, setGlobalLoginError, setGlobalAuthLoading, setGlobalUnauthorizedError, setUserDataSet, setUserDataFetched } = authSlice.actions;
 
 export const selectUser = (state) => state.auth.user;
+export const selectUserCurrentLocation = (state) => state.auth.userCurrentLocation;
 export const selectIsSignedIn = (state) => state.auth.isSignedIn;
 export const selectToken = (state) => state.auth.token;
 export const selectUserInfo = (state) => state.auth.userData;
@@ -65,6 +74,7 @@ export const selectTokenFetched = (state) => state.auth.tokenFetched;
 export const selectForgotPasswordTriggered = (state) => state.auth.forgotPasswordTriggered;
 export const selectGlobalLoginError = (state) => state.auth.globalLoginError;
 export const selectGlobalAuthLoading = (state) => state.auth.globalAuthLoading;
+export const selectGlobalUnauthorizedError = (state) => state.auth.globalUnauthorizedError
 export const selectUserDataSet = (state) => state.auth.userDataSet;
 export const selectUserDataFetched = (state) => state.auth.userDataFetched;
 

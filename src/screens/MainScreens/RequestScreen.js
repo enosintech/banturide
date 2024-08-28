@@ -7,9 +7,10 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import LottieView from "lottie-react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as SecureStore from "expo-secure-store";
 
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver, setDriverArray, selectFindNewDriver, setFindNewDriver, setNewDriverCalled } from '../../../slices/navSlice';
-import { selectToken } from '../../../slices/authSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver, setDriverArray, selectFindNewDriver, setFindNewDriver, setNewDriverCalled, selectDeliveryType, setDeliveryType, setRecipient } from '../../../slices/navSlice';
+import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import RequestMap from "../../components/atoms/RequestMap";
 import PageLoader from '../../components/atoms/PageLoader';
@@ -24,7 +25,10 @@ const RequestScreen = (props) => {
   const mapRef = useRef();
 
   const [ loading, setLoading ] = useState(false)
-  const [modalVisible, setModalVisible] = useState(false)
+  const [ searchError, setSearchError ] = useState(false);
+  const [ cancelError, setCancelError ] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [ searchCompleteText, setSearchCompleteText ] = useState("");
   const rating = 4.1;
 
   const dispatch = useDispatch();
@@ -34,6 +38,7 @@ const RequestScreen = (props) => {
   const searchComplete = useSelector(state => state.nav.searchComplete);
   const findNewDriver = useSelector(selectFindNewDriver);
   const newDriverCalled = useSelector(state => state.nav.newDriverCalled)
+  const isSignedIn = useSelector(selectIsSignedIn);
 
   const fontSize = width * 0.05;
 
@@ -49,6 +54,8 @@ const RequestScreen = (props) => {
   const booking = useSelector(selectBooking);
   const tokens = useSelector(selectToken);
   const driverArray = useSelector(state => state.nav.driverArray);
+
+  const deliveryType = useSelector(selectDeliveryType);
 
   const currentLocation = {
     latitude: origin?.location.lat,
@@ -76,18 +83,145 @@ const RequestScreen = (props) => {
         })
       }).then((response) => response.json())
       .then((data) => {
-        if(data.message === "Booking confirmed and Search has now stopped" || data.message === "Booking confirmed successfully!" || data.message === "Booking cancelled and Search has now stopped"){
-          console.log(data)
+
+        if(data.success === false) {
+          throw new Error(data.message || data.error)
         } else {
-          dispatch(setSearchComplete(true))
-          console.log(data)
+          if(data.message === "Booking confirmed and Search has now stopped" || data.message === "Booking confirmed successfully!" || data.message === "Booking cancelled and Search has now stopped"){
+            // do nothing as only the calling of another function can trigger this
+          } else if (data.message === "No drivers found within the time limit."){
+            setSearchCompleteText("No drivers found within the time limit")
+            dispatch(setSearchComplete(true))
+          } else if (data.message === "Drivers were found and the search is complete") {
+            setSearchCompleteText("Drivers were found but none were chosen")
+            dispatch(setSearchComplete(true))
+          } else {
+            setSearchCompleteText("Search ran for 2 minutes")
+            dispatch(setSearchComplete(true))
+          }
         }
+
       })
 
     } catch (error) {
-      dispatch(setSearchComplete(true))
-      console.error("Failed to search for drivers: ", error)
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized") {
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          dispatch(setSearchComplete(true))
+          setSearchCompleteText("Something went wrong")
+          setSearchError("Error Searching for driver. Unauthorized")
+          setTimeout(() => {
+            setSearchError(false)
+          }, 3000)
+        })
+      } else {
+        dispatch(setSearchComplete(true))
+        setSearchCompleteText(errorField || "Something went wrong")
+        setSearchError(errorField || "Something went wrong")
+        setTimeout(() => {
+          setSearchError(false)
+        }, 4000)
+      }
     }  
+  }
+
+  const handleDeliverySearch = async (deliveryId) => {
+    dispatch(setSearchComplete(false))
+    try {
+      await fetch("https://banturide-api.onrender.com/delivery/findDriver", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokens?.idToken}`,
+          'x-refresh-token' : tokens?.refreshToken,
+        },
+        body: JSON.stringify({
+          deliveryId: deliveryId,
+        })
+      }).then((response) => response.json())
+      .then((data) => {
+
+        if(data.success === false) {
+          throw new Error(data.message || data.error)
+        } else {
+          console.log(data)
+          if(data.message === "No drivers found within the time limit.") {
+            setSearchCompleteText("No drivers found within the time limit");
+            dispatch(setSearchComplete(true))
+          } else {
+            dispatch(setFindNewDriver(false))
+            dispatch(setNewDriverCalled(false))
+            dispatch(setBooking(data.booking))
+            dispatch(setDriver(data.driver))
+            navigation.navigate("RequestNavigator")
+          }
+        }
+
+      })
+    } catch (error) {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized"){
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          dispatch(setSearchComplete(true))
+          setSearchCompleteText("Something went wrong")
+          setSearchError("Error Searching for driver. Unauthorized")
+          setTimeout(() => {
+            setSearchError(false)
+          }, 3000)
+        })
+      } else {
+        dispatch(setSearchComplete(true))
+        setSearchCompleteText(errorField || "Something went wrong")
+        setSearchError(errorField || "Something went wrong")
+        setTimeout(() => {
+          setSearchError(false)
+        }, 4000)
+      }
+    }
   }
 
   const handleDriverReSearch = () => {
@@ -112,9 +246,9 @@ const RequestScreen = (props) => {
       })
       .then((response) => response.json())
       .then((data) => {
-        if(data.message === "Error in assigning driver to booking."){
-          setLoading(false)
-          console.log(data)
+
+        if(data.success === false) {
+          throw new Error(data.message || data.error)
         } else {
           setLoading(false)
           dispatch(setDriverArray([]))
@@ -122,13 +256,49 @@ const RequestScreen = (props) => {
           dispatch(setNewDriverCalled(false))
           dispatch(setBooking(data.booking))
           dispatch(setDriver(data.driver))
-          navigation.navigate("RequestNavigator");
+          navigation.navigate("RequestNavigator")
         }
-        
+    
       })
     } catch (error) {
-      setLoading(false)
-      console.error("Failed to assign driver: ", error)
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized"){
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          setLoading(false)
+          setSearchError("Error Choosing driver. Unauthorized")
+          setTimeout(() => {
+            setSearchError(false)
+          }, 3000)
+        })
+      } else {
+        setLoading(false)
+        setSearchError(errorField)
+        setTimeout(() => {
+          setSearchError(false)
+        }, 3000)
+      }
     }
   }
 
@@ -149,10 +319,8 @@ const RequestScreen = (props) => {
     .then(response => response.json())
     .then(data => {
       if(data.success === false){
-        setLoading(false)
-        console.log(data.message)
+        throw new Error(data.message || data.error)
       } else {
-        console.log(data)
         setLoading(false)
         setModalVisible(false)
         dispatch(setDestination(null))
@@ -162,6 +330,8 @@ const RequestScreen = (props) => {
         dispatch(setTripDetails(null))
         dispatch(setPassThrough(null))
         dispatch(setBooking(null))
+        dispatch(setDeliveryType(null))
+        dispatch(setRecipient(null))
         dispatch(setDriverArray([]))
         dispatch(setBookingRequested(false))
         dispatch(setSearchPerformed(false))
@@ -169,25 +339,158 @@ const RequestScreen = (props) => {
         navigation.navigate("Home")
       }
     })
-    .catch((error) => {
-      setLoading(false)
-      console.log("this is why", error )
+    .catch( async (error) => {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized") {
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          setLoading(false)
+          setModalVisible(false)
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          setLoading(false)
+          setCancelError("Error cancelling booking. Unauthorized")
+          setTimeout(() => {
+            setCancelError(false)
+          }, 3000)
+        })
+      } else {
+        setLoading(false)
+        setCancelError(errorField)
+        setTimeout(() => {
+          setCancelError(false)
+        }, 3000)
+      }
     })
   } 
+ 
+  const handleCancelDelivery = async () => {
+    setLoading(true)
+    await fetch ("https://banturide-api.onrender.com/delivery/cancel-delivery", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokens?.idToken}`,
+        'x-refresh-token' : tokens?.refreshToken,
+      },
+      body: JSON.stringify({
+        deliveryId: booking?.bookingId,
+        reason: "",
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.success === false) {
+        throw new Error(data.message || data.error)
+      } else {
+        setLoading(false)
+        setModalVisible(false)
+        dispatch(setDestination(null))
+        dispatch(setOrigin(null))
+        dispatch(setPrice(null))
+        dispatch(setTravelTimeInformation(null))
+        dispatch(setTripDetails(null))
+        dispatch(setPassThrough(null))
+        dispatch(setBooking(null))
+        dispatch(setDeliveryType(null))
+        dispatch(setRecipient(null))
+        dispatch(setDriverArray([]))
+        dispatch(setBookingRequested(false))
+        dispatch(setSearchPerformed(false))
+        dispatch(setSearchComplete(false))
+        navigation.navigate("Home")
+      }
+    })
+    .catch( async (error) => {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized") {
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          setLoading(false)
+          setModalVisible(false)
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          setLoading(false)
+          setCancelError("Error cancelling booking. Unauthorized")
+          setTimeout(() => {
+            setCancelError(false)
+          }, 3000)
+        })
+      } else {
+        setLoading(false)
+        setCancelError(errorField)
+        setTimeout(() => {
+          setCancelError(false)
+        }, 3000)
+      }
+    })
+  }
 
   useEffect(() => {
-    if(findNewDriver && !newDriverCalled){
+    if(findNewDriver && !newDriverCalled && booking?.bookingType === "ride" ){
       handleDriverReSearch();
       dispatch(setNewDriverCalled(true))
     }
-  }, [findNewDriver, newDriverCalled])
+  }, [findNewDriver, newDriverCalled, booking ])
 
   useEffect(() => {
-    if (bookingRequested && !searchPerformed) {
-      handleDriverSearch(booking.bookingId);
+    if(findNewDriver && !newDriverCalled && booking?.bookingType === "delivery" ){
+      handleDriverReSearch();
+      dispatch(setNewDriverCalled(true))
+    }
+  }, [findNewDriver, newDriverCalled, booking ])
+
+  useEffect(() => {
+    if (bookingRequested && !searchPerformed && booking?.bookingType === "ride") {
+      handleDriverSearch(booking?.bookingId);
       dispatch(setSearchPerformed(true));
     }
-  }, [bookingRequested, searchPerformed]);
+  }, [bookingRequested, searchPerformed, booking]);
+
+  useEffect(() => {
+    if(bookingRequested && !searchPerformed && booking?.bookingType === "delivery") {
+      handleDeliverySearch(booking?.bookingId);
+      dispatch(setSearchPerformed(true))
+    }
+  }, [bookingRequested, searchPerformed, booking])
 
   return (
     <View className={`flex-1 ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"} relative`}>
@@ -196,12 +499,21 @@ const RequestScreen = (props) => {
 
       {searchComplete && 
         <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex flex-row items-end`}>
+
+          { cancelError &&
+              <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                  <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                      <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof cancelError === "string" ? cancelError : "Server or Network Error Occurred"}</Text>
+                  </View>
+              </View>
+          }
+
           <View className={`w-full h-[25%] ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} rounded-t-[40px] flex flex-col`}>
             <View className={`w-full h-1/2 flex items-center justify-center`}>
-              <Text style={{fontSize: fontSize}}  className={`font-bold tracking-tight text-center max-w-[80%] ${props.theme === "dark" ? "text-white" : "text-black"}`}>Search ran for 2 minutes without a driver being selected</Text>
+              <Text style={{fontSize: fontSize}}  className={`font-bold tracking-tight text-center max-w-[60%] ${props.theme === "dark" ? "text-white" : "text-black"}`}>{searchCompleteText ? searchCompleteText : "Search is Complete"}</Text>
             </View>
             <View className={`w-full h-[40%] flex flex-row items-center justify-evenly`}>
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[50px] shadow-sm bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[50px] shadow-sm bg-red-700 flex items-center justify-center`} onPress={booking?.bookingType === "ride" ? handleCancelBooking : handleCancelDelivery}>
                 <Text style={{fontSize: fontSize * 0.9}} className={`font-bold tracking-tight text-white`}>Cancel Request</Text>
               </TouchableOpacity>
 
@@ -215,12 +527,21 @@ const RequestScreen = (props) => {
 
       {modalVisible && 
         <View style={{ backgroundColor: "rgba(0,0,0,0.5)"}} className={`absolute z-[10] w-full h-full flex items-center justify-center`}>
+
+          { cancelError &&
+              <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                  <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                      <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof cancelError === "string" ? cancelError : "Server or Network Error Occurred"}</Text>
+                  </View>
+              </View>
+          }
+
           <View className={`w-[90%] h-[20%] ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"} shadow-sm rounded-[40px] p-2 flex flex-col`}>
             <View className="w-full h-1/2 flex items-center justify-center">
               <Text style={{fontSize: fontSize * 0.7}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"} text-center max-w-[90%]`}>Are you sure you want to cancel your request? We will find you a suitable driver soon!</Text>
             </View>
             <View className="w-full h-1/2 flex flex-row items-center justify-evenly">
-              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[40px] bg-red-700 flex items-center justify-center`} onPress={handleCancelBooking}>
+              <TouchableOpacity className={`w-[45%] h-[90%] rounded-[40px] bg-red-700 flex items-center justify-center`} onPress={booking?.bookingType === "ride" ? handleCancelBooking : handleCancelDelivery}>
                 <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight text-white`}>Cancel</Text>
               </TouchableOpacity>
 
@@ -242,6 +563,15 @@ const RequestScreen = (props) => {
                 <MaterialIcons name="my-location" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
         </TouchableOpacity>
         <RequestMap mapRef={mapRef} theme={props.theme} />
+
+        {searchError &&
+            <View className={`w-full h-[9%] absolute z-[2000] top-28 flex items-center justify-center`}>
+                <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                    <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof searchError === "string" ? searchError : "Server or Network Error Occurred"}</Text>
+                </View>
+            </View>
+        }
+
         <View className={`absolute w-[80%] h-[55%] flex items-center justify-center`}>
             {
               searchComplete ? 
@@ -323,15 +653,15 @@ const RequestScreen = (props) => {
             <View className={`w-1/2 h-full flex items-center`}>
               <View className={`w-full h-1/2 overflow-visible relative flex items-center justify-center`}>
                 <Image 
-                  source={tripDetails?.image}
+                  source={booking?.bookingType === "ride" ? tripDetails?.image : deliveryType?.image}
                   style={{
                     width: 40,
                     height : 40,
                     overflow: "visible",
                   }}
                 />
-                <Text style={{fontSize: fontSize * 0.7}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{tripDetails?.title}</Text>
-                <Text style={{fontSize: fontSize * 0.55}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{seats} Seater</Text>
+                <Text style={{fontSize: fontSize * 0.7}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{ booking?.bookingType === "ride" ? tripDetails?.title : deliveryType?.title}</Text>
+                <Text style={{fontSize: fontSize * 0.55}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{booking?.bookingType === "ride" ? seats + " " + "seater" :  deliveryType?.description }</Text>
               </View>
               <View className={`w-[80%] h-0 border-t ${props.theme === "dark" ? "border-white" : "border-gray-200"}`}></View>
               <View className={`w-full h-1/2 flex items-center`}>

@@ -1,6 +1,6 @@
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
-import { View, TouchableOpacity } from "react-native";
 import { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -9,7 +9,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 
 import { GOOGLE_API_KEY } from "@env";
 
-import { selectBookingRequestLoading, selectDestination, selectOrigin, selectPassThrough, selectTravelTimeInformation } from "../../../slices/navSlice";
+import { selectBookingRequestLoading, selectDestination, selectGlobalBookingError, selectOrigin, selectPassThrough, selectTravelTimeInformation } from "../../../slices/navSlice";
 import { setTravelTimeInformation, setPassThrough, setDestination, setPrice } from "../../../slices/navSlice";
 
 import ConfirmScreen from "./ConfirmScreen";
@@ -20,6 +20,8 @@ import AddStop from "./AddStop";
 import LoadingBlur from "../../components/atoms/LoadingBlur";
 import SmallMap from "../../components/atoms/SmallMap";
 
+const { width } = Dimensions.get("window");
+
 const RideSelect = (props) => {
     const Stack = createNativeStackNavigator();
 
@@ -28,6 +30,7 @@ const RideSelect = (props) => {
     const destination = useSelector(selectDestination);
     const travelTimeInformation = useSelector(selectTravelTimeInformation);
     const bookingRequestLoading = useSelector(selectBookingRequestLoading);
+    const globalBookingError = useSelector(selectGlobalBookingError);
 
     const navigation = useNavigation();
     const mapRef = useRef(null)
@@ -36,6 +39,8 @@ const RideSelect = (props) => {
     const SURGE_CHARGE_RATE = 1.5;
 
     const api="AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
+
+    const fontSize = width * 0.05;
 
     const showFullJourneyOnMap = () => {
         if(!origin || !destination) return ;
@@ -82,6 +87,15 @@ const RideSelect = (props) => {
 
     return(
         <View className="w-full h-full">
+
+            {globalBookingError &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof globalBookingError === "string" ? globalBookingError : "Server or Network Error Occurred"}</Text>
+                    </View>
+                </View>
+            }
+
             <LoadingBlur theme={props.theme} loading={bookingRequestLoading} />
             <View className={`h-1/2 w-full`}>
                 <TouchableOpacity className={`absolute z-50 top-[15%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {

@@ -81,6 +81,7 @@ const RequestMap = (props) => {
               latitudeDelta: 0.01,
               longitudeDelta: 0.01
             }}
+            provider={PROVIDER_GOOGLE}
             customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         >
           {booking && booking?.status === "confirmed" &&

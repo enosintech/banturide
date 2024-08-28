@@ -1,3 +1,4 @@
+import { createStackNavigator, TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { useAuth } from "../hooks/useAuth";
@@ -13,8 +14,12 @@ import SigninScreen from "../screens/AuthScreens/SigninScreen";
 import ForgotPassword from "../screens/AuthScreens/ForgotPassword";
 import TermsAndConditions from "../screens/AuthScreens/TermsAndConditions";
 import SetPassword from "../screens/AuthScreens/SetPassword";
+import SearchModal from "../screens/MainScreens/SearchModal";
+import RequestScreen from "../screens/MainScreens/RequestScreen";
+import BookNavigator from "./BookNavigator";
+import RequestNavigator from "./RequestNavigator";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const AuthNavigator = (props) => {
 
@@ -27,6 +32,42 @@ const AuthNavigator = (props) => {
                     <Stack.Screen name="Tab" options={{headerShown: false}}>
                         {() => <TabNavigator handleLayout={props.handleLayout} theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
                     </Stack.Screen>
+                    <Stack.Screen name="BookNavigator" options={{headerShown: false}}>
+                        {() => <BookNavigator theme={props.theme} />}
+                    </Stack.Screen>
+                    <Stack.Group screenOptions={{
+                        presentation: "fullScreenModal", 
+                        ...TransitionPresets.ModalSlideFromBottomIOS,
+                        cardStyleInterpolator: ({ current, layouts }) => {
+                            return {
+                                cardStyle: {
+                                transform: [
+                                    {
+                                    translateY: current.progress.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [layouts.screen.height, 0],
+                                    }),
+                                    },
+                                ],
+                                },
+                            };
+                        },
+                        }}
+                    >
+                        <Stack.Screen name="RequestNavigator" options={{headerShown: false}}>
+                            {() => <RequestNavigator theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="requests" options={{headerShown: false}}>
+                            {() => <RequestScreen theme={props.theme}/>}
+                        </Stack.Screen>
+                    </Stack.Group>
+                    <Stack.Group screenOptions={{ presentation: "modal", gestureEnabled: false, detachPreviousScreen: false, cardStyle: {backgroundColor: "transparent"}, ...(Platform.OS === 'android' && {
+                    ...TransitionPresets.ModalSlideFromBottomIOS,
+                    })  }}>
+                        <Stack.Screen name="Search" options={{headerShown: false }}>
+                            {() => <SearchModal  theme={props.theme} />}
+                        </Stack.Screen>
+                    </Stack.Group>
                 </Stack.Navigator>
             </SocketProvider>
         )
@@ -59,7 +100,7 @@ const AuthNavigator = (props) => {
         return (
             <Stack.Navigator initialRouteName="loading">
                 <Stack.Screen name="loading" options={{headerShown: false}}>
-                    {() => <LoadingBlur loading={true} />}
+                    {() => <LoadingBlur theme={props.theme} loading={true} />}
                 </Stack.Screen>
             </Stack.Navigator>
         )

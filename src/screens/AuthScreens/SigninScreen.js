@@ -143,7 +143,7 @@ const SigninScreen = (props) => {
                         <View className="h-[25%]">
                             <Text style={{fontSize: fontSize * 1.4}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Sign in with your Email</Text>
                         </View>
-                        <View className={`h-[55%] ${props.theme === "dark" ? "border-gray-900 w-full" : "bg-white w-[90%]"} rounded-[40px] flex items-center justify-center mt-5 shadow-sm`}>
+                        <View className={`h-[55%] ${props.theme === "dark" ? "border-gray-900 w-[90%] bg-dark-secondary" : "bg-white w-[90%]"} rounded-[40px] flex items-center justify-center mt-5 shadow-sm`}>
                             <TextInput
                                 className={`${props.theme === "dark" ? "bg-gray-500 text-white border-gray-900" : "bg-white text-black border-gray-400"} h-[30%] w-[90%] font-semibold tracking-tight border-[0.25px] p-2 px-4 border-solid rounded-[25px]`} 
                                 placeholder="Email"
@@ -186,7 +186,7 @@ const SigninScreen = (props) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View className={`h-[30%] w-[90%] mt-4 rounded-[40px] py-5 flex items-center shadow-sm justify-evenly ${props.theme === "dark" ? "bg-[#353d4a]" : "bg-white"}`}>
+                    <View className={`h-[30%] w-[90%] mt-4 rounded-[40px] py-5 flex items-center shadow-sm justify-evenly ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"}`}>
                         { globalLoginError && 
                             <View className="w-full h-fit mt-2 flex items-center justify-center">
                                 <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} text-red-500 font-semibold tracking-tight`}>{globalLoginError}</Text>

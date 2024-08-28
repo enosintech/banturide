@@ -22,6 +22,7 @@ const initialState = {
     bookingRequestLoading: false,
     favAddressChanged: false,
     favAddressUpdated: false,
+    favAddressDeleted: false,
     paymentMethodUpdated: false,
     profileUpdated: false,
     bookingRequested: false, 
@@ -29,6 +30,7 @@ const initialState = {
     searchComplete: false,
     newDriverCalled: false,
     findNewDriver: false,
+    globalBookingError: false,
     chatMessages: [],
     favoriteHomeAddress: {
         description: "",
@@ -110,6 +112,9 @@ export const navSlice = createSlice({
         setProfileUpdated: (state, action) => {
             state.profileUpdated = action.payload;
         },
+        setFavoriteAddressDeleted: (state, action) => {
+            state.favAddressDeleted = action.payload;
+        },
         setFavoriteHomeAddress: (state, action) => {
             state.favoriteHomeAddress = action.payload;
         },
@@ -146,6 +151,9 @@ export const navSlice = createSlice({
         setRemainingTripDistance: (state, action) => {
             state.remainingTripDistance = action.payload;
         },
+        setGlobalBookingError: (state, action) => {
+            state.globalBookingError = action.payload;
+        },
         resetSearch(state) {
             state.searchPerformed = false;
         },
@@ -154,6 +162,9 @@ export const navSlice = createSlice({
         },
         addChatMessage: (state, action) => {
             state.chatMessages.push(action.payload);
+        },
+        clearChatMessages: (state, action) => {
+            state.chatMessages = []
         },
         addDriver: (state, action) => {
             const newDriver = action.payload;
@@ -184,7 +195,7 @@ export const navSlice = createSlice({
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addChatMessage, addDriver, removeDriver, decrementTime, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setNewDriverCalled, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime, setDeliveryType, setRecipient, setPaymentMethodUpdated, setDriverArray, setFindNewDriver } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavoriteAddressDeleted, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addChatMessage, clearChatMessages, addDriver, removeDriver, decrementTime, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setNewDriverCalled, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime, setGlobalBookingError, setDeliveryType, setRecipient, setPaymentMethodUpdated, setDriverArray, setFindNewDriver } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -203,6 +214,7 @@ export const selectHasArrived = (state) => state.nav.hasArrived;
 export const selectBookingRequestLoading = (state) => state.nav.bookingRequestLoading;
 export const selectFavAddressUpdated = (state) => state.nav.favAddressUpdated;
 export const selectFavAddressChanged = (state) => state.nav.favAddressChanged;
+export const selectFavAddressDeleted = (state) => state.nav.favAddressDeleted;
 export const selectProfileUpdated = (state) => state.nav.profileUpdated;
 export const selectFavoriteHomeAddress = (state) => state.nav.favoriteHomeAddress;
 export const selectFavoriteWorkAddress = (state) => state.nav.favoriteWorkAddress;
@@ -216,5 +228,6 @@ export const selectRecipient = (state) => state.nav.recipient;
 export const selectPaymentMethodUpdated = (state) => state.nav.paymentMethodUpdated;
 export const selectFindNewDriver = (state) => state.nav.findNewDriver;
 export const selectChatMessages = (state) => state.nav.chatMessages;
+export const selectGlobalBookingError = (state) => state.nav.globalBookingError;
 
 export default navSlice.reducer;

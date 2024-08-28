@@ -17,8 +17,8 @@ const ProfileScreen = (props) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
-    const userInfo = useSelector(selectUserInfo);
     const tokens = useSelector(selectToken);
+    const userInfo = useSelector(selectUserInfo);
     const isSignedIn = useSelector(selectIsSignedIn);
 
     const [notificationToggle, setNotificationToggle] = useState(userInfo?.notificationsEnabled);
@@ -100,14 +100,10 @@ const ProfileScreen = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 setNotificationToggle(previousState)
-                if(typeof error === "string"){
-                    setNotificationError(error)
-                } else {
-                    setNotificationError("Unknown error occcured")
-                }
+                setNotificationError(error)
                 setTimeout(() => {
                     setNotificationError(false)
-                }, 4000)
+                }, 3000)
             }
         }
     }
@@ -156,14 +152,10 @@ const ProfileScreen = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 setCallDriverToggle(previousState);
-                if(typeof error === "string"){
-                    setCallDriverError(error)
-                } else {
-                    setCallDriverError("Unknown error occcured")
-                }
+                setCallDriverError(error)
                 setTimeout(() => {
                     setCallDriverError(false)
-                }, 4000)
+                }, 3000)
             }
         }
     }
@@ -182,7 +174,7 @@ const ProfileScreen = (props) => {
             {notificationError &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{notificationError}</Text>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof notificationError === "string" ? notificationError : "Server or Network Error Occurred"}</Text>
                     </View>
                 </View>
             }
@@ -198,7 +190,7 @@ const ProfileScreen = (props) => {
             {callDriverError &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{callDriverError}</Text>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof callDriverError === "string" ? callDriverError : "Server or Network Error Occurred"}</Text>
                     </View>
                 </View>
             }

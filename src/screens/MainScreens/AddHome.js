@@ -62,12 +62,13 @@ const AddHome = (props) => {
                 dispatch(setFavAddressUpdated(true))
                 setTimeout(() => {
                     dispatch(setFavAddressUpdated(false))
-                }, 4000)
+                }, 3000)
                 dispatch(setFavAddressChanged(!favAddressChanged))
             }
         })
         .catch((err) => {
             if(err === "Unauthorized"){
+                setLoading(false)
                 dispatch(setUserInfo(null))
                 dispatch(setToken(null))
                 dispatch(setIsSignedIn(!isSignedIn))
@@ -76,14 +77,10 @@ const AddHome = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 setLoading(false)
-                if(typeof err === "string"){
-                    setError(err)
-                } else {
-                    setError("Unknown error occcured")
-                }
+                setError(err)
                 setTimeout(() => {
                     setError(false)
-                }, 4000)
+                }, 3000)
             }
         })
     }
@@ -105,7 +102,7 @@ const AddHome = (props) => {
              {error &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{error}</Text>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
                     </View>
                 </View>
             }

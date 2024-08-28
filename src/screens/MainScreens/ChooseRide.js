@@ -54,7 +54,7 @@ const ChooseRide = (props) => {
               {
                 rideData.map((data, index) => (
                     <View key={data.id} index={index} {...data} className={`w-full h-1/3 flex items-center justify-center`}>
-                        <TouchableOpacity className={`w-[95%] h-[95%] rounded-[25px] shadow-sm flex flex-row ${selected ? selected === data ? "opacity-100" : "opacity-60"  : "opacity-100" } ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"}`} onPress={() => {
+                        <TouchableOpacity disabled={travelTimeInformation ? false : true} className={`w-[95%] h-[95%] rounded-[25px] shadow-sm flex flex-row ${travelTimeInformation ? selected ? selected === data ? "opacity-100" : "opacity-60"  : "opacity-100" : "opacity-40" } ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"}`} onPress={() => {
                             setSelected(data)
                             dispatch(setSeats("4"));
                             dispatch(setTripDetails(data))
@@ -177,14 +177,14 @@ const ChooseRide = (props) => {
                     <View className={`w-full h-[32%] flex items-center justify-center`}>
                         <View className={`w-[40%] h-[50%] bg-neutral-100 shadow-sm rounded-full flex flex-row items-center`}>
                             <Image 
-                                source={deliveryType.image}
+                                source={deliveryType?.image}
                                 style={{
                                     width: 45,
                                     height: 45,
                                     resizeMode: 'contain',
                                 }}
                             />
-                            <Text style={{fontSize: fontSize * 0.6}} className={`font-bold tracking-tighter`}>{deliveryType.title}</Text>
+                            <Text style={{fontSize: fontSize * 0.6}} className={`font-bold tracking-tighter`}>{deliveryType?.title}</Text>
                         </View>
                     </View>
                 </View>

@@ -8,7 +8,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 
-import { selectFavAddressChanged, selectFavAddressUpdated } from "../../../slices/navSlice";
+import { selectFavAddressChanged, selectFavAddressDeleted, selectFavAddressUpdated } from "../../../slices/navSlice";
 import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
@@ -28,6 +28,7 @@ const FavouriteScreen = (props) => {
 
     const favAddressChanged = useSelector(selectFavAddressChanged);
     const favAddressUpdated = useSelector(selectFavAddressUpdated);
+    const favAddressDeleted = useSelector(selectFavAddressDeleted);
 
     const [favoritesData, setFavoritesData] = useState([]);
     const [ error, setError ] = useState(false);
@@ -63,11 +64,10 @@ const FavouriteScreen = (props) => {
                 if(result.success === false){
                     throw new Error(result.message || result.error)
                 } else {
-                    setLoading(false)
                     setFavoritesData(result.favoriteLocations)
                 }
+                
             } catch (error) {
-                setLoading(false)
                 if(error === "Unauthorized"){
                     dispatch(setUserInfo(null))
                     dispatch(setToken(null))
@@ -78,6 +78,8 @@ const FavouriteScreen = (props) => {
                 } else {
                     setError(true)
                 }
+            } finally {
+                setLoading(false)
             }
         }
 
@@ -131,6 +133,14 @@ const FavouriteScreen = (props) => {
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
                         <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-light text-center tracking-tight">{saveMessage}</Text>
+                    </View>
+                </View>
+            }
+
+            {favAddressDeleted &&
+                <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                    <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
+                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-light text-center tracking-tight">{favAddressDeleted}</Text>
                     </View>
                 </View>
             }

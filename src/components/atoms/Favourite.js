@@ -9,8 +9,8 @@ import Entypo from "@expo/vector-icons/Entypo";
 
 import ModalLoader from "./ModalLoader";
 
-import { selectFavAddressChanged, setFavAddressChanged } from "../../../slices/navSlice";
-import { selectToken } from "../../../slices/authSlice";
+import { selectFavAddressChanged, setFavAddressChanged, setFavoriteAddressDeleted } from "../../../slices/navSlice";
+import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -21,14 +21,15 @@ const Favorite = (props) => {
     const tokens = useSelector(selectToken)
     
     const [ loading, setLoading ] = useState(false);
+    const [ error , setError ] = useState(false);
     const [ modalVisible, setModalVisible ] = useState(false);
 
     const favAddressChanged = useSelector(selectFavAddressChanged);
+    const isSignedIn = useSelector(selectIsSignedIn);
 
     const fontSize = width * 0.05;
 
     const handleDeleteFavAddress = async () => {
-        setModalVisible(false)
         setLoading(true)
         try {
             const response = await fetch("https://banturide-api.onrender.com/favorites/delete-favorite", {
@@ -43,32 +44,62 @@ const Favorite = (props) => {
                 })
             })
             const result = await response.json();
-            console.log(result)
-            dispatch(setFavAddressChanged(!favAddressChanged))
-            setLoading(false)
+
+            if(result.success === false) {
+                throw new Error(result.message || result.error)
+            } else {
+                setModalVisible(false)
+                dispatch(setFavoriteAddressDeleted("Address Deleted Successfully"))
+                setTimeout(() => {
+                    dispatch(setFavoriteAddressDeleted(false))
+                }, 3000)
+                dispatch(setFavAddressChanged(!favAddressChanged))
+            }
+
         } catch (error) {
+            if(error === "Unauthorized"){
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setError(error)
+                setTimeout(() => {
+                    setError(false)
+                }, 4000)
+            }
+        } finally {
             setLoading(false)
-            console.log(error)
         }
     }
 
     return(
         <View className={`${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} w-[95%] h-[85px] mb-1 mt-1 flex justify-center rounded-[20px] shadow-sm`}>
-
-            <Modal transparent={true} animationType="fade" visible={loading} onRequestClose={() => {
+            
+            <Modal visible={modalVisible} onRequestClose={() => {
                 if(loading === true){
                     return
                 } else {
-                    setLoading(false)
+                    setModalVisible(false)
                 }
-             }}>
-                <View style={{backgroundColor: "rgba(0,0,0,0.6)"}} className={`w-full h-full flex items-center justify-center`}>
-                    <ModalLoader theme={props.theme} />
-                </View>
-             </Modal>
-            
-            <Modal visible={modalVisible} onRequestClose={() => setModalVisible(false)} animationType="fade" transparent={true}>
-                <View style={{backgroundColor: "rgba(0,0,0,0.7)"}} className={`w-full h-full flex justify-end`}>
+            }} animationType="fade" transparent={true}>
+                <View style={{backgroundColor: "rgba(0,0,0,0.7)"}} className={`w-full h-full flex justify-end relative`}>
+                    {error &&
+                        <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                            <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                                <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
+                            </View>
+                        </View>
+                    }
+
+                    {loading && 
+                        <View style={{backgroundColor: "rgba(0,0,0,0.6)"}} className={`w-full h-full flex items-center justify-center absolute z-50`}>
+                            <ModalLoader theme={props.theme} />
+                        </View>
+                    }
+
                     <View className={`w-full h-[30%] ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} shadow rounded-t-[30px] flex items-center justify-evenly`}>
                         <Text style={{fontSize: fontSize * 0.85}} className={`text-center w-[80%] font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Are you sure you want to remove this Saved Address?</Text>
                         <View className="flex flex-row items-center justify-evenly w-full h-[40%]">

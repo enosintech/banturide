@@ -51,6 +51,42 @@ const EditProfile = (props) => {
         }
     }
 
+    const saveImage = async (imageParam) => {
+        setModalVisible(false)
+        setLoading(true)
+
+        setImage(imageParam)
+
+        const formData = new FormData();
+        formData.append('userId', userInfo?.userId);
+        formData.append('avatar', {
+            uri: imageParam.uri,
+            type: imageParam.type,
+            name: imageParam.fileName
+        })      
+
+        const response = await fetch(`https://banturide-api.onrender.com/profile/uploadUserProfilePicture`, {
+            method: "POST",
+            headers: {
+                "Content-Type" : "multipart/form-data",
+                'Authorization': `Bearer ${tokens?.idToken}`,
+                'x-refresh-token' : tokens?.refreshToken,
+            },
+            body: formData,
+        })
+
+        const responseData = await response.json();
+        
+        if(responseData.success === false) {
+            throw new Error(data.message || data.error)
+        } else {
+            await getUpdatedUserProfile()
+            .then(() => {
+                setLoading(false)
+            })
+        }
+    }
+
     const uploadImage = async (mode) => {
         try {
 
@@ -93,52 +129,12 @@ const EditProfile = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 setModalVisible(false)
-                if(typeof error === "string"){
-                    setError(error)
-                } else {
-                    setError("There was an error")
-                }
+                setError(error)
                 setTimeout(() => {
                     setError(false)
                 }, 3000)
             }
         }
-    }
-
-    const saveImage = async (imageParam) => {
-        setModalVisible(false)
-        setLoading(true)
-
-        setImage(imageParam)
-
-        const formData = new FormData();
-        formData.append('userId', userInfo?.userId);
-        formData.append('avatar', {
-            uri: imageParam.uri,
-            type: imageParam.type,
-            name: imageParam.fileName
-        })      
-
-            const response = await fetch(`https://banturide-api.onrender.com/profile/uploadUserProfilePicture`, {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "multipart/form-data",
-                    'Authorization': `Bearer ${tokens?.idToken}`,
-                    'x-refresh-token' : tokens?.refreshToken,
-                },
-                body: formData,
-            })
-
-            const responseData = await response.json();
-            
-            if(responseData.success === false) {
-                throw new Error(data.message || data.error)
-            } else {
-                await getUpdatedUserProfile()
-                .then(() => {
-                    setLoading(false)
-                })
-            }
     }
 
     const removeImage = async () => {
@@ -178,11 +174,7 @@ const EditProfile = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 setLoading(false)
-                if(typeof error === "string"){
-                    setError(error)
-                } else {
-                    setError("There was an error")
-                }
+                setError(error)
                 setTimeout(() => {
                     setError(false)
                 }, 3000)
@@ -191,12 +183,12 @@ const EditProfile = (props) => {
     }
 
     return(
-        <SafeAreaView className={`${props.theme === "dark"? "bg-[#222831]" : "bg-white"} w-full h-full relative`}>
+        <SafeAreaView className={`${props.theme === "dark"? "bg-dark-primary" : "bg-white"} w-full h-full relative`}>
 
             {error &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{error}</Text>
+                        <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
                     </View>
                 </View>
             }

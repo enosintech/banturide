@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
 
 import { getItem } from "../components/lib/asyncStorage.js";
@@ -6,7 +6,7 @@ import { getItem } from "../components/lib/asyncStorage.js";
 import OnboardingScreen from "../screens/Onboarding/OnboardingScreen.js";
 import AuthNavigator from "./AuthNavigator.js";
 
-const Stack = createNativeStackNavigator()
+const Stack = createStackNavigator()
 
 const StackNavigator = (props) => {
     const [ showOnboarding, setShowOnboarding ] = useState(true);

@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 
 import AddStop from "../screens/MainScreens/AddStop";
 import DriverScreen from '../screens/MainScreens/DriverScreen';
@@ -9,7 +9,7 @@ import RateDriver from "../screens/MainScreens/RateDriver";
 import ReportDriver from "../screens/MainScreens/ReportDriver";
 import UpdateDestination from "../screens/MainScreens/UpdateDestination";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const RequestNavigator = (props) => {
 
@@ -24,7 +24,7 @@ const RequestNavigator = (props) => {
         <Stack.Screen name="rateDriver" options={{headerShown: false}}>
           {() => <RateDriver theme={props.theme} />}
         </Stack.Screen>
-        <Stack.Group screenOptions={{presentation: "modal", contentStyle: {
+        <Stack.Group screenOptions={{presentation: "modal", cardStyle: {
                 backgroundColor: "transparent",
           }}}>
           <Stack.Screen name="cancel" options={{headerShown: false }}>

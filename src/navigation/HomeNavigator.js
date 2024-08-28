@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import { useState } from "react";
 
 import HomeScreen from "../screens/MainScreens/HomeScreen";
@@ -8,7 +8,7 @@ import BookNavigator from "./BookNavigator";
 import RequestNavigator from "../navigation/RequestNavigator";
 import RequestScreen from "../screens/MainScreens/RequestScreen";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const HomeNavigator = (props) => {
     
@@ -22,24 +22,6 @@ const HomeNavigator = (props) => {
                 </Stack.Screen>
                 <Stack.Screen name="Notifications" options={{headerShown: false}}>
                     {() => <NotificationsScreen theme={props.theme} />}
-                </Stack.Screen>
-            </Stack.Group>
-            <Stack.Group screenOptions={{presentation: "fullScreenModal"}}>
-                <Stack.Screen name="requests" options={{headerShown: false}}>
-                    {() => <RequestScreen theme={props.theme}/>}
-                </Stack.Screen>
-                <Stack.Screen name="BookNavigator" options={{headerShown: false}}>
-                    {() => <BookNavigator initialRegion={initialRegion} theme={props.theme} />}
-                </Stack.Screen>
-                <Stack.Screen name="RequestNavigator" options={{headerShown: false}}>
-                    {() => <RequestNavigator theme={props.theme}/>}
-                </Stack.Screen>
-            </Stack.Group>
-            <Stack.Group screenOptions={{presentation: "modal", contentStyle: {
-                backgroundColor: "transparent",
-            }}}>
-                <Stack.Screen name="Search" options={{headerShown: false }}>
-                    {() => <SearchModal theme={props.theme} />}
                 </Stack.Screen>
             </Stack.Group>
         </Stack.Navigator>

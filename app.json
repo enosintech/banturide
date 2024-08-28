@@ -4,6 +4,7 @@
     "slug": "BantuRide",
     "version": "1.0.0",
     "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splashscreen.png",
@@ -15,10 +16,15 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "userInterfaceStyle": "automatic",
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.creatifgenus.BantuRide"
+      "bundleIdentifier": "com.creatifgenus.BantuRide",
+      "config": {
+        "googleMapsApiKey": "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE"
+      }
     },
     "android": {
+      "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -47,9 +53,9 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 31,
-            "targetSdkVersion": 31,
-            "buildToolsVersion": "31.0.0"
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "buildToolsVersion": "33.0.0"
           },
           "ios": {
             "deploymentTarget": "14.0",

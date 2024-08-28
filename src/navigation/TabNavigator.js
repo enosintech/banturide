@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Dimensions } from "react-native";
+import { StyleSheet, View, Dimensions } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -20,27 +20,26 @@ const TabNavigator = (props) => {
                 tabBarShowLabel: false,
                 tabBarStyle: {
                     position: "absolute",
-                    borderTopLeftRadius: 40,
-                    borderTopRightRadius: 40,
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
                     borderTopWidth: 0,
-                    height: "11%",
+                    height: "9%",
                     backgroundColor: `${props.theme === "dark" ? "#0e1115" : "white"}`,
                     ...styles.shadow
                 },
-                tabBarActiveTintColor: "#186F65",
-                tabBarInactiveTintColor: `${props.theme === "dark" ? "white" : "gray"}`
+                tabBarActiveTintColor: `${props.theme === "dark" ? "white" : "white"}`,
+                tabBarInactiveTintColor: `${props.theme === "dark" ? "white" : "#186f65"}`
             })}
             >
             <Tab.Screen name="HomeNav" options={{
                 headerShown: false,
-                tabBarIcon: ({ size, color}) => (
-                    <View className="items-center justify-center" style={{top: 10}}>
+                tabBarIcon: ({ size, color, focused }) => (
+                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
                         <MaterialIcons 
                             name="home-filled"
-                            size={size}
+                            size={fontSize * 1.3}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Home</Text>
                     </View>
                 )
             }}>
@@ -48,14 +47,13 @@ const TabNavigator = (props) => {
             </Tab.Screen>
             <Tab.Screen name="Favourite"  options={{
                 headerShown: false,
-                tabBarIcon: ({ size, color}) => (
-                    <View className="items-center justify-center" style={{top: 10}}>
+                tabBarIcon: ({ size, color, focused}) => (
+                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
                         <MaterialIcons 
                             name="favorite"
-                            size={size}
+                            size={fontSize * 1.3}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Favorites</Text>
                     </View>
                 )
                  }}>
@@ -63,14 +61,13 @@ const TabNavigator = (props) => {
                  </Tab.Screen> 
             <Tab.Screen name="ProfileNav"  options={{
                 headerShown: false,
-                tabBarIcon: ({ size, color}) => (
-                    <View className="items-center justify-center" style={{top: 10}}>
+                tabBarIcon: ({ size, color, focused}) => (
+                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
                         <MaterialIcons 
                             name="person"
-                            size={size}
+                            size={fontSize * 1.3}
                             color={color}
                         />
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight mt-1`} style={{fontSize: fontSize * 0.45}}>Profile</Text>
                     </View>
                 )
                 }}>

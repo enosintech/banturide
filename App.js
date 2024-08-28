@@ -1,11 +1,15 @@
+import 'react-native-gesture-handler';
+
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { useCallback, useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
-import AnimatedSplash from "react-native-animated-splash-screen";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import { useColorScheme } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { Provider } from "react-redux";
-import { Appearance, useColorScheme } from "react-native";
+import { useFonts } from "expo-font";
+import AnimatedSplash from "react-native-animated-splash-screen";
+import * as SplashScreen from "expo-splash-screen";
 
 import { store } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
@@ -14,12 +18,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 
-  const colorScheme = Appearance.getColorScheme()
+  const colorScheme = useColorScheme();
 
   const [theme, setTheme] = useState(colorScheme);
   const [darkMode, setDarkMode] = useState(false);
-
-  console.log(colorScheme)
+  const [ loading, setLoading ] = useState(false);
 
   const [isLoaded] = useFonts({
     "os-italic" : require("./assets/fonts/OpenSans-Italic.ttf"),
@@ -38,11 +41,13 @@ export default function App() {
     }
   }, [isLoaded])
 
-  const [ loading, setLoading ] = useState(false);
+  useEffect(() => {
+    setTheme(colorScheme)
+  }, [colorScheme])
 
   setInterval(() => {
     setLoading(true)
-  }, 5000)
+  }, 4000)
 
   if(!isLoaded){
     return null;
@@ -59,8 +64,10 @@ export default function App() {
         logoWidth={350}
       >
         <NavigationContainer>
+          <GestureHandlerRootView style={{ flex: 1}}>
             <StackNavigator handleLayout={onLayoutRootView} theme={theme} toggleDarkMode={() => {setDarkMode(!darkMode)}} />
             <StatusBar style={`${theme === "dark" ? "light" : "dark"}`}/>
+          </GestureHandlerRootView>
         </NavigationContainer>
       </AnimatedSplash>
     </Provider>

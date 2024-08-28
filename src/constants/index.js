@@ -78,3 +78,21 @@ export const ratingPerks = [
         image: "",
     },
 ]
+
+export const deliveryRatingPerks = [
+    {
+        id: 1,
+        title: "Rapid",
+        image: "",
+    },
+    {
+        id: 2,
+        title: "Responsive",
+        image: "",
+    },
+    {
+        id: 3,
+        title: "Resourceful",
+        image: "",
+    },
+]

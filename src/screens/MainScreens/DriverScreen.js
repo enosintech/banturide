@@ -7,12 +7,13 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as SecureStore from "expo-secure-store";
 
 import RequestMap from '../../components/atoms/RequestMap';
 import PageLoader from '../../components/atoms/PageLoader';
 
-import { selectBooking, selectDestination, selectDriver, selectLocationUpdatedRan, selectOrigin, selectPassThrough, selectPaymentMethod, selectPaymentMethodUpdated, selectRemaingTripDistance, selectRemainingTripTime, selectTripType, setBooking, setBookingRequested, setDestination, setDriver, setLocationUpdatedRan, setOrigin, setPassThrough, setPaymentMethodUpdated, setPrice, setRemainingTripDistance, setRemainingTripTime, setSearchComplete, setSearchPerformed, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
-import { selectToken } from '../../../slices/authSlice';
+import { clearChatMessages, selectBooking, selectDestination, selectDriver, selectLocationUpdatedRan, selectOrigin, selectPassThrough, selectPaymentMethod, selectPaymentMethodUpdated, selectRemaingTripDistance, selectRemainingTripTime, selectTripType, setBooking, setBookingRequested, setDeliveryType, setDestination, setDriver, setLocationUpdatedRan, setOrigin, setPassThrough, setPaymentMethodUpdated, setPrice, setRecipient, setRemainingTripDistance, setRemainingTripTime, setSearchComplete, setSearchPerformed, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
+import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 const  { width } = Dimensions.get("window");
 
@@ -39,6 +40,9 @@ const DriverScreen = (props) => {
   const tokens = useSelector(selectToken);
   const remainingTripDistance = useSelector(selectRemainingTripTime);
   const paymentMethodUpdated = useSelector(selectPaymentMethodUpdated);
+  const isSignedIn = useSelector(selectIsSignedIn)
+
+  const [ error, setError ] = useState(false);
 
   const { updatedPaymentMessage } = routes.params ? routes.params : "";
 
@@ -57,7 +61,7 @@ const DriverScreen = (props) => {
 
   const fitMarkers = () => {
     mapRef.current?.fitToSuppliedMarkers(['origin', 'driver' ], {
-      edgePadding: {top: 100, right: 200, bottom: 100, left: 200}
+      edgePadding: {top: 100, right: 100, bottom: 50, left: 100}
     })
   }
 
@@ -79,12 +83,16 @@ const DriverScreen = (props) => {
             title: "My Trip Details"
         });
     } catch (error) {
-        console.error('Error sharing trip details:', error);
+        const errorField = error.error || error.message;
+        setError(errorField || "Error Sharing Trip")
+        setTimeout(() => {
+          setError(false)
+        }, 3000)
     }
   };
 
   const updateBookingLocation = async () => {
-      console.log("trying");
+      console.log("trying booking");
       await fetch("https://banturide-api.onrender.com/location/update-booking-location", {
           method: "POST",
           headers: {
@@ -98,12 +106,110 @@ const DriverScreen = (props) => {
           })
       }).then(response => response.json())
       .then(data => {
-        console.log("now running")
+        if(data.success === false){
+          throw new Error(data.error || data.message)
+        } else {
+          console.log(data);
+        }
+      })
+      .catch( async (error) => {
+        const errorField = error.message || error.error;
+
+        if(errorField === "Unauthorized"){
+          await SecureStore.deleteItemAsync("tokens")
+          .then(() => {
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
+          .catch(() => {
+            setError("Something went wrong. Unauthorized")
+            setTimeout(() => {
+              setError(false)
+            }, 3000)
+          })
+        } else {
+          setError(errorField || "Something went wrong")
+          setTimeout(() => {
+            setError(false)
+          }, 3000)
+        }
+      })
+  }
+
+  const updateDeliveryLocation = async () => {
+    console.log("trying delivery");
+    await fetch("https://banturide-api.onrender.com/location/update-delivery-location", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokens?.idToken}`,
+        'x-refresh-token' : tokens?.refreshToken,
+      },
+      body: JSON.stringify({
+        deliveryId: booking?.bookingId,
+        driverId: booking?.driverId
+      })
+    }).then(response => response.json())
+    .then(data => {
+      if(data.success === false){
+        throw new Error(data.error || data.message)
+      } else {
         console.log(data);
-      })
-      .catch((err) => {
-        console.log("Error updating booking location: ", err)
-      })
+      }
+    }).catch( async (error) => {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized"){
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          setError("Something went wrong. Unauthorized")
+          setTimeout(() => {
+            setError(false)
+          }, 3000)
+        })
+      } else {
+        setError(errorField || "Something went wrong")
+        setTimeout(() => {
+          setError(false)
+        }, 3000)
+      }
+    })
   }
 
   useEffect(() => {
@@ -145,17 +251,18 @@ const DriverScreen = (props) => {
   }, [booking, api])
 
   useEffect(() => {
-    if(!locationUpdateRan && booking?.status === "confirmed"){
+    if(!locationUpdateRan && booking?.status === "confirmed" && booking?.bookingType === "ride"){
       updateBookingLocation();
       dispatch(setLocationUpdatedRan(true))
     }
   }, [locationUpdateRan, booking])
 
   useEffect(() => {
-    setTimeout(() => {
-        dispatch(setPaymentMethodUpdated(false))
-    }, 5000)
-}, [paymentMethodUpdated])
+    if(!locationUpdateRan && booking?.status === "confirmed" && booking?.bookingType === "delivery"){
+      updateDeliveryLocation();
+      dispatch(setLocationUpdatedRan(true))
+    }
+  }, [locationUpdateRan, booking])
 
 useEffect(() => {
   if(booking?.status !== "completed"){
@@ -180,6 +287,7 @@ useEffect(() => {
     dispatch(setTravelTimeInformation(null))
     dispatch(setTripDetails(null))
     dispatch(setPassThrough(null))
+    dispatch(clearChatMessages())
     dispatch(setBookingRequested(false))
     dispatch(setSearchPerformed(false))
     dispatch(setSearchComplete(false))
@@ -201,12 +309,20 @@ useEffect(() => {
     <View className={`w-full h-full`}>
       <View className={`w-full h-full relative flex ${props.theme === "dark" ? "bg-dark-main" : ""}`}>
           {paymentMethodUpdated &&
-                <View className={`w-full h-[6%] absolute z-20 top-20 flex items-center justify-center`}>
-                    <View className={`w-[65%] h-[90%] bg-black rounded-[50px] flex items-center justify-center px-2`}>
-                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{updatedPaymentMessage}</Text>
-                    </View>
-                </View>
-            }
+              <View className={`w-full h-[6%] absolute z-20 top-20 flex items-center justify-center`}>
+                  <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
+                      <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{updatedPaymentMessage}</Text>
+                  </View>
+              </View>
+          }
+
+          {error &&
+              <View className={`w-full h-[6%] absolute z-20 top-20 flex items-center justify-center`}>
+                  <View className={`w-fit px-6 h-[90%] bg-red-600 rounded-[50px] flex items-center justify-center`}>
+                      <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{error}</Text>
+                  </View>
+              </View>
+          }
 
         <ScrollView contentContainerStyle={{
           display: "flex",
@@ -259,22 +375,21 @@ useEffect(() => {
                   </View>
                 </View>
               </View>
-              <View className={`w-0 h-[80%] border-l-[0.5px] flex ${props.theme === "dark" ? "border-white" : "border-gray-300"}` }></View>
               <View className={`w-1/3 h-full flex items-center justify-center`}>
                 <TouchableOpacity disabled={booking?.rated === true ? true : false} className={`w-[85%] h-[85%] flex items-center justify-center rounded-[30px] shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`} onPress={() => {
-                  booking?.status === "ongoing" || booking?.status === "arrived" 
+                  booking?.bookingType === "ride" &&  (booking?.status === "ongoing" || booking?.status === "arrived") 
                   ? 
                     navigation.navigate("rateDriver")
                   :
                   navigation.navigate("chat");
                 }}>
                   {
-                    booking?.status === "ongoing" || booking?.status === "arrived"
+                    booking?.bookingType === "ride" &&  (booking?.status === "ongoing" || booking?.status === "arrived") 
                     ?
                     booking?.rated === true ?
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
                       <MaterialIcons name="star-rate" size={fontSize * 1.75} color={props.theme === "dark" ? "white" : "black"}/>
-                      <Text style={{fontSize: fontSize * 0.65}} className={`font-semibold tracking-tight mt-1 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.driverRating}</Text>
+                      <Text style={{fontSize: fontSize * 1.1}} className={`font-black tracking-tight mt-3 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.driverRating.toFixed(2)}</Text>
                     </View>
                     :
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
@@ -366,24 +481,27 @@ useEffect(() => {
               </View>
             </View>
             <View className={`w-[95%] h-[30%] flex flex-row items-center justify-evenly`}>
-              <View className={`flex flex-col items-center`}>
-                <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={() => {
-                  navigation.navigate("changePayment")
-                }}>
-                  <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
-                    {booking?.paymentMethod === "cash" 
-                    ?
-                    <Ionicons name="cash" size={fontSize * 1.6} color="green"/>
-                    :
-                    <Entypo name="wallet" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"} />
-                    }
-                  </View>
-                </TouchableOpacity>
-                <View className={`w-fit text-center flex flex-col items-center relative`}>
-                  <Text style={{fontSize: fontSize * 0.65}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Payment</Text>
-                  <Text style={{fontSize: fontSize * 0.5}} className={`text-neutral-700 absolute -translate-y-1`}>{booking?.paymentMethod === "cash" ? "Cash" : "Mobile Money"}</Text>
-                </View>
-              </View>
+                  {
+                    booking?.bookingType === "ride" && 
+                      <View className={`flex flex-col items-center`}>
+                        <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={() => {
+                          navigation.navigate("changePayment")
+                        }}>
+                          <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
+                            {booking?.paymentMethod === "cash" 
+                            ?
+                            <Ionicons name="cash" size={fontSize * 1.6} color="green"/>
+                            :
+                            <Entypo name="wallet" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"} />
+                            }
+                          </View>
+                        </TouchableOpacity>
+                        <View className={`w-fit text-center flex flex-col items-center relative`}>
+                          <Text style={{fontSize: fontSize * 0.65}} className={`tracking-tight mt-2 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Payment</Text>
+                          <Text style={{fontSize: fontSize * 0.5}} className={`text-neutral-700 absolute -translate-y-1`}>{booking?.paymentMethod === "cash" ? "Cash" : "Mobile Money"}</Text>
+                        </View>
+                      </View>
+                  }
               <View className={`flex flex-col items-center`}>
                 <TouchableOpacity className={`w-[100px] h-[100px] flex items-center justify-center`} onPress={shareTripDetails}>
                   <View className={`w-[65px] h-[65px] rounded-full shadow-sm flex items-center justify-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>

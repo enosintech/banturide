@@ -10,7 +10,7 @@ import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 import ModalLoader from "../../components/atoms/ModalLoader";
 
 import { selectFavAddressChanged, setFavAddressChanged, setFavAddressUpdated } from "../../../slices/navSlice";
-import { selectToken } from "../../../slices/authSlice";
+import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -22,6 +22,7 @@ const AddLocation = (props) => {
     const dispatch = useDispatch();
 
     const tokens = useSelector(selectToken);
+    const isSignedIn = useSelector(selectIsSignedIn);
     const favAddressChanged = useSelector(selectFavAddressChanged)
 
 
@@ -32,6 +33,7 @@ const AddLocation = (props) => {
     });
 
     const [ loading, setLoading ] = useState(false);
+    const [ error, setError ] = useState(false);
 
     const fontSize = width * 0.05;
 
@@ -56,17 +58,33 @@ const AddLocation = (props) => {
         .then( response => response.json())
         .then(data => {
             if(data.success === false){
-                setLoading(false)
-                console.log(data.message)
+                throw new Error(result.message || result.error)
             } else {
                 setLoading(false)
                 navigation.navigate("Favorite", {saveMessage: `${locationName} Address Added Successfully`})
                 dispatch(setFavAddressUpdated(true));
+                setTimeout(() => {
+                    dispatch(setFavAddressUpdated(false))
+                }, 4000)
                 dispatch(setFavAddressChanged(!favAddressChanged))
             }
         })
         .catch((err) => {
-            console.log(err)
+            if(err === "Unauthorized"){
+                setLoading(false)
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+            } else {
+                setLoading(false)
+                setError(err)
+                setTimeout(() => {
+                    setError(false)
+                }, 4000)
+            }
         })
     
     }
@@ -87,92 +105,106 @@ const AddLocation = (props) => {
                         <ModalLoader theme={props.theme} />
                     </View>
                 </Modal>
-                    
-                    <View className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-[50%] rounded-t-2xl shadow-2xl items-center`}>
-                        <View className={`w-full h-[3%] border-b-[0.5px] border-solid ${props.theme === "light" ? "border-gray-100" : props.theme === "dark" ? "border-gray-900" : "border-gray-400"} rounded-t-2xl  items-center justify-center`}>
-                            <ShortModalNavBar theme={props.theme}/>
-                        </View>
-                        <View className={`w-full h-[15%] px-3 items-center flex-row`}>
-                            <MaterialIcons name="add-location" size={fontSize * 1.5} color={`${props.theme === "dark" ? "white" : "black"}`}/>
-                            <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Add Location</Text>
-                        </View>
-                        <View className={`w-full h-[40%] pt-2 items-center relative z-20`}>
-                            <TextInput
-                                className={`w-[90%] h-[36%] rounded-[25px] font-semibold tracking-tight shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d] text-white" : "bg-white border-gray-200 text-black"} px-2 `}
-                                placeholder="Name"
-                                style={{fontSize: fontSize * 0.75}}
-                                placeholderTextColor="rgb(156 163 175)"
-                                value={locationName}
-                                onChangeText={(x) => {setLocationName(x)}}
-                            />
-                            <View className={`w-[90%] h-[36%] mt-5 rounded-[25px] shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d]" : "bg-white border-gray-200"}`}>
-                                <GooglePlacesAutocomplete 
-                                    styles={{
-                                        container: {
-                                            width: "100%",
-                                            height: "100%",
-                                        },
-                                        textInputContainer: {
-                                            height: "100%",
-                                            width: "100%",
-                                        },
-                                        textInput: {
-                                            fontSize: fontSize * 0.75,
-                                            height: "100%",
-                                            width: "100%",
-                                            fontWeight: "600",
-                                            color: props.theme === "dark" ? "white" : "black",
-                                            backgroundColor: "transparent",
-                                        },
-                                        listView: {
-                                            position : "absolute",
-                                            zIndex: 100,
-                                            elevation: 100,
-                                            top: 70,
-                                            backgroundColor: props.theme === "dark" ? "#222831" : "white",
-                                            borderBottomLeftRadius: 20,
-                                            borderBottomRightRadius: 20,
-                                            height: 150 ,
-                                            
-                                        },
-                                        row: {
-                                            backgroundColor: props.theme === "dark" ? "#222831" : "white",
-                                        },
-                                        description: {
-                                            color: props.theme === "dark" ? "white" : "black"
-                                        },
-                                    }}
-                                    listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
-                                    listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme} />}
-                                    textInputProps={{
-                                        placeholder: "Enter Location Address",
-                                        placeholderTextColor: "rgb(156 163 175)"
-                                    }}
-                                    onPress={(data, details = null) => {
-                                        setLocationAddress({
-                                            location: details.geometry.location,
-                                            description: data.description
-                                        })
-                                    }}
-                                    query={{
-                                        key: api,
-                                        language: "en",
-                                        components: "country:zm"
-                                    }}
-                                    fetchDetails={true}
-                                    enablePoweredByContainer={false}
-                                    minLength={1}
-                                    nearbyPlacesAPI="GooglePlacesSearch"
-                                    debounce={100}
-                                />
-                            </View>
-                        </View>
-                        <View className={`w-[90%] h-[23%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-dark-secondary" : "bg-white border-gray-200"} shadow border-[0.5px] justify-center items-center`}>
-                            <TouchableOpacity disabled={locationAddress["description"].length < 1 ? true : false} className={`bg-[#186F65] shadow-sm w-[90%] h-[65%] rounded-[50px] flex justify-center items-center ${locationAddress["description"].length < 1 ? "opacity-40" : "opacity-100"}`} onPress={handleSaveLocationAddress}>
-                                <Text style={{fontSize: fontSize * 0.85}} className="font-bold tracking-tight text-white">Save</Text>
-                            </TouchableOpacity>
+
+                {error &&
+                    <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
+                        <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
+                            <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
                         </View>
                     </View>
+                }
+                    
+                <View className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-[50%] rounded-t-2xl shadow-2xl items-center`}>
+                    <View className={`w-full h-[3%] border-b-[0.5px] border-solid ${props.theme === "light" ? "border-gray-100" : props.theme === "dark" ? "border-gray-900" : "border-gray-400"} rounded-t-2xl  items-center justify-center`}>
+                        <ShortModalNavBar theme={props.theme}/>
+                    </View>
+                    <View className={`w-full h-[15%] px-3 items-center flex-row`}>
+                        <MaterialIcons name="add-location" size={fontSize * 1.5} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                        <Text style={{fontSize: fontSize * 1.3}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-extrabold tracking-tight`}>Add Location</Text>
+                    </View>
+                    <View className={`w-full h-[40%] pt-2 items-center relative z-20`}>
+                        <TextInput
+                            className={`w-[90%] h-[36%] rounded-[25px] font-semibold tracking-tight shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d] text-white" : "bg-white border-gray-200 text-black"} px-2 `}
+                            placeholder="Name"
+                            style={{fontSize: fontSize * 0.75}}
+                            placeholderTextColor="rgb(156 163 175)"
+                            value={locationName}
+                            onChangeText={(x) => {setLocationName(x)}}
+                            keyboardType={"default"}
+                            autoComplete={"address-line1"}
+                            autoCapitalize="words"
+                            autoCorrect={false}
+                            accessibilityLabel="Location Name Input"
+                            accessibilityHint="Enter your Favorite Location Name"
+                        />
+                        <View className={`w-[90%] h-[36%] mt-5 rounded-[25px] shadow border-[0.5px] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d]" : "bg-white border-gray-200"}`}>
+                            <GooglePlacesAutocomplete 
+                                styles={{
+                                    container: {
+                                        width: "100%",
+                                        height: "100%",
+                                    },
+                                    textInputContainer: {
+                                        height: "100%",
+                                        width: "100%",
+                                    },
+                                    textInput: {
+                                        fontSize: fontSize * 0.75,
+                                        height: "100%",
+                                        width: "100%",
+                                        fontWeight: "600",
+                                        color: props.theme === "dark" ? "white" : "black",
+                                        backgroundColor: "transparent",
+                                    },
+                                    listView: {
+                                        position : "absolute",
+                                        zIndex: 100,
+                                        elevation: 100,
+                                        top: 70,
+                                        backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                                        borderBottomLeftRadius: 20,
+                                        borderBottomRightRadius: 20,
+                                        height: 150 ,
+                                        
+                                    },
+                                    row: {
+                                        backgroundColor: props.theme === "dark" ? "#222831" : "white",
+                                    },
+                                    description: {
+                                        color: props.theme === "dark" ? "white" : "black"
+                                    },
+                                }}
+                                listEmptyComponent={<ListLoadingComponent element={"Empty"} theme={props.theme} />}
+                                listLoaderComponent={<ListLoadingComponent element={"loading"} theme={props.theme} />}
+                                textInputProps={{
+                                    placeholder: "Enter Location Address",
+                                    placeholderTextColor: "rgb(156 163 175)"
+                                }}
+                                onPress={(data, details = null) => {
+                                    setLocationAddress({
+                                        location: details.geometry.location,
+                                        description: data.description
+                                    })
+                                }}
+                                query={{
+                                    key: api,
+                                    language: "en",
+                                    components: "country:zm"
+                                }}
+                                fetchDetails={true}
+                                enablePoweredByContainer={false}
+                                minLength={1}
+                                nearbyPlacesAPI="GooglePlacesSearch"
+                                debounce={100}
+                            />
+                        </View>
+                    </View>
+                    <View className={`w-[90%] h-[23%] rounded-[20px] ${props.theme === "dark" ? "border-[#222831] bg-dark-secondary" : "bg-white border-gray-200"} shadow border-[0.5px] justify-center items-center`}>
+                        <TouchableOpacity disabled={locationAddress["description"].length < 1 ? true : false} className={`bg-[#186F65] shadow-sm w-[90%] h-[65%] rounded-[50px] flex justify-center items-center ${locationAddress["description"].length < 1 ? "opacity-40" : "opacity-100"}`} onPress={handleSaveLocationAddress}>
+                            <Text style={{fontSize: fontSize * 0.85}} className="font-bold tracking-tight text-white">Save</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
                 </View>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>

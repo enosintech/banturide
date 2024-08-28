@@ -14,10 +14,10 @@ import { GOOGLE_API_KEY } from "@env";
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
 
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient, selectDeliveryType } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectNotificationsArray } from "../../../slices/notificationSlice";
-import { selectUserInfo } from "../../../slices/authSlice";
+import { selectUserCurrentLocation, selectUserInfo, setUserCurrentLocation } from "../../../slices/authSlice";
 
 Geocoder.init("AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE");
 
@@ -42,8 +42,9 @@ const HomeScreen = (props) => {
     const notificationsArray = useSelector(selectNotificationsArray);
     const remainingTripTime = useSelector(selectRemainingTripTime);
     const remainingTripDistance = useSelector(selectRemaingTripDistance);
+    const deliveryType = useSelector(selectDeliveryType);
 
-    const [ currentLocation, setCurrentLocation ] = useState(null)
+    const currentLocation = useSelector(selectUserCurrentLocation);
     const [currentStreet, setCurrentStreet] = useState(null)
     const mapRef = useRef(null);
 
@@ -60,13 +61,13 @@ const HomeScreen = (props) => {
         }
 
         let location = await Location.getCurrentPositionAsync({});
-        
-        setCurrentLocation({
+
+        dispatch(setUserCurrentLocation({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
             latitudeDelta: 0.010,
             longitudeDelta: 0.010
-        });
+        }))
     };
 
     const goToCurrent = () => {
@@ -112,14 +113,14 @@ const HomeScreen = (props) => {
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
             <View className={`h-full w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>
-                <Map theme={props.theme} mapRef={mapRef} currentLocation={currentLocation} initialRegion={props.initialRegion} setInitialRegion={props.setInitialRegion} setCurrentLocation={setCurrentLocation}/>
+                <Map theme={props.theme} mapRef={mapRef} currentLocation={currentLocation} initialRegion={props.initialRegion} setInitialRegion={props.setInitialRegion} setCurrentLocation={setUserCurrentLocation}/>
             </View>
 
             {booking 
             ?
-                <View className="absolute h-[18%] w-full bottom-[12%] flex items-center">
-                    <View className="h-full w-[98%] p-3 flex items-center justify-center">
-                        <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[40px] px-1 shadow-sm ${props.theme === "dark" ? "bg-dark-primary border-dark-primary" : "bg-white border-white"}`} onPress={() => {
+                <View className="absolute h-[18%] w-full bottom-[9%] flex items-center">
+                    <View className="h-full w-[97%] p-3 flex items-center justify-center">
+                        <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[25px] px-1 shadow-sm ${props.theme === "dark" ? "bg-dark-primary border-dark-primary" : "bg-white border-white"}`} onPress={() => {
                             if(booking?.status === "confirmed" || booking?.status === "ongoing" || booking?.status === "arrived" || booking?.status === "completed"){
                                 navigation.navigate("RequestNavigator")
                             } else {
@@ -129,14 +130,14 @@ const HomeScreen = (props) => {
                             <View className={`h-full w-1/2 flex items-center justify-center`}>
                                 <View className={`relative w-full h-1/2 flex items-center rounded-[30px] overflow-hidden`}>
                                     <Image 
-                                        source={tripDetails?.image}
+                                        source={booking?.bookingType === "ride" ? tripDetails?.image : deliveryType?.image}
                                         style={{
                                             width: fontSize * 2,
                                             height: fontSize * 2,
                                             resizeMode: "contain",
                                         }}
                                     />
-                                    <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{tripDetails?.title}</Text>
+                                    <Text style={{fontSize: fontSize * 0.7}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>{booking?.bookingType === "ride" ? tripDetails?.title : deliveryType?.title }</Text>
                                 </View>
                                 <View className={`w-[80%] h-0 border-t ${props.theme === "dark" ? "border-white" : "border-gray-200"}`}></View>
                                 <View className={`w-full h-1/2 flex items-center rounded-[25px]`}>
@@ -192,7 +193,7 @@ const HomeScreen = (props) => {
                                                 }}
                                             />
                                         }
-                                        <Text style={{fontSize: fontSize * 0.65}} className={`${booking?.status === "confirmed" || booking?.status === "ongoing" || booking?.status === "arrived" || booking?.status === "completed" || searchComplete ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-black tracking-tight`}>{booking?.status === "confirmed" && !booking?.driverArrivedAtPickup ? "Driver is on the way" : booking?.status === "confirmed" && booking?.driverArrivedAtPickup ? "Driver has Arrived" : booking?.status === "ongoing" ? "You're on the way!" : booking?.status === "arrived" ? "You have arrived" : booking?.status === "completed" ? "Rate Driver" : booking?.status === "pending" && searchComplete !== true ? "Looking for drivers..." : "Search Complete"}</Text>
+                                        <Text style={{fontSize: fontSize * 0.65}} className={`${booking?.status === "confirmed" || booking?.status === "ongoing" || booking?.status === "arrived" || booking?.status === "completed" || searchComplete ? "text-white" : props.theme === "dark"  ? "text-white" : "text-black"} font-black tracking-tight`}>{booking?.status === "confirmed" && !booking?.driverArrivedAtPickup ? "Driver is on the way" : booking?.status === "confirmed" && booking?.driverArrivedAtPickup ? "Driver has Arrived" : booking?.status === "ongoing" && booking?.bookingType === "ride" ? "You're on the way!" : booking?.status === "ongoing" && booking?.bookingType === "delivery" ? "Package on the way!" : booking?.status === "arrived" && booking?.bookingType === "ride" ? "You have arrived" : booking?.status === "arrived" && booking?.bookingType === "delivery" ? "Driver at Drop-Off" : booking?.status === "completed" ? "Rate Driver" : booking?.status === "pending" && searchComplete !== true ? "Looking for drivers..." : "Search Complete"}</Text>
                                     </View>
                                     <View className={`h-[45%] w-full flex items-center relative rounded-[30px] pl-2 justify-center ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} shadow-sm`}>
                                         <View className={`w-[90%]`}>
@@ -213,8 +214,8 @@ const HomeScreen = (props) => {
                     </View>
                 </View>
             :
-                <View className="absolute h-[18%] w-full bottom-[12%] flex items-center">
-                    <View className={`h-full w-[95%] rounded-[50px]  p-3 flex items-center justify-evenly`}>
+                <View className="absolute h-[18%] w-full bottom-[9%] flex items-center">
+                    <View className={`h-full w-[97%] rounded-[50px]  p-3 flex items-center justify-evenly`}>
                         <View className={`w-[98%]  h-[45%] ${props.theme === "dark" ? "bg-gray-300" : "bg-white"} rounded-[50px] shadow-sm `}>
                             {origin && destination 
                             ? 
@@ -277,11 +278,11 @@ const HomeScreen = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[30%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
+            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} h-[40px] w-[40px] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
                 <MaterialIcons name="my-location" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[30%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } h-[40px] w-[40px] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
+            <TouchableOpacity className={`absolute bottom-[27%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } h-[40px] w-[40px] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
                 <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 

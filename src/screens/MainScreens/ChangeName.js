@@ -89,11 +89,7 @@ const ChangeName = (props) => {
           dispatch(setUserDataSet(false))
         } else {
           setLoading(false)
-          if(typeof error === "string"){
-            setError(error)
-          } else {
-            setError("There was an error")
-          }
+          setError(error)
           setTimeout(() => {
             setError(false)
           }, 3000)
@@ -119,7 +115,7 @@ const ChangeName = (props) => {
       {error &&
           <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
               <View className={`w-fit h-[80%] px-6 bg-red-700 rounded-[50px] flex items-center justify-center`}>
-                  <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{error}</Text>
+                  <Text style={{fontSize: fontSize * 0.8}} className="text-white font-light tracking-tight text-center">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
               </View>
           </View>
       }
@@ -132,6 +128,12 @@ const ChangeName = (props) => {
             className={`w-[90%] h-[15%] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d] text-white" : "bg-white border-gray-200 text-black"} shadow border rounded-[25px] px-4`}
             placeholder="First Name"
             onChangeText={(x) => {setFirstName(x)}}
+            keyboardType={"default"}
+            autoComplete={"name"}
+            autoCapitalize="words"
+            autoCorrect={false}
+            accessibilityLabel="First Name Input"
+            accessibilityHint="Enter your First Name"
         />
         <TextInput
             value={lastName} 
@@ -139,6 +141,12 @@ const ChangeName = (props) => {
             className={`w-[90%] h-[15%] ${props.theme === "dark" ? "bg-[#2b3540] border-[#1e252d] text-white" : "bg-white border-gray-200 text-black"} shadow border rounded-[25px] px-4`}
             placeholder="Last Name"
             onChangeText={(x) => {setLastName(x)}}
+            keyboardType={"default"}
+            autoComplete={"family-name"}
+            autoCapitalize="words"
+            autoCorrect={false}
+            accessibilityLabel="Last Name Input"
+            accessibilityHint="Enter your Last Name"
         />
         <View className={`w-full h-[30%] flex flex-row items-start justify-evenly`}>
             <TouchableOpacity onPress={() => {

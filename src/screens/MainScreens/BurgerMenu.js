@@ -65,11 +65,7 @@ const BurgerMenu = (props) => {
                 dispatch(setUserDataSet(false))
             } else {
                 dispatch(setGlobalAuthLoading(false))
-                if(typeof error === "string"){
-                    dispatch(setError(error))
-                } else {
-                    dispatch(setError("Unknown error occcured"))
-                }
+                setError(error)
                 setTimeout(() => {
                     setError(false)
                 }, 4000)
@@ -95,7 +91,7 @@ const BurgerMenu = (props) => {
              {error &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit px-4 h-[90%] bg-red-600 rounded-[50px] flex items-center justify-center`}>
-                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{error}</Text>
+                        <Text style={{ fontSize: fontSize * 0.7 }} className="text-white font-medium text-center tracking-tight">{typeof error === "string" ? error : "Server or Network Error Occurred"}</Text>
                     </View>
                 </View>
             }

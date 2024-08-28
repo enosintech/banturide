@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 
 import ProfileScreen from "../screens/MainScreens/ProfileScreen";
 import AboutScreen from "../screens/MainScreens/AboutScreen";
@@ -6,7 +6,7 @@ import BurgerMenu from "../screens/MainScreens/BurgerMenu";
 import EditProfile from "../screens/MainScreens/EditProfile";
 import ChangeName from "../screens/MainScreens/ChangeName";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const ProfileNavigator = (props) => {
     return(

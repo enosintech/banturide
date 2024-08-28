@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 
 import FavouriteScreen from "../screens/MainScreens/FavouriteScreen";
 import AddHome from "../screens/MainScreens/AddHome";
@@ -8,7 +8,7 @@ import EditHome from "../screens/MainScreens/EditHome";
 import EditWork from "../screens/MainScreens/EditWork";
 import EditLocation from "../screens/MainScreens/EditLocation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const FavoriteNavigator = (props) => {
     return (

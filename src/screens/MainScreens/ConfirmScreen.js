@@ -6,12 +6,13 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as SecureStore from "expo-secure-store";
 
 import PageLoader from '../../components/atoms/PageLoader';
 
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId, selectPaymentMethod, setBookingRequested, selectDeliveryType, selectRecipient, setDeliveryType, setRecipient } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId, selectPaymentMethod, setBookingRequested, selectDeliveryType, selectRecipient, setDeliveryType, setRecipient, setGlobalBookingError } from '../../../slices/navSlice';
 import { setDestination, setOrigin, setPrice, setTravelTimeInformation, setTripDetails, setBooking } from '../../../slices/navSlice';
-import { selectToken, selectUserInfo } from '../../../slices/authSlice';
+import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 const { width } = Dimensions.get("window");
 
@@ -37,20 +38,37 @@ const ConfirmScreen = (props) => {
   const paymentMethod = useSelector(selectPaymentMethod);
   const deliveryType = useSelector(selectDeliveryType);
   const recipient = useSelector(selectRecipient);
-  const [ cancelPromptVisible, setCancelPromptVisible ] = useState(false)
+  const isSignedIn = useSelector(selectIsSignedIn);
+
+  const [ cancelPromptVisible, setCancelPromptVisible ] = useState(false);
 
   const rideRequestForm = {
-    user: userInfo ? userInfo._id : "",
     price: parseFloat(price?.replace(/[K]/g, "")),
     hasThirdStop: passThrough ? true : false,
     thirdStopLatitude: passThrough ? passThrough.location.lat : "",
     thirdStopLongitude: passThrough ? passThrough.location.lng : "",
-    pickUpLatitude: origin.location.lat,
-    pickUpLongitude: origin.location.lng,
-    dropOffLatitude: destination.location.lat,
-    dropOffLongitude: destination.location.lng,
+    pickUpLatitude: origin?.location.lat,
+    pickUpLongitude: origin?.location.lng,
+    dropOffLatitude: destination?.location.lat,
+    dropOffLongitude: destination?.location.lng,
     seats: seats,
+    bookingClass: tripDetails?.title,
     paymentMethod: paymentMethod
+  }
+
+  const deliveryRequestForm = {
+    price: parseFloat(price?.replace(/[K]/g, "")),
+    hasThirdStop: passThrough ? true : false,
+    thirdStopLatitude: passThrough ? passThrough.location.lat : "",
+    thirdStopLongitude: passThrough ? passThrough.location.lng : "",
+    pickUpLatitude: origin?.location.lat,
+    pickUpLongitude: origin?.location.lng,
+    dropOffLatitude: destination?.location.lat,
+    dropOffLongitude: destination?.location.lng,
+    paymentMethod: paymentMethod,
+    recipientName: recipient?.recipientFullName,
+    recipientContact: recipient?.recipientContact,
+    deliveryClass: deliveryType?.title
   }
 
   const handleMakeRideRequest = async () => {
@@ -66,10 +84,8 @@ const ConfirmScreen = (props) => {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       if(data.success === false){
-        dispatch(setBookingRequestLoading(false))
-        console.log(data.error, "failed")
+        throw new Error(data.message || data.error)
       } else {
         dispatch(setBookingRequestLoading(false))
         dispatch(setBooking(data.booking))
@@ -78,13 +94,114 @@ const ConfirmScreen = (props) => {
         navigation.navigate("requests")
       }
     })
-    .catch((error) => {
-      console.log("Error making a booking:", error);
+    .catch( async (error) => {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized"){
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setGlobalBookingError("Error Making Booking Request. Unauthorized"))
+          setTimeout(() => {
+            dispatch(setGlobalBookingError(false))
+          }, 3000)
+        })
+
+      } else {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setGlobalBookingError(errorField))
+          setTimeout(() => {
+              dispatch(setGlobalBookingError(false))
+          }, 3000)
+      }
     })
   }
 
   const handleMakeDeliveryRequest = async () => {
-    console.log("delivery made")
+    dispatch(setBookingRequestLoading(true))
+    await fetch("https://banturide-api.onrender.com/delivery/make-delivery-request", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokens?.idToken}`,
+        'x-refresh-token' : tokens?.refreshToken,
+      },
+      body: JSON.stringify(deliveryRequestForm)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.success === false) {
+        throw new Error(data.message || data.error)
+      } else {
+        dispatch(setBookingRequestLoading(false))
+        dispatch(setBooking(data.booking))
+        dispatch(setBookingRequested(true))
+        navigation.navigate("Home")
+        navigation.navigate("requests")
+      }
+    })
+    .catch( async (error) => {
+      const errorField = error.message || error.error;
+
+      if(errorField === "Unauthorized"){
+        await SecureStore.deleteItemAsync("tokens")
+        .then(() => {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setDestination(null))
+          dispatch(setOrigin(null))
+          dispatch(setPassThrough(null))
+          dispatch(setPrice(null))
+          dispatch(setTravelTimeInformation(null))
+          dispatch(setTripDetails(null))
+          dispatch(setDeliveryType(null))
+          dispatch(setRecipient(null))
+          dispatch(setUserInfo(null))
+          dispatch(setToken(null))
+          dispatch(setIsSignedIn(!isSignedIn))
+          dispatch(setTokenFetched(false))
+          dispatch(setUserDataFetched(false))
+          dispatch(setUserDataSet(false))
+          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+          setTimeout(() => {
+            dispatch(setGlobalUnauthorizedError(false))
+          }, 5000)
+        })
+        .catch(() => {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setGlobalBookingError("Error Making Delivery Request. Unauthorized"))  
+          setTimeout(() => {
+            dispatch(setGlobalBookingError(false))
+        }, 3000)        
+        })        
+      } else {
+          dispatch(setBookingRequestLoading(false))
+          dispatch(setGlobalBookingError(errorField))
+          setTimeout(() => {
+              dispatch(setGlobalBookingError(false))
+          }, 3000)
+      }
+    })
   }
 
   return (
@@ -211,7 +328,7 @@ const ConfirmScreen = (props) => {
                       />
                       <View className={`-translate-x-7`}>
                         <Text style={{fontSize: fontSize * 0.7}} className={`font-black tracking-tight relative z-20 ${props.theme === "dark" ? "text-white" : "text-black"}`}>{deliveryType?.title}</Text>
-                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} text-right`}>{deliveryType.description}</Text>
+                        <Text className={`${props.theme === "dark" ? "text-white" : "text-black"} text-right`}>{deliveryType?.description}</Text>
                       </View>
                     </View>
                   </View>
@@ -323,7 +440,7 @@ const ConfirmScreen = (props) => {
             </TouchableOpacity>
           </View>
           <View className={`w-[41%] h-full flex items-center justify-center`}>
-            <TouchableOpacity className={`h-[80%] w-[90%] rounded-[35px] bg-[#186f65] flex items-center justify-center`} onPress={ toggle === "ride" ? handleMakeRideRequest : handleMakeDeliveryRequest}>
+            <TouchableOpacity disabled={travelTimeInformation ? false : true } className={`h-[80%] w-[90%] rounded-[35px] bg-[#186f65] ${travelTimeInformation ? "opacity-100" : "opacity-50"} flex items-center justify-center`} onPress={ toggle === "ride" ? handleMakeRideRequest : handleMakeDeliveryRequest}>
               <Text style={{fontSize: fontSize * 0.7}} className={`text-white font-extrabold tracking-tight`}>Make Request</Text>
             </TouchableOpacity>
           </View>
