@@ -40,7 +40,7 @@ const AddLocation = (props) => {
 
     const addLocationForm = {
         type: "other",
-        address: locationAddress?.description,
+        address: locationAddress,
         name: locationName,
     }
 

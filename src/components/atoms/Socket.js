@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import io from "socket.io-client";
 import { selectUserInfo } from "../../../slices/authSlice";
-import { addDriver, decrementTime, removeDriver, setBooking } from "../../../slices/navSlice";
+import { addDriver, decrementTime, removeDriver, setBooking, setSearchComplete } from "../../../slices/navSlice";
 import { addNotification } from "../../../slices/notificationSlice";
 
 const SocketContext = createContext();
@@ -86,6 +86,7 @@ export const SocketProvider = ({children}) => {
                     content: data.message,
                     status: "unread"
                 }));
+                dispatch(setSearchComplete(true))
                 break;
 
             case "driverArrived":

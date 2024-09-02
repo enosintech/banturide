@@ -5,13 +5,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useCallback, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useColorScheme } from "react-native";
+import { PersistGate } from 'redux-persist/integration/react';
 import { StatusBar } from 'expo-status-bar';
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { useFonts } from "expo-font";
 import AnimatedSplash from "react-native-animated-splash-screen";
 import * as SplashScreen from "expo-splash-screen";
 
-import { store } from './store';
+import { store, persistor } from './store';
 import StackNavigator from './src/navigation/StackNavigator';
 
 SplashScreen.preventAutoHideAsync();
@@ -40,14 +41,14 @@ export default function App() {
       await SplashScreen.hideAsync();
     }
   }, [isLoaded])
+  
+  setInterval(() => {
+    setLoading(true)
+  }, 4000)
 
   useEffect(() => {
     setTheme(colorScheme)
   }, [colorScheme])
-
-  setInterval(() => {
-    setLoading(true)
-  }, 4000)
 
   if(!isLoaded){
     return null;
@@ -55,21 +56,23 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <AnimatedSplash
-        translucent={true}
-        isLoaded={loading}
-        logoImage={require("./assets/icons/BantuRide-White.png")}
-        backgroundColor={"#186F65"}
-        logoHeight={350}
-        logoWidth={350}
-      >
-        <NavigationContainer>
-          <GestureHandlerRootView style={{ flex: 1}}>
-            <StackNavigator handleLayout={onLayoutRootView} theme={theme} toggleDarkMode={() => {setDarkMode(!darkMode)}} />
-            <StatusBar style={`${theme === "dark" ? "light" : "dark"}`}/>
-          </GestureHandlerRootView>
-        </NavigationContainer>
-      </AnimatedSplash>
+      <PersistGate loading={null} persistor={persistor}>
+        <AnimatedSplash
+          translucent={true}
+          isLoaded={loading}
+          logoImage={require("./assets/icons/BantuRide-White.png")}
+          backgroundColor={"#186F65"}
+          logoHeight={350}
+          logoWidth={350}
+        >
+          <NavigationContainer>
+            <GestureHandlerRootView style={{ flex: 1}}>
+              <StackNavigator handleLayout={onLayoutRootView} theme={theme} toggleDarkMode={() => {setDarkMode(!darkMode)}} />
+              <StatusBar style={`${theme === "dark" ? "light" : "dark"}`}/>
+            </GestureHandlerRootView>
+          </NavigationContainer>
+        </AnimatedSplash>
+      </PersistGate>
     </Provider>
   );
 }

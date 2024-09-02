@@ -26,6 +26,8 @@ import AddWork from "../screens/MainScreens/AddWork";
 import EditHome from "../screens/MainScreens/EditHome";
 import EditWork from "../screens/MainScreens/EditWork";
 import EditLocation from "../screens/MainScreens/EditLocation";
+import TogglePayment from "../screens/MainScreens/TogglePayment";
+import AddStop from "../screens/MainScreens/AddStop";
 
 const Stack = createStackNavigator();
 
@@ -100,6 +102,12 @@ const AuthNavigator = (props) => {
                         </Stack.Screen>
                         <Stack.Screen name="editlocation" options={{headerShown: false}}>
                             {() => <EditLocation theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="togglePayment" options={{headerShown: false }}>
+                            {() => <TogglePayment theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="addStop" options={{headerShown: false }}>
+                            {() => <AddStop theme={props.theme}/>}
                         </Stack.Screen>
                     </Stack.Group>
                 </Stack.Navigator>

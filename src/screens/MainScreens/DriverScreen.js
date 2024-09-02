@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Dimensions, TouchableOpacity, Share } from 'react-native'
+import { View, Text, ScrollView, Dimensions, TouchableOpacity, Share, Image } from 'react-native'
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -90,6 +90,8 @@ const DriverScreen = (props) => {
         }, 3000)
     }
   };
+
+  console.log(booking)
 
   const updateBookingLocation = async () => {
       console.log("trying booking");
@@ -351,12 +353,21 @@ useEffect(() => {
             <View className={`w-[95%] h-[20%] rounded-[40px] shadow-sm flex flex-row items-center ${props.theme === "dark" ? "bg-dark-primary" : "bg-white"}`}>
               <View className={`w-2/3 h-full flex-row`}>
                 <View className={`w-1/3 h-full flex items-center justify-start pt-7`}>
-                  <View className={`w-14 h-14 ${props.theme === "dark" ? "" : "bg-white"} rounded-full bg-black`}></View>
+                  <View className={`w-14 h-14 rounded-full overflow-hidden ${props.theme === "dark" ? "bg-dark-secondary" : "bg-gray-100"}`}>
+                    <Image 
+                      source={driver?.avatar ? { uri: driver.avatar } : require("../../../assets/images/profileplaceholder.png")}
+                      resizeMode={"contain"}
+                      style={{
+                        width: "100%",
+                        height: "100%"
+                      }}
+                    />
+                  </View>
                 </View>
                 <View className={`w-2/3 h-full flex items-start justify-center`}>
                   <Text style={{fontSize: fontSize}} className={`font-extrabold ${props.theme === "dark" ? "text-white" : "text-black "} tracking-tight`}>{driver?.firstname} {driver?.lastname}</Text>
-                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Red Toyota Prius</Text>
-                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>BAE 3155</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>{driver?.carColor} {driver?.carManufacturer} {driver?.carModel}</Text>
+                  <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{driver?.vehicleReg}</Text>
                   <View className={`w-[95%] h-[20%] mt-2 rounded-[20px] bg-[#186f65] flex items-center justify-center overflow-hidden`}>
                     {min 
                     ?

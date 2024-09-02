@@ -245,7 +245,7 @@ const ConfirmScreen = (props) => {
           </View>
         </Modal>
 
-      <View className={`relative w-full h-[12%] flex-row items-center border-b-[0.25px] justify-center`}>
+      <View className={`relative w-full h-[12%] flex-row items-center justify-center`}>
         <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{toggle === "ride" ? "Trip Summary" : "Delivery Summary"} - </Text>
         {tripType === "normal"
         ?

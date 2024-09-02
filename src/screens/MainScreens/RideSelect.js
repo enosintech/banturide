@@ -61,13 +61,17 @@ const RideSelect = (props) => {
         if(!origin || !destination) return ;
 
         const getTravelTime = async () => {
+            const url = passThrough ? `https://maps.googleapis.com/maps/api/directions/json?destination=${destination?.location?.lat},${destination?.location?.lng}&origin=${origin?.location?.lat},${origin?.location?.lng}&waypoints=${passThrough.location.lat},${passThrough.location.lng}&key=${api}` : `https://maps.googleapis.com/maps/api/directions/json?destination=${destination?.location?.lat},${destination?.location?.lng}&origin=${origin?.location?.lat},${origin?.location?.lng}&key=${api}`
             fetch(
-                `https://maps.googleapis.com/maps/api/directions/json?destination=${destination.description}&origin=${origin.description}&waypoints=${passThrough ? passThrough.description : "" }&key=${api}`
+                url
             )
             .then((res) => res.json())
             .then(data => {
                 dispatch(setTravelTimeInformation(data.routes[0].legs))
-            });
+            })
+            .catch((error) => {
+                console.log(error)
+            })
         }
 
         getTravelTime();
@@ -98,17 +102,17 @@ const RideSelect = (props) => {
 
             <LoadingBlur theme={props.theme} loading={bookingRequestLoading} />
             <View className={`h-1/2 w-full`}>
-                <TouchableOpacity className={`absolute z-50 top-[15%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+                <TouchableOpacity style={{ width : fontSize * 2.5, height: fontSize * 2.5}} className={`absolute z-50 top-[15%] left-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} items-center justify-center`} onPress={() => {
                     navigation.goBack()
                 }}>
-                    <Ionicons name="chevron-back" size={25} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                    <Ionicons name="chevron-back" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
                 </TouchableOpacity>
                 <SmallMap expandMap={showFullJourneyOnMap} expandMapRef={mapRef} initialRegion={props.initialRegion} theme={props.theme}/>
-                <TouchableOpacity className={`absolute bottom-[10%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={() => showFullJourneyOnMap()}>
-                    <MaterialCommunityIcons name="arrow-expand" size={25} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+                <TouchableOpacity style={{ width : fontSize * 2.5, height: fontSize * 2.5}} className={`absolute bottom-[10%] left-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} items-center justify-center`} onPress={() => showFullJourneyOnMap()}>
+                    <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
                 </TouchableOpacity>
-                <TouchableOpacity disabled={!passThrough} className={`absolute bottom-[10%] rotate-90 ${passThrough ? "opacity-100" : "opacity-40"} right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"}  h-[40px] w-[40px] items-center justify-center`} onPress={handleSwitch}>
-                    <Octicons name="arrow-switch" size={19} color={props.theme === "dark" ? "white" : "black"} />
+                <TouchableOpacity disabled={!passThrough} style={{ width : fontSize * 2.5, height: fontSize * 2.5}} className={`absolute bottom-[10%] rotate-90 ${passThrough ? "opacity-100" : "opacity-40"} right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} items-center justify-center`} onPress={handleSwitch}>
+                    <Octicons name="arrow-switch" size={fontSize * 1.1} color={props.theme === "dark" ? "white" : "black"} />
                 </TouchableOpacity>
             </View>
             <View className={`h-1/2 w-full`}>
@@ -129,16 +133,6 @@ const RideSelect = (props) => {
                     >
                         {() => <ConfirmScreen theme={props.theme}/>}
                     </Stack.Screen>
-                    <Stack.Group screenOptions={{presentation: "modal", contentStyle: {
-                            backgroundColor: "transparent",
-                    }}}>
-                        <Stack.Screen name="togglePayment" options={{headerShown: false }}>
-                            {() => <TogglePayment theme={props.theme}/>}
-                        </Stack.Screen>
-                        <Stack.Screen name="addStop" options={{headerShown: false }}>
-                            {() => <AddStop theme={props.theme}/>}
-                        </Stack.Screen>
-                    </Stack.Group>
                 </Stack.Navigator>
             </View>
         </View>

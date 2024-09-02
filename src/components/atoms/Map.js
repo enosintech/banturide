@@ -21,24 +21,6 @@ const Map = (props) => {
 
   const fontSize = width * 0.05;
 
-  useEffect(() => {
-
-    if(!origin || !destination) return;
-
-    if(booking?.status !== "ongoing" && booking?.status !== "arrived"){
-      mapRef.current?.fitToSuppliedMarkers(['origin', 'stop' , 'destination'], {
-          edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
-      })
-    } else {
-      mapRef.current?.animateToRegion({
-        latitude: booking?.driverCurrentLocation[0],
-        longitude: booking?.driverCurrentLocation[1],
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01
-      }, 1 * 1000)
-    }
-  }, [origin, destination, booking])
-
   return (
     <View className="flex-1">
       { props.initialRegion ? (
@@ -53,7 +35,162 @@ const Map = (props) => {
           showsUserLocation={true}
           customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         > 
+          {
+            booking?.status === "pending" && origin?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng,
+                }}
+                title="Origin"
+                description={origin.description}
+                identifier="origin"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-black text-[12px]`}>1</Text>
+                </View>
+            </Marker>
+            )
+          }
 
+          {
+            booking?.status === "pending" && passThrough?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: passThrough.location.lat,
+                  longitude: passThrough.location.lng,
+                }}
+                title="1st Stop"
+                description={passThrough.description}
+                identifier="stop"
+            >
+               <View className={`w-5 h-5 shadow-md rounded-full bg-[#186f65] flex items-center justify-center`}>
+                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+              </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "pending" && destination?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+            >
+               <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
+                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{passThrough ? 3 : 2}</Text>
+              </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "pending" && origin?.location && destination?.location && (
+              <MapViewDirections 
+                origin={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                waypoints={passThrough ? [{ latitude: passThrough.location.lat, longitude: passThrough.location.lng }] : []}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "confirmed" && origin?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng,
+                }}
+                title="Origin"
+                description={origin.description}
+                identifier="origin"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-black text-[12px]`}>1</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "confirmed" && origin?.location && booking?.driverCurrentLocation && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "confirmed" && origin?.location && booking?.driverCurrentLocation && (
+              <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : fontSize * 2.5,
+                      height: fontSize * 2.5,
+                  }}
+                />
+              </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && destination?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{passThrough ? 3 : 2}</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          
         </MapView> 
       ) : 
       <View className="flex-1">

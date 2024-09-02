@@ -16,7 +16,7 @@ import { GOOGLE_API_KEY } from "@env";
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
 
-import { setOrigin, setDestination, selectTripType, selectToggle, setSchoolPickup, selectSchoolPickup, selectPassThrough, setPassThrough, selectPaymentMethod, setPaymentMethod, selectDestination, selectOrigin, setTripType, selectDeliveryType, setDeliveryType } from "../../../slices/navSlice";
+import { setOrigin, setDestination, selectTripType, selectToggle, setSchoolPickup, selectSchoolPickup, selectPassThrough, setPassThrough, selectPaymentMethod, setPaymentMethod, selectDestination, selectOrigin, setTripType, selectDeliveryType, setDeliveryType, selectFavoritesData } from "../../../slices/navSlice";
 import { selectUserCurrentLocation, selectUserInfo } from "../../../slices/authSlice";
 
 import { deliveryData } from "../../constants";
@@ -36,6 +36,7 @@ const SearchModal = (props) => {
     const userInfo = useSelector(selectUserInfo);
     const paymentMethod = useSelector(selectPaymentMethod);
     const deliveryType = useSelector(selectDeliveryType);
+    const favoritesData = useSelector(selectFavoritesData);
 
     const height = Dimensions.get("window").height;
 
@@ -82,6 +83,19 @@ const SearchModal = (props) => {
         inputRange: [0, 9999],  // Large range to allow normal dragging
         outputRange: [0, 9999], // Mirrors input but clamps the lower bound to 0
         extrapolate: 'clamp',
+    });
+
+    const predefinedPlaces = favoritesData.map((place) => ({
+        description: place.type === 'home' ? "Home" : place.type === 'work' ? "Work" : place.address.description,
+        geometry: { location: place.address.location },
+    }));
+
+    const sortedPredefinedPlaces = [...predefinedPlaces].sort((a, b) => {
+        if (a.description === "Home") return -1;
+        if (b.description === "Home") return 1;
+        if (a.description === "Work") return b.description === "Home" ? 1 : -1;
+        if (b.description === "Work") return a.description === "Home" ? -1 : 1;
+        return 0;
     });
     
     const handleGreeting = () => {
@@ -191,6 +205,7 @@ const SearchModal = (props) => {
                                         placeholder: toggle === "ride" ? "Where From?" : "Pick Up?",
                                         placeholderTextColor: "gray",
                                     }}
+                                    predefinedPlaces={sortedPredefinedPlaces}
                                     onPress={(data, details = null) => {
                                         dispatch(setOrigin({
                                             location: details.geometry.location,
@@ -287,6 +302,7 @@ const SearchModal = (props) => {
                                             language: "en",
                                             components: "country:zm"
                                         }}
+                                        predefinedPlaces={sortedPredefinedPlaces}
                                         onPress={(data, details = null) => {
                                             dispatch(setPassThrough({
                                                 location: details.geometry.location,
@@ -357,6 +373,7 @@ const SearchModal = (props) => {
                                         language: "en",
                                         components: "country:zm"
                                     }}
+                                    predefinedPlaces={sortedPredefinedPlaces}
                                     onPress={(data, details = null) => {
                                         dispatch(setDestination({
                                             location: details.geometry.location,

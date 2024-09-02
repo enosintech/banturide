@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, Dimensions, SafeAreaView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, TextInput } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -33,8 +33,8 @@ const ChooseRide = (props) => {
   const SURGE_CHARGE_RATE = 1.5;
 
   return (
-    <SafeAreaView className={`relative h-full w-full ${props.theme === "dark" ? "bg-[#0e1115]" : ""}`}>
-      <View className={`w-full h-[12%] flex-row items-center border-b-[0.25px] justify-center`}>
+    <View className={`relative h-full w-full ${props.theme === "dark" ? "bg-dark-primary" : ""}`}>
+      <View className={`w-full h-[12.5%] flex-row items-center justify-center`}>
           <Text style={{fontSize: fontSize}} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{toggle === "ride" ? "Select A Ride" : "Specify Recipient"} - </Text>
           {tripType === "normal"
           ?
@@ -50,7 +50,7 @@ const ChooseRide = (props) => {
       {
           toggle === "ride"
           ?
-          <View className={`w-full h-[76%] flex`}>
+          <View className={`w-full h-[70%] flex`}>
               {
                 rideData.map((data, index) => (
                     <View key={data.id} index={index} {...data} className={`w-full h-1/3 flex items-center justify-center`}>
@@ -140,7 +140,7 @@ const ChooseRide = (props) => {
               }
           </View>
           :
-          <View className={`w-full h-[76%] flex-col`}>
+          <View className={`w-full h-[70%] flex-col`}>
             <View className="w-full h-full flex items-center justify-center">
                 <View className={`${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} px-3 w-[90%] h-[90%] rounded-[40px] shadow-sm flex items-center`}>
                     <View className={`w-full h-1/3 flex flex-row items-center justify-between`}>
@@ -191,17 +191,17 @@ const ChooseRide = (props) => {
             </View>
           </View>
       }
-      <View className={`absolute bottom-7 border-t-[0.25px] w-full h-[12%] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"} items-center`}>
+      <View className={`w-full h-[17.5%] items-center`}>
           <View className={`h-full w-[50%] flex-row items-center justify-center`}>
               
           </View>
-          <TouchableOpacity className={`absolute right-5 top-[20%] h-[35px] rounded-full w-[35px] ${props.theme === "dark" ? "bg-white" : "bg-black"} flex items-center justify-center ${toggle === "delivery" ? Object.values(recipient ? recipient : {}).includes("") || !recipient?.recipientFullName || !recipient?.recipientContact ? " opacity-25" : "opacity-100" : travelTimeInformation && selected ? "opacity-100" : "opacity-25" }`}  disabled={toggle === "delivery" ? Object.values(recipient ? recipient : {} ).includes("") ? true : false : travelTimeInformation && selected ? false : true } onPress={() => {
+          <TouchableOpacity style={{ width: fontSize * 1.8, height: fontSize * 1.8 }} className={`absolute right-5 top-[20%] rounded-full ${props.theme === "dark" ? "bg-white" : "bg-black"} flex items-center justify-center ${toggle === "delivery" ? Object.values(recipient ? recipient : {}).includes("") || !recipient?.recipientFullName || !recipient?.recipientContact ? " opacity-25" : "opacity-100" : travelTimeInformation && selected ? "opacity-100" : "opacity-25" }`}  disabled={toggle === "delivery" ? Object.values(recipient ? recipient : {} ).includes("") ? true : false : travelTimeInformation && selected ? false : true } onPress={() => {
             navigation.navigate("confirmscreen")
           }}>
               <Ionicons name="md-checkmark-sharp" size={fontSize} color={`${props.theme === "dark" ? "black" : "white"}`} />
           </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 

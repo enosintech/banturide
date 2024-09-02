@@ -1,15 +1,33 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import navReducer from "./slices/navSlice.js";
 import authReducer from "./slices/authSlice.js";
 import notificationReducer from "./slices/notificationSlice.js";
-import webSocketReducer from "./slices/webSocketSlice.js";
 
-export const store = configureStore({
+const persistConfig = {
+    key: "nav",
+    storage: AsyncStorage,
+}
+
+const persistedNavReducer = persistReducer(persistConfig, navReducer);
+const persistedNotificationReducer = persistReducer({...persistConfig, key: "notifications"}, notificationReducer);
+
+const store = configureStore({
     reducer: {
-        nav: navReducer,
         auth: authReducer,
-        notifications: notificationReducer,
-        websocket: webSocketReducer,
-    }
+        nav: persistedNavReducer,
+        notifications: persistedNotificationReducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    })
 });
+
+const persistor = persistStore(store);
+
+export { store, persistor};

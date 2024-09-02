@@ -603,19 +603,28 @@ const RequestScreen = (props) => {
                 <View className={`w-full h-1/3 flex flex-row items-center`}>
                   <View className={`w-[60%] h-full flex flex-row`}>
                     <View className={`w-[40%] h-full flex items-center justify-center`}>
-                      <View className={`w-14 h-14 rounded-full ${props.theme === "dark" ? "bg-dark-tertiary" : "bg-white"}`}></View>
+                      <View className={`w-14 h-14 rounded-full overflow-hidden ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"}`}>
+                        <Image 
+                          source={driver?.avatar ? { uri: driver.avatar } : require("../../../assets/images/profileplaceholder.png")}
+                          resizeMode={"contain"}
+                          style={{
+                            width: "100%",
+                            height: "100%"
+                          }}
+                        />
+                      </View>
                     </View>
                     <View className={`w-[60%] h-full flex justify-center`}>
-                      <Text style={{fontSize: fontSize * 0.7}} className={`font-extrabold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{`${driver?.firstname} ${driver?.lastname}`}</Text>
-                      <Text style={{fontSize: fontSize * 0.7}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Red Toyota Prius</Text>
-                      <Text style={{fontSize: fontSize * 0.7}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>BAE 3155</Text>
+                      <Text numberOfLines={1} style={{fontSize: fontSize * 0.7}} className={`font-extrabold max-w-[90%] tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{`${driver?.firstname} ${driver?.lastname}`}</Text>
+                      <Text numberOfLines={1} style={{fontSize: fontSize * 0.7}} className={`font-medium max-w-[90%] tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.carColor} {driver?.carManufacturer} {driver?.carModel}</Text>
+                      <Text numberOfLines={1}  style={{fontSize: fontSize * 0.7}} className={`font-light max-w-[90%] tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.vehicleReg}</Text>
                     </View>
                   </View>
                   <View className={`w-0 h-[80%] border-l ${props.theme === "dark" ? "border-white" : "border-gray-300"}`}></View>
                   <View className={`w-[40%] h-full flex items-center justify-center`}>
-                    <View className={`w-[85%] h-[85%] rounded-[40px] flex items-center justify-center ${rating > 4 ? "bg-green-200" : rating > 2 ? "bg-gray-300" : "bg-red-200"}`}>
+                    <View className={`w-[85%] h-[85%] rounded-[40px] flex items-center justify-center ${driver?.driverRating > 4 ? "bg-green-200" : driver?.driverRating > 2 ? "bg-gray-300" : "bg-red-200"}`}>
                       <Text style={{fontSize: fontSize * 0.6}} className={`font-light tracking-tight`}>Rating</Text>
-                      <Text style={{fontSize: fontSize * 1.5}} className={`font-black tracking-tight`}>{rating}</Text>
+                      <Text style={{fontSize: fontSize * 1.5}} className={`font-black tracking-tight`}>{driver?.driverRating}</Text>
                     </View>
                   </View>
                 </View>
@@ -623,7 +632,7 @@ const RequestScreen = (props) => {
                   <View className={`w-[95%] h-[80%] shadow-sm rounded-[40px] flex flex-row items-center justify-between pl-1 pr-3 ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`}>
                     <View className={`w-[50%] h-[85%] rounded-[40px] shadow-sm ${props.theme === "dark" ? "bg-dark-tertiary" : "bg-white border border-gray-100"} flex justify-center px-2 pl-3 py-1`}>
                       <Text style={{fontSize: fontSize * 0.65}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Known For</Text>
-                      <Text numberOfLines={1} style={{fontSize: fontSize * 0.55}} className={`font-medium ${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight w-full h-1/2`}>Clean Car, Punctual, Respectful</Text>
+                      <Text numberOfLines={1} style={{fontSize: fontSize * 0.55}} className={`font-medium ${props.theme === "dark" ? "text-white" : "text-black"} tracking-tight w-full h-1/2`}>{driver?.knownFor.join(", ")}</Text>
                     </View>
                     <View className={`flex flex-row`}>
                       <TouchableOpacity className="rounded-full bg-red-600 flex items-center justify-center w-12 h-12 mr-3" onPress={() => {

@@ -18,23 +18,26 @@ const TabNavigator = (props) => {
         <Tab.Navigator initialRouteName="HomeNav"
             screenOptions={({}) => ({
                 tabBarShowLabel: false,
+                tabBarIconStyle: {
+                    marginBottom: -fontSize * 0.70,
+                },
                 tabBarStyle: {
                     position: "absolute",
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
                     borderTopWidth: 0,
                     height: "9%",
+                    justifyContent: "space-evenly", 
+                    alignItems: 'center',
                     backgroundColor: `${props.theme === "dark" ? "#0e1115" : "white"}`,
                     ...styles.shadow
                 },
                 tabBarActiveTintColor: `${props.theme === "dark" ? "white" : "white"}`,
                 tabBarInactiveTintColor: `${props.theme === "dark" ? "white" : "#186f65"}`
             })}
-            >
+        >
             <Tab.Screen name="HomeNav" options={{
                 headerShown: false,
                 tabBarIcon: ({ size, color, focused }) => (
-                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
+                    <View className={`items-center justify-center px-[20%] py-[7%] rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`}>
                         <MaterialIcons 
                             name="home-filled"
                             size={fontSize * 1.3}
@@ -48,7 +51,7 @@ const TabNavigator = (props) => {
             <Tab.Screen name="Favourite"  options={{
                 headerShown: false,
                 tabBarIcon: ({ size, color, focused}) => (
-                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
+                    <View className={`items-center justify-center px-[20%] py-[7%] rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`}>
                         <MaterialIcons 
                             name="favorite"
                             size={fontSize * 1.3}
@@ -56,13 +59,13 @@ const TabNavigator = (props) => {
                         />
                     </View>
                 )
-                 }}>
-                    {() => <FavoriteNavigator theme={props.theme} />}
-                 </Tab.Screen> 
+                }}>
+                {() => <FavoriteNavigator theme={props.theme} />}
+            </Tab.Screen> 
             <Tab.Screen name="ProfileNav"  options={{
                 headerShown: false,
                 tabBarIcon: ({ size, color, focused}) => (
-                    <View className={`items-center justify-center px-7 py-2 rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`} style={{top: 10}}>
+                    <View className={`items-center justify-center px-[20%] py-[7%] rounded-full ${props.theme === "dark" ? focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]" : focused ? "bg-[#186f65]" : "bg-[rgba(0,0,0,0)]"}`}>
                         <MaterialIcons 
                             name="person"
                             size={fontSize * 1.3}
@@ -70,9 +73,9 @@ const TabNavigator = (props) => {
                         />
                     </View>
                 )
-                }}>
-                    {() => <ProfileNavigator theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
-                </Tab.Screen> 
+            }}>
+                {() => <ProfileNavigator theme={props.theme} toggleDarkMode={props.toggleDarkMode}/>}
+            </Tab.Screen> 
         </Tab.Navigator>
     )
 }
@@ -83,11 +86,11 @@ const styles = StyleSheet.create({
     shadow: {
         shadowColor: "#000000",
         shadowOffset: {
-        width: 0,
-        height: 7,
+            height: 7,
+            width: 0,
         },
         shadowOpacity:  0.21,
         shadowRadius: 7.68,
-        elevation: 10
-    }
+        elevation: 10,
+    },   
 });

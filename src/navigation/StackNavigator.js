@@ -1,5 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { clearOldNotifications } from "../../slices/notificationSlice.js";
 
 import { getItem } from "../components/lib/asyncStorage.js";
 
@@ -11,9 +13,20 @@ const Stack = createStackNavigator()
 const StackNavigator = (props) => {
     const [ showOnboarding, setShowOnboarding ] = useState(true);
 
+    const dispatch = useDispatch();
+
     useEffect(()=>{
         checkIfAlreadyOnboarded();
     }, [])
+
+    useEffect(() => {
+
+        const interval = setInterval(() => {
+            dispatch(clearOldNotifications());
+          }, 30 * 60 * 1000); 
+      
+          return () => clearInterval(interval);
+      }, [])
 
     const checkIfAlreadyOnboarded = async () => {   
         let onboarded = await getItem("onboarded");

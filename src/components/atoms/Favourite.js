@@ -163,17 +163,17 @@ const Favorite = (props) => {
                             })
                         }
                     }}>
-                        <MaterialCommunityIcons name="circle-edit-outline" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "#186f65"}`}/>
+                        <MaterialCommunityIcons name="pencil-circle" size={fontSize * 1.2} color={`#186f65`}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
                         setModalVisible(true)
                     }}>
-                        <Entypo name="circle-with-minus" size={fontSize * 1.2} color={`${props.theme === "dark" ? "white" : "#186f65"}`}/>
+                        <Entypo name="circle-with-minus" size={fontSize * 1.2} color={`${props.theme === "dark" ? "#dc2626" : "#b91c1c"}`}/>
                     </TouchableOpacity>
                 </View>
             </View>
             <View className="px-4 -translate-y-1">
-                <Text style={{fontSize: fontSize * 0.5}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address}</Text>
+                <Text style={{fontSize: fontSize * 0.5}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address.description.split(",")[0]}</Text>
             </View>
         </View>
     )

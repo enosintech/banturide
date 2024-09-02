@@ -266,10 +266,10 @@ const ProfileScreen = (props) => {
                 </View>
 
                 <View className={`h-[55%] w-full items-center`}>
-                    <TouchableOpacity className={`w-[95%] h-[12%] bg-white shadow-sm rounded-[50px] flex-row items-center justify-center`} onPress={() => {
+                    <TouchableOpacity className={`w-[95%] h-[12%] bg-[#186f65] shadow-sm rounded-[50px] flex-row items-center justify-center`} onPress={() => {
                         navigation.navigate("EditProfile")
                     }}>
-                        <Text style={{fontSize: fontSize}} className="text-black font-extrabold tracking-tight"> Edit Profile</Text>
+                        <Text style={{fontSize: fontSize}} className="text-white font-black tracking-tight"> Edit Profile</Text>
                     </TouchableOpacity>
                     <View className={`w-full border-b-[0.25px] mt-4 ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
                     <View className={`h-[12%] w-full border-t-[0.25px] border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" :"border-gray-400"} px-5 flex-row items-center justify-between`}>

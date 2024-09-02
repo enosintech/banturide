@@ -17,6 +17,7 @@ const initialState = {
     driver: null,
     hasArrived: false,
     onTheWay: false,
+    favoritesData: [],
     remainingTripTime: 0,
     remainingTripDistance: 0,
     bookingRequestLoading: false,
@@ -78,6 +79,9 @@ export const navSlice = createSlice({
         },
         setSeats : (state, action) => {
             state.seats = action.payload;
+        },
+        setFavoritesData: (state, action) => {
+            state.favoritesData = action.payload;
         },
         setDeliveryType: (state, action) =>{
             state.deliveryType = action.payload;
@@ -195,7 +199,7 @@ export const navSlice = createSlice({
     }
 })
 
-export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavoriteAddressDeleted, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addChatMessage, clearChatMessages, addDriver, removeDriver, decrementTime, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setNewDriverCalled, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime, setGlobalBookingError, setDeliveryType, setRecipient, setPaymentMethodUpdated, setDriverArray, setFindNewDriver } = navSlice.actions;
+export const { setOrigin, setDestination, setPassThrough, setTravelTimeInformation, setToggle, setTripDetails, setPrice, setSeats, setBooking, setFavoritesData, setTripType, setDriver, setSchoolPickup, setOnTheWay, setHasArrived, setBookingRequestLoading, setFavAddressUpdated, setFavoriteAddressDeleted, setFavAddressChanged, setProfileUpdated, setFavoriteHomeAddress, setFavoriteWorkAddress, setWsClientId, addChatMessage, clearChatMessages, addDriver, removeDriver, decrementTime, setPaymentMethod, setBookingRequested, setSearchPerformed, resetSearch, setSearchComplete, setNewDriverCalled, setLocationUpdatedRan, setRemainingTripDistance, setRemainingTripTime, setGlobalBookingError, setDeliveryType, setRecipient, setPaymentMethodUpdated, setDriverArray, setFindNewDriver } = navSlice.actions;
 
 export const selectOrigin = (state) => state.nav.origin;
 export const selectDestination = (state) => state.nav.destination;
@@ -229,5 +233,6 @@ export const selectPaymentMethodUpdated = (state) => state.nav.paymentMethodUpda
 export const selectFindNewDriver = (state) => state.nav.findNewDriver;
 export const selectChatMessages = (state) => state.nav.chatMessages;
 export const selectGlobalBookingError = (state) => state.nav.globalBookingError;
+export const selectFavoritesData = (state) => state.nav.favoritesData;
 
 export default navSlice.reducer;

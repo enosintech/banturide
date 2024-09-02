@@ -7,9 +7,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 
 import { selectBooking, setBooking, setDeliveryType, setDestination, setOrigin, setPassThrough, setPaymentMethod, setPaymentMethodUpdated, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
-import { selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
+import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import ModalLoader from "../../components/atoms/ModalLoader.js"
+import ShortModalNavBar from '../../components/atoms/ShortModalNavBar';
 
 const { width } = Dimensions.get("window");
 
@@ -27,6 +28,7 @@ const TogglePayment = (props) => {
 
   const tokens = useSelector(selectToken);
   const booking = useSelector(selectBooking);
+  const isSignedIn = useSelector(selectIsSignedIn);
 
   const { goBack } = useNavigation();
   const translateY = useRef(new Animated.Value(0)).current;
@@ -51,6 +53,12 @@ const TogglePayment = (props) => {
       },
       [goBack, translateY]
   )
+
+  const translateYClamped = translateY.interpolate({
+    inputRange: [0, 9999],  // Large range to allow normal dragging
+    outputRange: [0, 9999], // Mirrors input but clamps the lower bound to 0
+    extrapolate: 'clamp',
+  });
 
   const handleChangePayment = async (passedPaymentMethod) => {
     setLoading(true)
@@ -131,7 +139,7 @@ const TogglePayment = (props) => {
       onHandlerStateChange={onHandlerStateChange}
     >
       <Animated.View 
-        style={[containerStyles.container, { transform: [{ translateY }]}]}
+        style={[containerStyles.container, { transform: [{ translateY: translateYClamped }]}]}
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
         keyboardVerticalOffset={10}
       >
@@ -159,8 +167,11 @@ const TogglePayment = (props) => {
         <View style={{
           height: 0.3 * height
         }} className={`w-full flex flex-col ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} rounded-t-[40px] px-3`}>
-          <View className="w-full h-1/4 flex items-center flex-row">
-            <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-bold tracking-tight`}>Payment Method</Text>
+          <View className="w-full h-1/4 flex items-center justify-center flex-row relative">
+            <View className={`w-full h-[20%] absolute top-0 left-0 flex items-center justify-center`}>
+                <ShortModalNavBar theme={props.theme} />
+            </View>
+            <Text style={{fontSize: fontSize}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}>Payment Method</Text>
           </View>
           <View className="w-full h-0 border-[0.5px] border-gray-400"></View>
           <TouchableOpacity className={`w-full h-1/4 flex flex-row items-center`} onPress={() => {

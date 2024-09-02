@@ -30,9 +30,15 @@ const SmallMap = (props) => {
       >
         {origin && destination && (
           <MapViewDirections 
-            origin={origin.description}
-            destination={destination.description}
-            waypoints={[passThrough ? passThrough?.description : "" ]}
+            origin={{
+              latitude: origin.location.lat,
+              longitude: origin.location.lng
+            }}
+            destination={{
+              latitude: destination.location.lat,
+              longitude: destination.location.lng
+            }}
+            waypoints={passThrough ? [{ latitude: passThrough.location.lat, longitude: passThrough.location.lng }] : []}
             apikey={api}
             strokeWidth={3}
             strokeColor= {props.theme === "dark" ? "white" : "black"}

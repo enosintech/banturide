@@ -1,21 +1,22 @@
 import {Text, View, TouchableOpacity, ScrollView, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 import NewNotification from "../../components/atoms/NewNotification";
 import OldNotification from "../../components/atoms/OldNotification";
 
-import { selectNotificationsArray } from "../../../slices/notificationSlice";
+import { selectNotificationsArray, clearOldNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
 const NotificationsScreen = (props) => {
 
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const [notifToggle, setNotifToggle] = useState("unread");
 
@@ -51,7 +52,7 @@ const NotificationsScreen = (props) => {
                 </View>
                 <View className={`border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
             </View>
-            <View className={`w-full h-[68%] bg-inherit`}>
+            <View className={`w-full h-[76%]`}>
                 <View className={`w-full h-[8%] ${props.theme === "dark" ? "bg-[#222831] border-gray-900" : " border-gray-400"} border-b-[0.25px] border-t-[0.25px] border-solid flex-row justify-end items-center px-3`}>
                     <TouchableOpacity className={`flex-row h-[80%] items-center rounded-[50px] p-1 px-3 ${notifToggle === "all" ? "bg-[#186f65] border-[#186f65]" : "bg-white border-white"} shadow border`} onPress={() => {
                         setNotifToggle("all")
@@ -63,9 +64,10 @@ const NotificationsScreen = (props) => {
                 {
                     notifToggle === "unread"
                     ?
-                    <View className={`w-full h-full mt-0.2`}>
+                    <View className={`w-full h-[92%] mt-0.2`}>
                         <ScrollView className={`w-full`} contentContainerStyle={{
-                            alignItems: "center"
+                            alignItems: "center",
+                            paddingBottom: 30,
                         }}>
                             {unreadNotifications.length > 0 ? 
                                 unreadNotifications.map((notification, idx) => (
@@ -78,7 +80,7 @@ const NotificationsScreen = (props) => {
                     </View> 
                     : notifToggle === "read" 
                     ?
-                    <View className={`w-full h-full bg-inherit mt-0.2`}>
+                    <View className={`w-full h-[92%] mt-0.2`}>
                         <ScrollView className="w-full" contentContainerStyle={{
                             alignItems: "center"
                         }}>
@@ -92,7 +94,7 @@ const NotificationsScreen = (props) => {
                         </ScrollView>
                     </View>
                     :
-                    <View className={`w-full h-full bg-inherit mt-0.2`}>
+                    <View className={`w-full h-[92%] mt-0.2`}>
                         <ScrollView className="w-full" contentContainerStyle={{
                             alignItems: "center"
                         }}>

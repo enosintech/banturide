@@ -42,7 +42,7 @@ const EditLocation = (props) => {
     const fontSize = width * 0.05;
 
     const editLocationForm = {
-        address: locationAddress?.description,
+        address: locationAddress,
         name: locationName,
         locationId: id
     }

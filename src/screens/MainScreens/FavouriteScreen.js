@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as SecureStore from "expo-secure-store";
 
 import Favorite from "../../components/atoms/Favourite";
 import ScreenTitle from "../../components/atoms/ScreenTitle";
 
-import { selectFavAddressChanged, selectFavAddressDeleted, selectFavAddressUpdated } from "../../../slices/navSlice";
-import { selectIsSignedIn, selectToken, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { selectFavAddressChanged, selectFavAddressDeleted, selectFavAddressUpdated, selectFavoritesData, setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -30,7 +31,7 @@ const FavouriteScreen = (props) => {
     const favAddressUpdated = useSelector(selectFavAddressUpdated);
     const favAddressDeleted = useSelector(selectFavAddressDeleted);
 
-    const [favoritesData, setFavoritesData] = useState([]);
+    const favoritesData = useSelector(selectFavoritesData)
     const [ error, setError ] = useState(false);
     const [loading, setLoading] = useState(false); 
     const [homeAdded, setHomeAdded] = useState(false);
@@ -38,10 +39,11 @@ const FavouriteScreen = (props) => {
 
     let hasRenderedWork = false;
 
-    const sortedFavorites = favoritesData.sort((a, b) => {
+    const sortedFavorites = [...favoritesData].sort((a, b) => {
         if (a.type === "home") return -1;
         if (b.type === "home") return 1;
         if (a.type === "work") return b.type === "home" ? 1 : -1;
+        if (b.type === "work") return a.type === "home" ? -1 : 1;
         return 0;
     });
 
@@ -64,17 +66,37 @@ const FavouriteScreen = (props) => {
                 if(result.success === false){
                     throw new Error(result.message || result.error)
                 } else {
-                    setFavoritesData(result.favoriteLocations)
+                    dispatch(setFavoritesData(result?.favoriteLocations))
                 }
                 
             } catch (error) {
-                if(error === "Unauthorized"){
-                    dispatch(setUserInfo(null))
-                    dispatch(setToken(null))
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    dispatch(setTokenFetched(false))
-                    dispatch(setUserDataFetched(false))
-                    dispatch(setUserDataSet(false))
+                const errorField = error.message || error.error;
+                
+                if(errorField === "Unauthorized"){
+                    await SecureStore.deleteItemAsync("tokens")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
+                    .catch((error) => {
+                        setError("Unauthorized")    
+                    })     
                 } else {
                     setError(true)
                 }
@@ -119,7 +141,7 @@ const FavouriteScreen = (props) => {
                     setWorkAdded(false)
                 }
             }
-        }
+        } 
 
         checkForHome();
         checkForWork();
@@ -143,38 +165,19 @@ const FavouriteScreen = (props) => {
                     </View>
                 </View>
             }
+
             <ScreenTitle theme={props.theme} iconName="favorite" title="Favorites" />
             <View className={`w-full px-5 h-[6%]`}>
                 <Text style={{ fontSize: fontSize * 0.7 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tighter`}>Add your frequent destinations to easily access them when booking</Text>
             </View>
-            <View className={`w-full h-[15%] flex flex-row items-center justify-evenly`}>
-                <TouchableOpacity disabled={loading || homeAdded ? true : false}  className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow ${homeAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
-                    navigation.navigate("addhome")
-                }}>
-                    <MaterialIcons name="home-filled" size={fontSize * 1.5} color={`white`} />
-                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
-                </TouchableOpacity>
-                <TouchableOpacity disabled={loading || workAdded ? true : false} className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow ${workAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
-                    navigation.navigate("addwork")
-                }}>
-                    <MaterialIcons name="work" size={fontSize * 1.3} color={`white`} />
-                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
-                </TouchableOpacity>
-                <TouchableOpacity className={`w-[28%] h-[45%] bg-[#186f65] rounded-full shadow flex flex-row items-center justify-center`} onPress={() => {
-                    navigation.navigate("addlocation")
-                }}>
-                    <MaterialIcons name="add-location" size={fontSize * 1.3} color={`white`} />
-                    <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
-                </TouchableOpacity>
-            </View>
-            <View className={`border-b-[0.25px] border-solid ${props.theme === "dark" ? "border-gray-900" : "border-gray-400"}`}></View>
             <View className={`h-[60%] w-full`} style={{ overflow: "visible"}}>
                 <View className={`w-full p-3`}>
-                    <Text style={{ fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tighter`}>Saved Places</Text>
+                    <Text style={{ fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tighter text-center`}>Saved Places</Text>
                 </View>
                 <ScrollView className="w-full" contentContainerStyle={{
                     alignItems: "center",
                     paddingTop: 5,
+                    paddingBottom: 20,
                 }}>
                     {
                         loading
@@ -192,7 +195,7 @@ const FavouriteScreen = (props) => {
                                         hasRenderedWork = true;
                                         return (
                                             <React.Fragment key={fav.id}>
-                                                <View className={`w-[90%] my-2 h-0 border-[0.5px] ${props.theme === "dark" ? "border-white" : "border-neutral-400"}`}></View>
+                                                <View className={`w-[90%] ${ workAdded || homeAdded ? "block" : "hidden"} my-2 h-0 border-[0.5px] ${props.theme === "dark" ? "border-white" : "border-neutral-400"}`}></View>
                                                 <Favorite
                                                     index={index}
                                                     theme={props.theme}
@@ -221,6 +224,28 @@ const FavouriteScreen = (props) => {
                                 <Text style={{ fontSize: fontSize * 0.8 }} className={`mt-2 tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>No Saved Places</Text>
                     }
                 </ScrollView>
+            </View>
+            <View className={`w-full h-[18%] flex flex-row items-center justify-center`}>
+                <View className={`w-[95%] h-[85%] rounded-[25px] shadow ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white"} flex flex-row items-center justify-evenly`}>
+                    <TouchableOpacity disabled={loading || homeAdded ? true : false}  className={`w-[28%] h-[55%] bg-[#186f65] rounded-full shadow ${homeAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
+                        navigation.navigate("addhome")
+                    }}>
+                        <MaterialIcons name="home-filled" size={fontSize * 1.5} color={`white`} />
+                        <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                    </TouchableOpacity>
+                    <TouchableOpacity disabled={loading || workAdded ? true : false} className={`w-[28%] h-[55%] bg-[#186f65] rounded-full shadow ${workAdded || loading ? "opacity-30" : "opacity-100"} flex flex-row items-center justify-center`} onPress={() => {
+                        navigation.navigate("addwork")
+                    }}>
+                        <MaterialIcons name="work" size={fontSize * 1.3} color={`white`} />
+                        <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                    </TouchableOpacity>
+                    <TouchableOpacity className={`w-[28%] h-[55%] bg-[#186f65] rounded-full shadow flex flex-row items-center justify-center`} onPress={() => {
+                        navigation.navigate("addlocation")
+                    }}>
+                        <MaterialIcons name="add-location" size={fontSize * 1.3} color={`white`} />
+                        <MaterialIcons name="add" color={"white"} size={fontSize * 1.1} />
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     )

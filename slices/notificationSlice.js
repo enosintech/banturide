@@ -9,18 +9,28 @@ export const notificationSlice = createSlice({
     initialState,
     reducers: {
         addNotification: (state, action) => {
-            state.notificationsArray.push(action.payload);
+            state.notificationsArray.push({
+                ...action.payload,
+                createdAt: Date.now(),
+              });
         },
         toggleNotificationStatus: (state, action) => {
             const notification = state.notificationsArray.find(notif => notif.id === action.payload);
             if (notification) {
                 notification.status = notification.status === "unread" ? "read" : "unread";
             }
-        }
+        },
+        clearOldNotifications(state) {
+            const now = Date.now();
+            const twoDays = 2 * 24 * 60 * 60 * 1000;
+            state.notificationsArray = state.notificationsArray.filter(
+                notification => now - notification.createdAt <= twoDays 
+            );
+        },
     }
 })
 
-export const { addNotification, toggleNotificationStatus } = notificationSlice.actions;
+export const { addNotification, toggleNotificationStatus, clearOldNotifications } = notificationSlice.actions;
 
 export const selectNotificationsArray = state => state.notifications.notificationsArray;
 

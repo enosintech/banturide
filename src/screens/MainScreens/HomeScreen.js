@@ -14,10 +14,10 @@ import { GOOGLE_API_KEY } from "@env";
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
 
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient, selectDeliveryType } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient, selectDeliveryType, selectFavoritesData } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectNotificationsArray } from "../../../slices/notificationSlice";
-import { selectUserCurrentLocation, selectUserInfo, setUserCurrentLocation } from "../../../slices/authSlice";
+import { selectUserCurrentLocation, setUserCurrentLocation } from "../../../slices/authSlice";
 
 Geocoder.init("AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE");
 
@@ -42,6 +42,7 @@ const HomeScreen = (props) => {
     const remainingTripTime = useSelector(selectRemainingTripTime);
     const remainingTripDistance = useSelector(selectRemaingTripDistance);
     const deliveryType = useSelector(selectDeliveryType);
+    const favoritesData = useSelector(selectFavoritesData);
 
     const currentLocation = useSelector(selectUserCurrentLocation);
     const [currentStreet, setCurrentStreet] = useState(null)
@@ -59,19 +60,27 @@ const HomeScreen = (props) => {
 
     const goToCarLocation = () => {
         mapRef.current.animateToRegion({
-            latitude: booking.driverCurrentLocation[0],
-            longitude: booking.driverCurrentLocation[1],
+            latitude: booking?.driverCurrentLocation[0],
+            longitude: booking?.driverCurrentLocation[1],
             latitudeDelta: 0.01,
             longitudeDelta: 0.01
         }, 1 * 1000)
     }
 
     const expandMaptoViewRoute = () => {
-        if(!origin || !destination) return;
+        if(!booking) return;
 
-        mapRef.current.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
-        edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
-        })
+        if(booking?.status === "pending"){
+            mapRef.current.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "confirmed"){
+            mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
     }
 
     const getLocation = async () => {
@@ -107,6 +116,23 @@ const HomeScreen = (props) => {
     }, [currentLocation])
 
     useEffect(() => {
+        if(!booking) return;
+
+        if(booking?.status === "pending"){
+            mapRef.current.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "confirmed"){
+            mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+        
+    }, [booking])
+
+    useEffect(() => {
         if (currentLocation) {
             Geocoder.from(currentLocation.latitude, currentLocation.longitude)
         .then(json => {
@@ -114,7 +140,9 @@ const HomeScreen = (props) => {
             setCurrentStreet(location);
             setError(false)
         })
-        .catch(error => setError(error.error || error.message || "Problem fetching currrent street"))
+        .catch(error => {
+            setError(error.error || error.message || "Problem fetching currrent street")
+        })
         }
     }, [currentLocation])
 
@@ -295,11 +323,11 @@ const HomeScreen = (props) => {
             </TouchableOpacity>
 
             <View className="absolute top-[13%] w-full">
-                <Text style={{fontSize: fontSize * 0.85}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>{error ? "Hmmm..." : "You are on"}</Text>
-                <Text style={{fontSize: fontSize * 1.2}} className={`mx-auto text-lg tracking-wide uppercase ${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}>{currentStreet ? currentStreet : error ? error : "Searching..."}</Text>
+                <Text style={{fontSize: fontSize * 0.85}} className={`mx-auto text-lg ${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>{error ? "Error getting current street" : "You are on"}</Text>
+                <Text style={{fontSize: !error ? fontSize * 1.2 : fontSize }} className={`mx-auto text-lg tracking-wide ${!error && "uppercase"} ${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}>{currentStreet ? currentStreet : error && !currentStreet ? "Something went wrong" : "Searching..."}</Text>
             </View>
         </View> 
     )
 }
 
-export default HomeScreen;                                                      
+export default HomeScreen;                                                     
