@@ -3,13 +3,14 @@ import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import ProfileScreenTitle from "../../components/atoms/ProfileScreenTitle";
 import NewNotification from "../../components/atoms/NewNotification";
 import OldNotification from "../../components/atoms/OldNotification";
 
-import { selectNotificationsArray, clearOldNotifications } from "../../../slices/notificationSlice";
+import { selectNotificationsArray, clearOldNotifications, clearAllNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -54,10 +55,16 @@ const NotificationsScreen = (props) => {
             </View>
             <View className={`w-full h-[76%]`}>
                 <View className={`w-full h-[8%] ${props.theme === "dark" ? "bg-[#222831] border-gray-900" : " border-gray-400"} border-b-[0.25px] border-t-[0.25px] border-solid flex-row justify-end items-center px-3`}>
+                    <TouchableOpacity className={`flex-row h-[80%] mr-2 items-center rounded-[50px] p-1 px-3 bg-white border-white shadow border`} onPress={() => {
+                        dispatch(clearAllNotifications())
+                    }}>
+                        <MaterialCommunityIcons name="delete-sweep" size={fontSize * 0.85} color={`black`}/>
+                        <Text style={{fontSize: fontSize * 0.65}} className={`text-black tracking-tighter font-medium`}> Clear all</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity className={`flex-row h-[80%] items-center rounded-[50px] p-1 px-3 ${notifToggle === "all" ? "bg-[#186f65] border-[#186f65]" : "bg-white border-white"} shadow border`} onPress={() => {
                         setNotifToggle("all")
                     }}>
-                        <Ionicons name="logo-stackoverflow" size={fontSize * 0.65} color={`${notifToggle === "all" ? "white" : "black"}` }/>
+                        <Ionicons name="logo-stackoverflow" size={fontSize * 0.75} color={`${notifToggle === "all" ? "white" : "black"}` }/>
                         <Text style={{fontSize: fontSize * 0.65}} className={`${notifToggle === "all" ? "text-white" : "text-black"} tracking-tighter font-medium`}> View all</Text>
                     </TouchableOpacity>
                 </View>

@@ -59,10 +59,47 @@ const DriverScreen = (props) => {
     mapRef.current.animateToRegion(currentLocation, 1 * 1000);
   }
 
+  const goToCarLocation = () => {
+    mapRef.current.animateToRegion({
+        latitude: booking?.driverCurrentLocation[0],
+        longitude: booking?.driverCurrentLocation[1],
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01
+    }, 1 * 1000)
+  }
+
   const fitMarkers = () => {
-    mapRef.current?.fitToSuppliedMarkers(['origin', 'driver' ], {
-      edgePadding: {top: 100, right: 100, bottom: 50, left: 100}
-    })
+    if(!booking) return;
+
+    if(booking?.status === "confirmed"){
+      mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+          edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+      })        
+    }
+
+    if(booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop){
+      mapRef.current.fitToSuppliedMarkers(['destination', 'stop', 'driver'], {
+          edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+      })        
+    }
+
+    if(booking?.status === "ongoing" && booking?.hasThirdStop && booking?.reachedThirdStop){
+        mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+            edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+        })        
+    }
+
+    if(booking?.status === "ongoing" && !booking?.hasThirdStop){
+        mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+            edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+        })        
+    }
+
+    if(booking?.status === "arrived"){
+      mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+          edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+      })        
+  }
   }
 
   const formatTripDetails = (bookingDetails) => {
@@ -90,8 +127,6 @@ const DriverScreen = (props) => {
         }, 3000)
     }
   };
-
-  console.log(booking)
 
   const updateBookingLocation = async () => {
       console.log("trying booking");
@@ -215,7 +250,7 @@ const DriverScreen = (props) => {
   }
 
   useEffect(() => {
-    if(!booking || booking?.status !== "confirmed") return ;
+    if(!booking) return ;
 
     const getDriverTime = async () => {
         fetch(
@@ -224,33 +259,18 @@ const DriverScreen = (props) => {
         .then((res) => res.json())
         .then(data => {
             setMin(parseInt(data?.routes[0]?.legs[0]?.duration?.text))
-        });
+        })
+        .catch((error) => {
+          console.log("failure")
+        })
     }
 
-    getDriverTime();
-
-  }, [booking, api])
-
-  useEffect(() => {
-
-    const getTripTime = async () => {
-      fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?destination=${booking?.dropOffLocation?.latitude},${booking?.dropOffLocation?.longitude}&origin=${booking?.driverCurrentLocation[0]},${booking?.driverCurrentLocation[1]}&key=${api}`
-      )
-      .then((res) => res.json())
-      .then(data => {
-        console.log(data?.routes[0]?.legs[0]?.duration?.text, data?.routes[0]?.legs[0]?.distance?.text)
-        dispatch(setRemainingTripTime(parseInt(data?.routes[0]?.legs[0]?.duration?.text)))
-        dispatch(setRemainingTripDistance(parseInt(data?.routes[0]?.legs[0]?.distance?.text)))
-      }) 
+    if(booking?.status === "confirmed" && booking?.driverCurrentLocation){
+      getDriverTime();
     }
 
-    if(booking?.status === "ongoing"){
-      console.log("called")
-      getTripTime();
-    }
 
-  }, [booking, api])
+  }, [booking, booking?.driverCurrentLocation, api])
 
   useEffect(() => {
     if(!locationUpdateRan && booking?.status === "confirmed" && booking?.bookingType === "ride"){
@@ -294,16 +314,44 @@ useEffect(() => {
     dispatch(setSearchPerformed(false))
     dispatch(setSearchComplete(false))
     dispatch(setLocationUpdatedRan(false))
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0, 
-        routes: [
-          { name: 'Home' },
-        ],
-      })
-    );
+    navigation.navigate("Home")
   }
 
+
+}, [booking])
+
+useEffect(() => {
+  if(!booking) return;
+
+  if(booking?.status === "confirmed"){
+    mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+        edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+    })        
+  }
+
+  if(booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop){
+    mapRef.current.fitToSuppliedMarkers(['destination', 'stop', 'driver'], {
+        edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+    })        
+  }
+
+  if(booking?.status === "ongoing" && booking?.hasThirdStop && booking?.reachedThirdStop){
+      mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+          edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+      })        
+  }
+
+  if(booking?.status === "ongoing" && !booking?.hasThirdStop){
+      mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+          edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+      })        
+  }
+
+  if(booking?.status === "arrived"){
+    mapRef.current.fitToSuppliedMarkers(['destination', 'driver'], {
+        edgePadding: {top: 200, right: 100, bottom: 100, left: 100}
+    })        
+  }
 
 }, [booking])
 
@@ -334,16 +382,16 @@ useEffect(() => {
             height: 0.7 * height
           }} className={`w-full relative`}>
 
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => {
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] right-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} p-[3%] items-center justify-center`} onPress={() => {
                     navigation.navigate("Home")
                 }}>
-                <Ionicons name="chevron-down" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`} />
+                <Ionicons name="chevron-down" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`} />
             </TouchableOpacity>
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => goToCurrentLocation()}>
-                    <MaterialIcons name="my-location" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[5%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} p-[3%] items-center justify-center`} onPress={() => booking?.status === 'ongoing' || booking?.status === 'arrived' ? goToCarLocation() : goToCurrentLocation()}>
+                    <MaterialIcons name="my-location" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
-            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[18%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} h-[40px] w-[40px] items-center justify-center`} onPress={() => fitMarkers()}>
-                    <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.3} color={`${props.theme === "dark" ? "white" : "black"}`}/>
+            <TouchableOpacity className={`absolute z-50 bottom-[5%] left-[18%] rounded-2xl shadow-sm ${props.theme === "dark" ? "bg-dark-main" : "bg-white"} p-[3%] items-center justify-center`} onPress={() => fitMarkers()}>
+                    <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
             <RequestMap mapRef={mapRef} theme={props.theme}/>
           </View>
@@ -387,7 +435,7 @@ useEffect(() => {
                 </View>
               </View>
               <View className={`w-1/3 h-full flex items-center justify-center`}>
-                <TouchableOpacity disabled={booking?.rated === true ? true : false} className={`w-[85%] h-[85%] flex items-center justify-center rounded-[30px] shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`} onPress={() => {
+                <TouchableOpacity disabled={booking?.bookingType === "ride" && booking?.rated === true ? true : false} className={`w-[85%] h-[85%] flex items-center justify-center rounded-[30px] shadow-sm ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border-[0.5px] border-gray-100"}`} onPress={() => {
                   booking?.bookingType === "ride" &&  (booking?.status === "ongoing" || booking?.status === "arrived") 
                   ? 
                     navigation.navigate("rateDriver")
@@ -400,7 +448,7 @@ useEffect(() => {
                     booking?.rated === true ?
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>
                       <MaterialIcons name="star-rate" size={fontSize * 1.75} color={props.theme === "dark" ? "white" : "black"}/>
-                      <Text style={{fontSize: fontSize * 1.1}} className={`font-black tracking-tight mt-3 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.driverRating.toFixed(2)}</Text>
+                      <Text style={{fontSize: booking?.rated ? fontSize * 0.70 : fontSize * 1.1}} className={`font-black tracking-tight mt-3 text-center ${props.theme === "dark" ? "text-white" : "text-black"}`}>Ride Rated</Text>
                     </View>
                     :
                     <View className={`w-[70%] h-[70%] flex items-center justify-center`}>

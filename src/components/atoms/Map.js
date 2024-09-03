@@ -55,7 +55,7 @@ const Map = (props) => {
           }
 
           {
-            booking?.status === "pending" && passThrough?.location &&
+            booking?.status === "pending" && booking?.hasThirdStop &&
             (
               <Marker 
                 coordinate={{
@@ -86,14 +86,14 @@ const Map = (props) => {
                 identifier="destination"
             >
                <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
-                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{passThrough ? 3 : 2}</Text>
+                <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{booking?.hasThirdStop ? 3 : 2}</Text>
               </View>
             </Marker>
             )
           }
 
           {
-            booking?.status === "pending" && origin?.location && destination?.location && (
+            booking?.status === "pending" && origin?.location && destination?.location && !booking?.hasThirdStop && (
               <MapViewDirections 
                 origin={{
                   latitude: origin.location.lat,
@@ -103,7 +103,29 @@ const Map = (props) => {
                   latitude: destination.location.lat,
                   longitude: destination.location.lng
                 }}
-                waypoints={passThrough ? [{ latitude: passThrough.location.lat, longitude: passThrough.location.lng }] : []}
+                // waypoints={passThrough ? [{ latitude: passThrough.location.lat, longitude: passThrough.location.lng }] : []}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "pending" && origin?.location && destination?.location && passThrough?.location && booking?.hasThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                waypoints={{ 
+                  latitude: passThrough.location.lat, 
+                  longitude: passThrough.location.lng 
+                }}
                 apikey={api}
                 strokeWidth={3}
                 strokeColor= {props.theme === "dark" ? "white" : "black"}
@@ -149,7 +171,7 @@ const Map = (props) => {
           }
 
           {
-            booking?.status === "confirmed" && origin?.location && booking?.driverCurrentLocation && (
+            booking?.status === "confirmed" && booking?.driverCurrentLocation && (
               <Marker 
                 coordinate={{
                   latitude: booking.driverCurrentLocation[0],
@@ -184,13 +206,154 @@ const Map = (props) => {
                 identifier="destination"
             >
                 <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
-                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{passThrough ? 3 : 2}</Text>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{booking?.hasThirdStop ? booking?.reachedThirdStop ? 2 : 3 : 2}</Text>
                 </View>
             </Marker>
             )
           }
 
-          
+          {
+            booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop && passThrough?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: passThrough.location.lat,
+                  longitude: passThrough.location.lng,
+                }}
+                title="Stop"
+                description={passThrough.description}
+                identifier="stop"
+            >
+                <View className={`w-5 h-5 shadow rounded-full bg-[#186f65] flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && (
+              <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : fontSize * 1.5,
+                      height: fontSize * 1.5,
+                  }}
+                />
+              </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && passThrough?.location && booking?.hasThirdStop && !booking?.reachedThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                waypoints={{ 
+                  latitude: passThrough.location.lat, 
+                  longitude: passThrough.location.lng 
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && passThrough?.location && booking?.hasThirdStop && booking?.reachedThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && !booking?.hasThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "arrived" && destination?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "arrived" && booking?.driverCurrentLocation && (
+              <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : fontSize * 1.5,
+                      height: fontSize * 1.5,
+                  }}
+                />
+              </Marker>
+            )
+          }
+
         </MapView> 
       ) : 
       <View className="flex-1">

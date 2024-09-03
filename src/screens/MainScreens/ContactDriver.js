@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Dimensions, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Dimensions, FlatList, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
@@ -97,10 +97,19 @@ const ContactDriver = (props) => {
                   }}>
                     <Ionicons name="chevron-back" size={fontSize * 1.6} color={props.theme === "dark" ? "white" : "black"}/>
                   </TouchableOpacity>
-                  <View className={`ml-2 w-14 h-14 rounded-full bg-green-500`}></View>
+                  <View className={`ml-2 w-14 h-14 rounded-full overflow-hidden ${props.theme === "dark" ? "bg-dark-secondary" : "bg-gray-100"}`}>
+                    <Image 
+                      source={driver?.avatar ? { uri: driver.avatar } : require("../../../assets/images/profileplaceholder.png")}
+                      resizeMode={"contain"}
+                      style={{
+                        width: "100%",
+                        height: "100%"
+                      }}
+                    />
+                  </View>
                   <View className={`flex ml-3`}>
                     <Text style={{fontSize: fontSize }} className={`font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.firstname} {driver?.lastname}</Text>
-                    <Text style={{fontSize: fontSize * 0.65}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>BAE 3155</Text>
+                    <Text style={{fontSize: fontSize * 0.65}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{driver?.vehicleReg}</Text>
                   </View>
                 </View>
               </View>

@@ -77,6 +77,7 @@ const RateDriver = (props) => {
                     setLoading(false)
 
                     if(booking?.status !== "completed" ){
+                        dispatch(setBooking(data.booking))
                         navigation.goBack();
                     } else {
                         dispatch(setBooking(null))
@@ -239,8 +240,7 @@ const RateDriver = (props) => {
             </View>
         }
 
-      <View className={`w-full h-[10%] flex flex-row items-center px-4`}>
-        <MaterialIcons name="star-rate" size={fontSize * 2} color={props.theme === "dark" ? "white" : "black"}/>
+      <View className={`w-full h-[10%] flex flex-row items-center justify-center px-4`}>
         <Text style={{fontSize: fontSize * 1.5}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Rate Driver</Text>
       </View>
       <View className={`w-full h-[20%] flex items-center justify-center`}>
@@ -256,13 +256,21 @@ const RateDriver = (props) => {
                 />
                 <Text style={{fontSize : fontSize * 0.75}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tight`}>{booking?.bookingType === "ride" ? tripDetails?.title : deliveryType?.title}</Text>
             </View>
-            <View className={`w-0 h-[80%] border ${props.theme === "dark" ? "border-white" : "border-gray-300"}`}></View>
             <View className={`w-1/2 h-full flex flex-row items-center justify-between pl-3 pr-5`}>
-                <View className={`w-14 h-14 rounded-full bg-black`}></View>
+                <View className={`w-14 h-14 rounded-full overflow-hidden ${props.theme === "dark" ? "bg-dark-tertiary" : "bg-gray-100"}`}>
+                    <Image 
+                        source={driver?.avatar ? { uri: driver.avatar } : require("../../../assets/images/profileplaceholder.png")}
+                        resizeMode={"contain"}
+                        style={{
+                        width: "100%",
+                        height: "100%"
+                        }}
+                    />
+                </View>
                 <View>
-                    <Text style={{fontSize: fontSize * 0.85}} className={`font-extrabold ${props.theme === "dark" ? "text-white" : "text-black "} tracking-tight`}>{driver?.firstname} {driver?.lastname}</Text>
-                    <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>Red Toyota Prius</Text>
-                    <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>BAE 3155</Text>
+                    <Text style={{fontSize: fontSize * 0.85}} className={`font-black ${props.theme === "dark" ? "text-white" : "text-black "} tracking-tight`}>{driver?.firstname} {driver?.lastname}</Text>
+                    <Text style={{fontSize: fontSize * 0.5}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tight`}>{driver?.carColor} {driver?.carManufacturer} {driver?.carModel}</Text>
+                    <Text style={{fontSize: fontSize * 0.65}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-light tracking-tight`}>{driver?.vehicleReg}</Text>
                 </View>
             </View>
         </View>
@@ -284,7 +292,7 @@ const RateDriver = (props) => {
       ?
         <View className={`w-full h-[35%] flex flex-row justify-evenly flex-wrap`} style={{alignItems: "center"}}>
                 {ratingPerks.map((item, idx) => (
-                    <TouchableOpacity key={item.id} className={`w-[30%] h-[40%] mb-5 pl-2 ${comments.includes(item.title) ? "opacity-40" : "opacity-100"} ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border border-gray-100"} rounded-[20px] shadow-sm flex`} onPress={() => {
+                    <TouchableOpacity key={item.id} className={`w-[30%] h-fit py-[8%] mb-5 ${comments.includes(item.title) ? "opacity-40" : "opacity-100"} ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border border-gray-100"} rounded-[30px] shadow flex items-center justify-center`} onPress={() => {
                         let updatedComments;
 
                         if(comments.includes(item.title)){
@@ -296,13 +304,6 @@ const RateDriver = (props) => {
 
                         setComments(updatedComments);
                     }}>
-                        <Image 
-                            style={{
-                                width: 70,
-                                height: 70,
-                                resizeMode: "contain"
-                            }}
-                        />
                         <Text style={{fontSize: fontSize * 0.8 }} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.title}</Text>
                     </TouchableOpacity>
                 ))}
@@ -310,7 +311,7 @@ const RateDriver = (props) => {
       :
         <View className={`w-full h-[35%] flex flex-row justify-evenly flex-wrap`} style={{alignItems: "center"}}>
                     {deliveryRatingPerks.map((item, idx) => (
-                        <TouchableOpacity key={item.id} className={`w-[30%] h-[40%] mb-5 pl-2 ${comments.includes(item.title) ? "opacity-40" : "opacity-100"} ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border border-gray-100"} rounded-[20px] shadow-sm flex`} onPress={() => {
+                        <TouchableOpacity key={item.id} className={`w-[30%] h-fit py-[8%] mb-5 ${comments.includes(item.title) ? "opacity-40" : "opacity-100"} ${props.theme === "dark" ? "bg-dark-secondary" : "bg-white border border-gray-100"} rounded-[30px] shadow flex items-center justify-center`} onPress={() => {
                             let updatedComments;
 
                             if(comments.includes(item.title)){
@@ -322,13 +323,6 @@ const RateDriver = (props) => {
 
                             setComments(updatedComments);
                         }}>
-                            <Image 
-                                style={{
-                                    width: 70,
-                                    height: 70,
-                                    resizeMode: "contain"
-                                }}
-                            />
                             <Text style={{fontSize: fontSize * 0.8 }} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.title}</Text>
                         </TouchableOpacity>
                     ))}

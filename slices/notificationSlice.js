@@ -27,10 +27,13 @@ export const notificationSlice = createSlice({
                 notification => now - notification.createdAt <= twoDays 
             );
         },
+        clearAllNotifications(state){
+            state.notificationsArray = [];
+        },
     }
 })
 
-export const { addNotification, toggleNotificationStatus, clearOldNotifications } = notificationSlice.actions;
+export const { addNotification, toggleNotificationStatus, clearOldNotifications, clearAllNotifications } = notificationSlice.actions;
 
 export const selectNotificationsArray = state => state.notifications.notificationsArray;
 

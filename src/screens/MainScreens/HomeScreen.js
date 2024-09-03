@@ -14,7 +14,7 @@ import { GOOGLE_API_KEY } from "@env";
 import Map from "../../components/atoms/Map";
 import PageLoader from "../../components/atoms/PageLoader";
 
-import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient, selectDeliveryType, selectFavoritesData } from "../../../slices/navSlice";
+import { selectDestination, selectOrigin, selectToggle, selectBooking, selectTripDetails, selectPrice, selectTravelTimeInformation, setTripDetails, setTripType, selectDriver, selectOnTheWay, selectHasArrived, setPassThrough, selectTripType, selectPassThrough, setWsClientId, selectWsClientId, addDriver, selectDriverArray, setBooking, setDriver, selectRemainingTripTime, selectRemaingTripDistance, setDeliveryType, setRecipient, selectDeliveryType, selectFavoritesData, setRemainingTripTime, setRemainingTripDistance } from "../../../slices/navSlice";
 import { setOrigin, setDestination, setToggle } from "../../../slices/navSlice";
 import { selectNotificationsArray } from "../../../slices/notificationSlice";
 import { selectUserCurrentLocation, setUserCurrentLocation } from "../../../slices/authSlice";
@@ -44,6 +44,8 @@ const HomeScreen = (props) => {
     const deliveryType = useSelector(selectDeliveryType);
     const favoritesData = useSelector(selectFavoritesData);
 
+    const api="AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
+
     const currentLocation = useSelector(selectUserCurrentLocation);
     const [currentStreet, setCurrentStreet] = useState(null)
     const mapRef = useRef(null);
@@ -55,11 +57,20 @@ const HomeScreen = (props) => {
     const unreadNotifications = notificationsArray.filter(notification => notification.status === "unread");
 
     const goToCurrent = () => {
-        mapRef.current.animateToRegion(currentLocation, 1 * 1000)
+        mapRef.current?.animateToRegion(currentLocation, 1 * 1000)
+    }
+
+    const goToOrigin = () => {
+        mapRef.current?.animateToRegion({
+            latitude: origin?.location.lat,
+            longitude: origin?.location.lng,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+        }, 1 * 1000) 
     }
 
     const goToCarLocation = () => {
-        mapRef.current.animateToRegion({
+        mapRef.current?.animateToRegion({
             latitude: booking?.driverCurrentLocation[0],
             longitude: booking?.driverCurrentLocation[1],
             latitudeDelta: 0.01,
@@ -70,14 +81,44 @@ const HomeScreen = (props) => {
     const expandMaptoViewRoute = () => {
         if(!booking) return;
 
-        if(booking?.status === "pending"){
-            mapRef.current.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+        if(booking?.status === "pending" && booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "pending" && !booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'destination'], {
                 edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
             })        
         }
 
         if(booking?.status === "confirmed"){
-            mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'stop', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "ongoing" && booking?.hasThirdStop && booking?.reachedThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "ongoing" && !booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "arrived"){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
                 edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
             })        
         }
@@ -118,17 +159,48 @@ const HomeScreen = (props) => {
     useEffect(() => {
         if(!booking) return;
 
-        if(booking?.status === "pending"){
-            mapRef.current.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+        if(booking?.status === "pending" && booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'stop', 'destination'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "pending" && !booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'destination'], {
                 edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
             })        
         }
 
         if(booking?.status === "confirmed"){
-            mapRef.current.fitToSuppliedMarkers(['origin', 'driver'], {
+            mapRef.current?.fitToSuppliedMarkers(['origin', 'driver'], {
                 edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
             })        
         }
+
+        if(booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'stop', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "ongoing" && booking?.hasThirdStop && booking?.reachedThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "ongoing" && !booking?.hasThirdStop){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+
+        if(booking?.status === "arrived"){
+            mapRef.current?.fitToSuppliedMarkers(['destination', 'driver'], {
+                edgePadding: {top: 200, right: 100, bottom: 350, left: 100}
+            })        
+        }
+        
         
     }, [booking])
 
@@ -146,6 +218,31 @@ const HomeScreen = (props) => {
         }
     }, [currentLocation])
 
+
+    useEffect(() => {
+
+        if(!booking) return;
+    
+        const getTripTime = async () => {
+          fetch(
+            `https://maps.googleapis.com/maps/api/directions/json?destination=${booking?.dropOffLocation?.latitude},${booking?.dropOffLocation?.longitude}&origin=${booking?.driverCurrentLocation[0]},${booking?.driverCurrentLocation[1]}&key=${api}`
+          )
+          .then((res) => res.json())
+          .then(data => {
+            dispatch(setRemainingTripTime(parseInt(data?.routes[0]?.legs[0]?.duration?.text)))
+            dispatch(setRemainingTripDistance(parseInt(data?.routes[0]?.legs[0]?.distance?.text)))
+          }) 
+          .catch((error) => {
+            console.log("failure")
+          })
+        }
+    
+        if(booking?.status === "ongoing" && booking?.driverCurrentLocation){
+          getTripTime();
+        }
+    
+      }, [booking, booking?.driverCurrentLocation, api])
+
     return(
         <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
             <View className={`h-full w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>
@@ -156,7 +253,7 @@ const HomeScreen = (props) => {
             ?
                 <View className="absolute h-[18%] w-full bottom-[9%] flex items-center">
                     <View className="h-full w-[97%] p-3 flex items-center justify-center">
-                        <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[25px] px-1 shadow-sm ${props.theme === "dark" ? "bg-dark-primary border-dark-primary" : "bg-white border-white"}`} onPress={() => {
+                        <TouchableOpacity className={`w-full h-full flex flex-row border-4 items-center rounded-[25px] px-1 shadow-sm ${props.theme === "dark" ? "bg-dark-extra border-dark-extra" : "bg-white border-white"}`} onPress={() => {
                             if(booking?.status === "confirmed" || booking?.status === "ongoing" || booking?.status === "arrived" || booking?.status === "completed"){
                                 navigation.navigate("RequestNavigator")
                             } else {
@@ -314,11 +411,11 @@ const HomeScreen = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} p-[3%] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : goToCurrent()} disabled={!props.initialRegion}>
+            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} p-[3%] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : booking?.status === "confirmed" ? goToOrigin() : goToCurrent()} disabled={!props.initialRegion}>
                 <MaterialIcons name="my-location" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[27%] left-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!destination ? "opacity-50" : "opacity-100" } p-[3%] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!destination}>
+            <TouchableOpacity className={`absolute bottom-[27%] left-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!booking ? "opacity-50" : "opacity-100" } p-[3%] items-center justify-center`} onPress={() => expandMaptoViewRoute()} disabled={!booking}>
                 <MaterialCommunityIcons name="arrow-expand" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 

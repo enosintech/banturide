@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Image, PixelRatio, Text } from 'react-native';
+import { View, Image, Dimensions, Text } from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useSelector } from 'react-redux';
@@ -7,6 +7,8 @@ import { useSelector } from 'react-redux';
 import { darkModeMapStyle, lightModeMapStyle } from '../../../assets/styles/MapStyles';
 import { selectBooking, selectDestination, selectOrigin, selectPassThrough } from '../../../slices/navSlice';
 
+const { width } = Dimensions.get("window");
+ 
 const RequestMap = (props) => {
 
   const origin = useSelector(selectOrigin);
@@ -16,66 +18,14 @@ const RequestMap = (props) => {
 
   const api="AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
 
-  const fontScale = PixelRatio.getFontScale();
-
-  const getFontSize = size => size / fontScale;
-
-  const [ driverLocation, setDriverLocation ] = useState(booking && booking?.driverCurrentLocation ? {
-    latitude: booking?.driverCurrentLocation[0],
-    longitude: booking?.driverCurrentLocation[1]
-  } : {
-    latitude: "",
-    longitude: ""
-  })
-
-  useEffect(() => {
-    setDriverLocation( booking && booking?.driverCurrentLocation ? {
-      latitude: booking?.driverCurrentLocation[0],
-      longitude: booking?.driverCurrentLocation[1]
-    } : {
-      latitude: origin?.location?.lat,
-      longitude: origin?.location?.lng
-    })
-  }, [booking])
-
-  const pointA = { latitude: driverLocation?.latitude, longitude: driverLocation?.longitude }; 
-  const pointB = { latitude: booking?.pickUpLocation?.latitude, longitude: booking?.pickUpLocation?.longitude }; 
-
-  const midPoint = {
-      latitude: (pointA.latitude + pointB.latitude) / 2,
-      longitude: (pointA.longitude + pointB.longitude) / 2,
-  };
-
-  const latitudeDelta = Math.abs(pointA.latitude - pointB.latitude) * 2;
-  const longitudeDelta = Math.abs(pointA.longitude - pointB.longitude) * 2;
-
-  const confirmedBookingInitialRegion = {
-    latitude: midPoint.latitude,
-    longitude: midPoint.longitude,
-    latitudeDelta: latitudeDelta,
-    longitudeDelta: longitudeDelta,
-  }
-
-  const ongoingBookingInitialRegion = {
-    latitude: booking && booking?.driverCurrentLocation ? booking?.driverCurrentLocation[0] : "",
-    longitude: booking && booking?.driverCurrentLocation ? booking?.driverCurrentLocation[1] : "",
-    latitudeDelta: latitudeDelta,
-    longitudeDelta: longitudeDelta,
-  }
-
-  const arrivedBookingInitialRegion = {
-    latitude: midPoint.latitude,
-    longitude: midPoint.longitude,
-    latitudeDelta: latitudeDelta,
-    longitudeDelta: longitudeDelta,
-  }
+  const fontSize = width * 0.05;
 
   return (
     <View className={`relative w-full h-full`}>
         <MapView
             ref={props.mapRef}
             className="w-full h-full"
-            initialRegion={ booking?.status === "confirmed" ? confirmedBookingInitialRegion : booking?.status === "ongoing" ? ongoingBookingInitialRegion : booking?.status === "arrived" ? arrivedBookingInitialRegion : {
+            initialRegion={{
               latitude: origin?.location?.lat,
               longitude: origin?.location?.lng,
               latitudeDelta: 0.01,
@@ -84,75 +34,49 @@ const RequestMap = (props) => {
             provider={PROVIDER_GOOGLE}
             customMapStyle={props.theme === "dark" ? darkModeMapStyle : lightModeMapStyle}
         >
-          {booking && booking?.status === "confirmed" &&
-            <>
-              <MapViewDirections 
-                  origin={{
-                    latitude: driverLocation?.latitude,
-                    longitude: driverLocation?.longitude
-                  }}
-                  destination={{
-                    latitude: booking?.pickUpLocation?.latitude,
-                    longitude: booking?.pickUpLocation?.longitude
-                  }}
-                  apikey={api}
-                  strokeWidth={3}
-                  strokeColor= {props.theme === "dark" ? "white" : "black"}
-              />
-
+          {
+            booking?.status === "confirmed" && origin?.location &&
+            (
               <Marker 
                 coordinate={{
-                  latitude: driverLocation?.latitude,
-                  longitude: driverLocation?.longitude,
-                }}
-                title="Driver"
-                description={"Driver Marker"}
-                identifier="driver"
-              >
-                <Image 
-                  source={require("../../../assets/images/driver.png")}
-                  style={{
-                      objectFit: "contain",
-                      width : getFontSize(55),
-                      height: getFontSize(55),
-                  }}
-                />
-              </Marker>
-
-              <Marker 
-                coordinate={{
-                  latitude: booking?.pickUpLocation?.latitude,
-                  longitude: booking?.pickUpLocation?.longitude,
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng,
                 }}
                 title="Origin"
-                description={origin?.description}
+                description={origin.description}
                 identifier="origin"
-              >
-                <View className={`w-14 h-14 shadow-md rounded-full bg-white flex items-center justify-center`}>
-                  <Text style={{fontSize: getFontSize(25)}} className={`text-black font-light tracking-tight`}>1</Text>
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-white flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-black text-[12px]`}>1</Text>
                 </View>
-              </Marker>
-            </>
+            </Marker>
+            )
           }
 
-          {(booking?.status === "ongoing" || booking?.status === "arrived") &&
-          <>
-            <MapViewDirections 
+          {
+            booking?.status === "confirmed" && origin?.location && booking?.driverCurrentLocation && (
+              <MapViewDirections 
                 origin={{
-                    latitude: booking?.driverCurrentLocation[0],
-                    longitude: booking?.driverCurrentLocation[1]
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
                 }}
-                destination={destination?.description}
-                waypoints={[passThrough ? passThrough?.description : ""]}
+                destination={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng
+                }}
                 apikey={api}
                 strokeWidth={3}
-                strokeColor= {props.theme === "dark" ? "white" : "#186f65"}
-            />
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
 
-            <Marker 
+          {
+            booking?.status === "confirmed" && booking?.driverCurrentLocation && (
+              <Marker 
                 coordinate={{
-                  latitude: booking?.driverCurrentLocation[0],
-                  longitude: booking?.driverCurrentLocation[1]
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
                 }}
                 title="Driver"
                 description={"Driver Marker"}
@@ -162,14 +86,174 @@ const RequestMap = (props) => {
                   source={require("../../../assets/images/driver.png")}
                   style={{
                       objectFit: "contain",
-                      width : getFontSize(55),
-                      height: getFontSize(55),
+                      width : fontSize * 2.5,
+                      height: fontSize * 2.5,
                   }}
                 />
               </Marker>
-              </>
+            )
           }
 
+          {
+            booking?.status === "ongoing" && destination?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>{booking?.hasThirdStop ? booking?.reachedThirdStop ? 2 : 3 : 2}</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.hasThirdStop && !booking?.reachedThirdStop && passThrough?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: passThrough.location.lat,
+                  longitude: passThrough.location.lng,
+                }}
+                title="Stop"
+                description={passThrough.description}
+                identifier="stop"
+            >
+                <View className={`w-5 h-5 shadow rounded-full bg-[#186f65] flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && (
+              <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : fontSize * 1.5,
+                      height: fontSize * 1.5,
+                  }}
+                />
+              </Marker>
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && passThrough?.location && booking?.hasThirdStop && !booking?.reachedThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                waypoints={{ 
+                  latitude: passThrough.location.lat, 
+                  longitude: passThrough.location.lng 
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && passThrough?.location && booking?.hasThirdStop && booking?.reachedThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "ongoing" && booking?.driverCurrentLocation && destination?.location && !booking?.hasThirdStop && (
+              <MapViewDirections 
+                origin={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                destination={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng
+                }}
+                apikey={api}
+                strokeWidth={3}
+                strokeColor= {props.theme === "dark" ? "white" : "black"}
+              />
+            )
+          }
+
+          {
+            booking?.status === "arrived" && destination?.location &&
+            (
+              <Marker 
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+            >
+                <View className={`w-5 h-5 shadow-md rounded-full bg-black flex items-center justify-center`}>
+                  <Text style={{fontFamily: "os-light"}} className={`text-white text-[12px]`}>2</Text>
+                </View>
+            </Marker>
+            )
+          }
+
+          {
+            booking?.status === "arrived" && booking?.driverCurrentLocation && (
+              <Marker 
+                coordinate={{
+                  latitude: booking.driverCurrentLocation[0],
+                  longitude: booking.driverCurrentLocation[1]
+                }}
+                title="Driver"
+                description={"Driver Marker"}
+                identifier="driver"
+              >
+                <Image 
+                  source={require("../../../assets/images/driver.png")}
+                  style={{
+                      objectFit: "contain",
+                      width : fontSize * 1.5,
+                      height: fontSize * 1.5,
+                  }}
+                />
+              </Marker>
+            )
+          }
 
         </MapView>
     </View>
