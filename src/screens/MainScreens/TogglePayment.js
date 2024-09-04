@@ -5,12 +5,15 @@ import { PanGestureHandler } from "react-native-gesture-handler"
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
+import * as SecureStore from "expo-secure-store";
 
-import { selectBooking, setBooking, setDeliveryType, setDestination, setOrigin, setPassThrough, setPaymentMethod, setPaymentMethodUpdated, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
+import { selectBooking, setBooking, setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPaymentMethod, setPaymentMethodUpdated, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import ModalLoader from "../../components/atoms/ModalLoader.js"
 import ShortModalNavBar from '../../components/atoms/ShortModalNavBar';
+import { removeItem } from '../../components/lib/asyncStorage';
+import { clearAllNotifications } from '../../../slices/notificationSlice';
 
 const { width } = Dimensions.get("window");
 
@@ -95,26 +98,31 @@ const TogglePayment = (props) => {
 
       if(errorField === "Unauthorized"){
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          setLoading(false)
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            setLoading(false)
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications())
+            dispatch(setFavoritesData([]))
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           setLoading(false)
@@ -166,7 +174,7 @@ const TogglePayment = (props) => {
 
         <View style={{
           height: 0.3 * height
-        }} className={`w-full flex flex-col ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} rounded-t-[40px] px-3`}>
+        }} className={`w-full flex flex-col ${props.theme === "dark" ? "bg-dark-middle" : "bg-white"} rounded-t-[40px] px-3`}>
           <View className="w-full h-1/4 flex items-center justify-center flex-row relative">
             <View className={`w-full h-[20%] absolute top-0 left-0 flex items-center justify-center`}>
                 <ShortModalNavBar theme={props.theme} />

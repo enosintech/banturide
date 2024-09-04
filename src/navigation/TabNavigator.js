@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions } from "react-native";
+import { StyleSheet, View, Dimensions, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -19,7 +19,7 @@ const TabNavigator = (props) => {
             screenOptions={({}) => ({
                 tabBarShowLabel: false,
                 tabBarIconStyle: {
-                    marginBottom: -fontSize * 0.70,
+                    marginBottom: Platform.OS === "ios" ? -fontSize * 0.70 : fontSize * 0.2,
                 },
                 tabBarStyle: {
                     position: "absolute",

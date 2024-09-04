@@ -50,6 +50,8 @@ const HomeScreen = (props) => {
     const [currentStreet, setCurrentStreet] = useState(null)
     const mapRef = useRef(null);
 
+    const height = Dimensions.get('window').height;
+
     const [ error, setError ] = useState(false);
 
     const fontSize = width * 0.05;
@@ -244,7 +246,7 @@ const HomeScreen = (props) => {
       }, [booking, booking?.driverCurrentLocation, api])
 
     return(
-        <View className={`h-full w-full relative`} onLayout={props.handleLayout}>
+        <View className={`w-full h-full relative`} onLayout={props.handleLayout}>
             <View className={`h-full w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-gray-100"}`}>
                 <Map theme={props.theme} mapRef={mapRef} currentLocation={currentLocation} initialRegion={props.initialRegion} setInitialRegion={props.setInitialRegion} setCurrentLocation={setUserCurrentLocation}/>
             </View>
@@ -411,7 +413,7 @@ const HomeScreen = (props) => {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} p-[3%] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : booking?.status === "confirmed" ? goToOrigin() : goToCurrent()} disabled={!props.initialRegion}>
+            <TouchableOpacity className={`absolute bottom-[27%] right-[5%] rounded-2xl shadow ${props.theme === "dark" ? "bg-[#0e1115]" : "bg-white"} ${!props.initialRegion ? "opacity-50" : "opacity-100"} p-[3%] items-center justify-center`} onPress={() => booking?.status === "ongoing" || booking?.status === "arrived" ? goToCarLocation() : booking?.status === "confirmed" || booking?.status === "pending" ? goToOrigin() : goToCurrent()} disabled={!props.initialRegion}>
                 <MaterialIcons name="my-location" size={fontSize * 1.1} color={`${props.theme === "dark" ? "white" : "black"}`}/>
             </TouchableOpacity>
 

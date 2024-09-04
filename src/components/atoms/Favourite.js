@@ -10,8 +10,10 @@ import * as SecureStore from "expo-secure-store";
 
 import ModalLoader from "./ModalLoader";
 
-import { selectFavAddressChanged, setDeliveryType, setDestination, setFavAddressChanged, setFavoriteAddressDeleted, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { selectFavAddressChanged, setDeliveryType, setDestination, setFavAddressChanged, setFavoriteAddressDeleted, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { removeItem } from "../lib/asyncStorage";
+import { clearAllNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -20,6 +22,8 @@ const Favorite = (props) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const tokens = useSelector(selectToken)
+
+    const height = Dimensions.get("window").height;
     
     const [ loading, setLoading ] = useState(false);
     const [ error , setError ] = useState(false);
@@ -62,25 +66,30 @@ const Favorite = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                    dispatch(setDestination(null))
-                    dispatch(setOrigin(null))
-                    dispatch(setPassThrough(null))
-                    dispatch(setPrice(null))
-                    dispatch(setTravelTimeInformation(null))
-                    dispatch(setTripDetails(null))
-                    dispatch(setDeliveryType(null))
-                    dispatch(setRecipient(null))
-                    dispatch(setUserInfo(null))
-                    dispatch(setToken(null))
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    dispatch(setTokenFetched(false))
-                    dispatch(setUserDataFetched(false))
-                    dispatch(setUserDataSet(false))
-                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                    setTimeout(() => {
-                        dispatch(setGlobalUnauthorizedError(false))
-                    }, 5000)
+                .then(async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setError("Unauthorized")
@@ -124,7 +133,7 @@ const Favorite = (props) => {
                         </View>
                     }
 
-                    <View className={`w-full h-[30%] ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} shadow rounded-t-[30px] flex items-center justify-evenly`}>
+                    <View style={{height: 0.3 * height}} className={`w-full ${props.theme === "dark" ? "bg-dark-middle" : "bg-white"} shadow rounded-t-[40px] flex items-center justify-evenly`}>
                         <Text style={{fontSize: fontSize * 0.85}} className={`text-center w-[80%] font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Are you sure you want to remove this Saved Address?</Text>
                         <View className="flex flex-row items-center justify-evenly w-full h-[40%]">
                             <TouchableOpacity onPress={() => setModalVisible(false)} className={`w-[40%] h-[70%] bg-red-600 rounded-[40px] flex items-center justify-center`}>
@@ -173,7 +182,7 @@ const Favorite = (props) => {
                 </View>
             </View>
             <View className="px-4 -translate-y-1">
-                <Text style={{fontSize: fontSize * 0.5}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address.description.split(",")[0]}</Text>
+                <Text style={{fontSize: fontSize * 0.5}} className={`font-medium tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{props.address.description}</Text>
             </View>
         </View>
     )

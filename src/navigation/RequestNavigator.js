@@ -27,15 +27,6 @@ const RequestNavigator = (props) => {
         <Stack.Group screenOptions={{presentation: "modal", cardStyle: {
                 backgroundColor: "transparent",
           }}}>
-          <Stack.Screen name="cancel" options={{headerShown: false }}>
-              {() => <CancelScreen theme={props.theme}/>}
-          </Stack.Screen>
-          <Stack.Screen name="addStop" options={{headerShown: false }}>
-              {() => <AddStop theme={props.theme}/>}
-          </Stack.Screen>
-          <Stack.Screen name="changePayment" options={{headerShown: false }}>
-              {() => <TogglePayment theme={props.theme} />}
-          </Stack.Screen>
           <Stack.Screen name="reportDriver" options={{headerShown: false }}>
               {() => <ReportDriver theme={props.theme} />}
           </Stack.Screen>

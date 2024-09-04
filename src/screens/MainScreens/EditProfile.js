@@ -12,8 +12,9 @@ import * as SecureStore from "expo-secure-store";
 import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 import LoadingBlur from "../../components/atoms/LoadingBlur";
-import { setItem } from "../../components/lib/asyncStorage";
-import { setDeliveryType, setDestination, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { removeItem, setItem } from "../../components/lib/asyncStorage";
+import { setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { clearAllNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -126,28 +127,34 @@ const EditProfile = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                    dispatch(setDestination(null))
-                    dispatch(setOrigin(null))
-                    dispatch(setPassThrough(null))
-                    dispatch(setPrice(null))
-                    dispatch(setTravelTimeInformation(null))
-                    dispatch(setTripDetails(null))
-                    dispatch(setDeliveryType(null))
-                    dispatch(setRecipient(null))
-                    dispatch(setUserInfo(null))
-                    dispatch(setToken(null))
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    dispatch(setTokenFetched(false))
-                    dispatch(setUserDataFetched(false))
-                    dispatch(setUserDataSet(false))
-                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                    setTimeout(() => {
-                        dispatch(setGlobalUnauthorizedError(false))
-                    }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setModalVisible(false)
+                    setLoading(false)
                     setError("Unauthorized")
                     setTimeout(() => {
                         setError(false)
@@ -155,6 +162,7 @@ const EditProfile = (props) => {
                 })     
             } else {
                 setModalVisible(false)
+                setLoading(false)
                 setError(errorField || "Failed to upload Image")
                 setTimeout(() => {
                     setError(false)
@@ -181,7 +189,7 @@ const EditProfile = (props) => {
 
             if(responseData.success === false) {
 
-                throw new Error(data.message || data.error)
+                throw new Error(responseData.message || responseData.error)
 
             } else {
                 await getUpdatedUserProfile()
@@ -195,34 +203,41 @@ const EditProfile = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                    dispatch(setDestination(null))
-                    dispatch(setOrigin(null))
-                    dispatch(setPassThrough(null))
-                    dispatch(setPrice(null))
-                    dispatch(setTravelTimeInformation(null))
-                    dispatch(setTripDetails(null))
-                    dispatch(setDeliveryType(null))
-                    dispatch(setRecipient(null))
-                    dispatch(setUserInfo(null))
-                    dispatch(setToken(null))
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    dispatch(setTokenFetched(false))
-                    dispatch(setUserDataFetched(false))
-                    dispatch(setUserDataSet(false))
-                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                    setTimeout(() => {
-                        dispatch(setGlobalUnauthorizedError(false))
-                    }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setModalVisible(false)
+                    setLoading(false)
                     setError("Unauthorized")
                     setTimeout(() => {
                         setError(false)
                     }, 3000)
                 })     
             } else {
+                setModalVisible(false)
                 setLoading(false)
                 setError(errorField || "failed to remove Image")
                 setTimeout(() => {

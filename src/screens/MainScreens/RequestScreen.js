@@ -9,12 +9,14 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import * as SecureStore from "expo-secure-store";
 
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver, setDriverArray, selectFindNewDriver, setFindNewDriver, setNewDriverCalled, selectDeliveryType, setDeliveryType, setRecipient } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, setTripDetails, setTravelTimeInformation, setOrigin, setDestination, setPrice, setBooking, setDriver, setPassThrough, selectSeats, selectTripType, selectPassThrough, selectBooking, selectWsClientId, selectDriverArray, selectIsSearching, setSearchPerformed, setBookingRequested, resetSearch, setSearchComplete, removeDriver, setDriverArray, selectFindNewDriver, setFindNewDriver, setNewDriverCalled, selectDeliveryType, setDeliveryType, setRecipient, setFavoritesData } from '../../../slices/navSlice';
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import RequestMap from "../../components/atoms/RequestMap";
 import PageLoader from '../../components/atoms/PageLoader';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
+import { removeItem } from '../../components/lib/asyncStorage';
+import { clearAllNotifications } from '../../../slices/notificationSlice';
 
 
 const { width } = Dimensions.get("window");
@@ -108,25 +110,30 @@ const RequestScreen = (props) => {
 
       if(errorField === "Unauthorized") {
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications());
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setFavoritesData([]))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           dispatch(setSearchComplete(true))
@@ -185,25 +192,30 @@ const RequestScreen = (props) => {
 
       if(errorField === "Unauthorized"){
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications());
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setFavoritesData([]))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           dispatch(setSearchComplete(true))
@@ -265,25 +277,30 @@ const RequestScreen = (props) => {
 
       if(errorField === "Unauthorized"){
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications());
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setFavoritesData([]))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           setLoading(false)
@@ -344,27 +361,32 @@ const RequestScreen = (props) => {
 
       if(errorField === "Unauthorized") {
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          setLoading(false)
-          setModalVisible(false)
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem('userInfo')
+          .then(() => {
+            setLoading(false)
+            setModalVisible(false)
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications())
+            dispatch(setFavoritesData([]))
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           setLoading(false)
@@ -425,27 +447,32 @@ const RequestScreen = (props) => {
 
       if(errorField === "Unauthorized") {
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          setLoading(false)
-          setModalVisible(false)
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem('userInfo')
+          .then(() => {
+            setLoading(false)
+            setModalVisible(false)
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications())
+            dispatch(setFavoritesData([]))
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          })
         })
         .catch(() => {
           setLoading(false)

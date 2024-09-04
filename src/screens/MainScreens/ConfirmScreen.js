@@ -10,9 +10,12 @@ import * as SecureStore from "expo-secure-store";
 
 import PageLoader from '../../components/atoms/PageLoader';
 
-import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId, selectPaymentMethod, setBookingRequested, selectDeliveryType, selectRecipient, setDeliveryType, setRecipient, setGlobalBookingError } from '../../../slices/navSlice';
+import { selectDestination, selectOrigin, selectPrice, selectToggle, selectTravelTimeInformation, selectTripDetails, selectBooking, selectSchoolPickup, selectTripType, selectPassThrough, setPassThrough, selectSeats, setBookingRequestLoading, selectWsClientId, selectPaymentMethod, setBookingRequested, selectDeliveryType, selectRecipient, setDeliveryType, setRecipient, setGlobalBookingError, setFavoritesData } from '../../../slices/navSlice';
 import { setDestination, setOrigin, setPrice, setTravelTimeInformation, setTripDetails, setBooking } from '../../../slices/navSlice';
 import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
+import { clearAllNotifications } from "../../../slices/notificationSlice.js"
+
+import { removeItem } from "../../components/lib/asyncStorage.js";
 
 const { width } = Dimensions.get("window");
 
@@ -99,26 +102,31 @@ const ConfirmScreen = (props) => {
 
       if(errorField === "Unauthorized"){
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          dispatch(setBookingRequestLoading(false))
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            dispatch(setBookingRequestLoading(false))
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications())
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setFavoritesData([]))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          }) 
         })
         .catch(() => {
           dispatch(setBookingRequestLoading(false))
@@ -166,26 +174,31 @@ const ConfirmScreen = (props) => {
 
       if(errorField === "Unauthorized"){
         await SecureStore.deleteItemAsync("tokens")
-        .then(() => {
-          dispatch(setBookingRequestLoading(false))
-          dispatch(setDestination(null))
-          dispatch(setOrigin(null))
-          dispatch(setPassThrough(null))
-          dispatch(setPrice(null))
-          dispatch(setTravelTimeInformation(null))
-          dispatch(setTripDetails(null))
-          dispatch(setDeliveryType(null))
-          dispatch(setRecipient(null))
-          dispatch(setUserInfo(null))
-          dispatch(setToken(null))
-          dispatch(setIsSignedIn(!isSignedIn))
-          dispatch(setTokenFetched(false))
-          dispatch(setUserDataFetched(false))
-          dispatch(setUserDataSet(false))
-          dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-          setTimeout(() => {
-            dispatch(setGlobalUnauthorizedError(false))
-          }, 5000)
+        .then( async () => {
+          await removeItem("userInfo")
+          .then(() => {
+            dispatch(setBookingRequestLoading(false))
+            dispatch(setDestination(null))
+            dispatch(setOrigin(null))
+            dispatch(setPassThrough(null))
+            dispatch(setPrice(null))
+            dispatch(setTravelTimeInformation(null))
+            dispatch(setTripDetails(null))
+            dispatch(setDeliveryType(null))
+            dispatch(setRecipient(null))
+            dispatch(setUserInfo(null))
+            dispatch(setToken(null))
+            dispatch(setIsSignedIn(!isSignedIn))
+            dispatch(clearAllNotifications())
+            dispatch(setTokenFetched(false))
+            dispatch(setUserDataFetched(false))
+            dispatch(setFavoritesData([]))
+            dispatch(setUserDataSet(false))
+            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+            setTimeout(() => {
+              dispatch(setGlobalUnauthorizedError(false))
+            }, 5000)
+          }) 
         })
         .catch(() => {
           dispatch(setBookingRequestLoading(false))
@@ -268,12 +281,12 @@ const ConfirmScreen = (props) => {
           {toggle === "ride" 
           ?
             <View className={`w-1/2 h-full flex items-center`}>
-              <View className={`w-full h-1/2 overflow-hidden relative flex items-center justify-center`}>
+              <View className={`w-full h-1/2 relative flex items-center justify-center`}>
                 <Image 
                   source={tripDetails?.image}
                   style={{
-                    width: 50,
-                    height : 50,
+                    width: fontSize * 2.5,
+                    height : fontSize * 2.5,
                     overflow: "visible",
                   }}
                 />

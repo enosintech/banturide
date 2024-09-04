@@ -28,6 +28,7 @@ import EditWork from "../screens/MainScreens/EditWork";
 import EditLocation from "../screens/MainScreens/EditLocation";
 import TogglePayment from "../screens/MainScreens/TogglePayment";
 import AddStop from "../screens/MainScreens/AddStop";
+import CancelScreen from "../screens/MainScreens/CancelScreen";
 
 const Stack = createStackNavigator();
 
@@ -109,6 +110,12 @@ const AuthNavigator = (props) => {
                         <Stack.Screen name="addStop" options={{headerShown: false }}>
                             {() => <AddStop theme={props.theme}/>}
                         </Stack.Screen>
+                        <Stack.Screen name="cancel" options={{headerShown: false }}>
+                            {() => <CancelScreen theme={props.theme}/>}
+                        </Stack.Screen>
+                        <Stack.Screen name="changePayment" options={{headerShown: false }}>
+                            {() => <TogglePayment theme={props.theme} />}
+                        </Stack.Screen>
                     </Stack.Group>
                 </Stack.Navigator>
             </SocketProvider>
@@ -128,7 +135,9 @@ const AuthNavigator = (props) => {
                 <Stack.Screen name="setpassword" options={{headerShown: false}}>
                     {() => <SetPassword theme={props.theme}/>}
                 </Stack.Screen>
-                <Stack.Group screenOptions={{presentation: "modal"}}>
+                <Stack.Group screenOptions={{ presentation: "modal", gestureEnabled: true, detachPreviousScreen: false, ...(Platform.OS === 'android' && {
+                    ...TransitionPresets.ModalSlideFromBottomIOS,
+                    })  }}>
                     <Stack.Screen name="Forgot" options={{headerShown: false}}>
                         {() => <ForgotPassword theme={props.theme}/>}
                     </Stack.Screen>

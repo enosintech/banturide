@@ -6,13 +6,15 @@ import { PanGestureHandler } from "react-native-gesture-handler";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SecureStore from "expo-secure-store";
 
-import { setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged, setDestination, setOrigin, setPassThrough, setPrice, setTravelTimeInformation, setTripDetails, setDeliveryType, setRecipient } from "../../../slices/navSlice";
+import { setFavAddressUpdated, selectFavAddressChanged, setFavAddressChanged, setDestination, setOrigin, setPassThrough, setPrice, setTravelTimeInformation, setTripDetails, setDeliveryType, setRecipient, setFavoritesData } from "../../../slices/navSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
 
 import ShortModalNavBar from "../../components/atoms/ShortModalNavBar";
 import ModalLoader from "../../components/atoms/ModalLoader";
 import ListLoadingComponent from "../../components/atoms/ListLoadingComponent";
+import { removeItem } from "../../components/lib/asyncStorage";
+import { clearAllNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -23,6 +25,8 @@ const EditWork = (props) => {
     const  { id } = routes.params;
 
     const api = "AIzaSyBXqjZCksjSa5e3uFEYwGDf9FK7fKrqCrE";
+
+    const height = Dimensions.get("window").height;
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -109,25 +113,30 @@ const EditWork = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                    dispatch(setDestination(null))
-                    dispatch(setOrigin(null))
-                    dispatch(setPassThrough(null))
-                    dispatch(setPrice(null))
-                    dispatch(setTravelTimeInformation(null))
-                    dispatch(setTripDetails(null))
-                    dispatch(setDeliveryType(null))
-                    dispatch(setRecipient(null))
-                    dispatch(setUserInfo(null))
-                    dispatch(setToken(null))
-                    dispatch(setIsSignedIn(!isSignedIn))
-                    dispatch(setTokenFetched(false))
-                    dispatch(setUserDataFetched(false))
-                    dispatch(setUserDataSet(false))
-                    dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                    setTimeout(() => {
-                        dispatch(setGlobalUnauthorizedError(false))
-                    }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setLoading(false)
@@ -173,7 +182,7 @@ const EditWork = (props) => {
                     </View>
                 }
 
-                <View className={`${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} w-full h-[30%] rounded-t-2xl shadow-2xl items-center`}>
+                <View style={{ height: 0.3 * height }} className={`${props.theme === "dark" ? "bg-dark-middle" : "bg-white"} w-full rounded-t-[40px] shadow items-center`}>
                     <View className={`w-full h-[5%] ${props.theme === "light" ? "border-gray-100" : props.theme === "dark" ? "border-gray-900" : "border-gray-400"} rounded-t-2xl  items-center justify-center`}>
                         <ShortModalNavBar theme={props.theme}/>
                     </View>

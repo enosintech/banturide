@@ -70,8 +70,8 @@ const ChooseRide = (props) => {
                                     source={data.image}
                                     style={{
                                         objectFit: "contain",
-                                        width : 85,
-                                        height: 85,
+                                        width : fontSize * 4,
+                                        height: fontSize * 4,
                                     }}
                                 />
                             </View>

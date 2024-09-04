@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { removeItem } from "../../components/lib/asyncStorage.js";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SecureStore from "expo-secure-store";
 
@@ -11,10 +13,13 @@ import ScreenTitle from "../../components/atoms/ScreenTitle";
 
 import { selectFavAddressChanged, selectFavAddressDeleted, selectFavAddressUpdated, selectFavoritesData, setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
+import { clearAllNotifications } from "../../../slices/notificationSlice.js";
 
 const { width } = Dimensions.get("window");
 
 const FavouriteScreen = (props) => {
+
+    const tabBarHeight = useBottomTabBarHeight();
 
     const navigation = useNavigation();
     const route = useRoute();
@@ -74,25 +79,30 @@ const FavouriteScreen = (props) => {
                 
                 if(errorField === "Unauthorized"){
                     await SecureStore.deleteItemAsync("tokens")
-                    .then(() => {
-                        dispatch(setDestination(null))
-                        dispatch(setOrigin(null))
-                        dispatch(setPassThrough(null))
-                        dispatch(setPrice(null))
-                        dispatch(setTravelTimeInformation(null))
-                        dispatch(setTripDetails(null))
-                        dispatch(setDeliveryType(null))
-                        dispatch(setRecipient(null))
-                        dispatch(setUserInfo(null))
-                        dispatch(setToken(null))
-                        dispatch(setIsSignedIn(!isSignedIn))
-                        dispatch(setTokenFetched(false))
-                        dispatch(setUserDataFetched(false))
-                        dispatch(setUserDataSet(false))
-                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                        setTimeout(() => {
-                            dispatch(setGlobalUnauthorizedError(false))
-                        }, 5000)
+                    .then( async () => {
+                        await removeItem("userInfo")
+                        .then(() => {
+                            dispatch(setDestination(null))
+                            dispatch(setOrigin(null))
+                            dispatch(setPassThrough(null))
+                            dispatch(setPrice(null))
+                            dispatch(setTravelTimeInformation(null))
+                            dispatch(setTripDetails(null))
+                            dispatch(setDeliveryType(null))
+                            dispatch(setRecipient(null))
+                            dispatch(setUserInfo(null))
+                            dispatch(setToken(null))
+                            dispatch(setIsSignedIn(!isSignedIn))
+                            dispatch(clearAllNotifications())
+                            dispatch(setTokenFetched(false))
+                            dispatch(setUserDataFetched(false))
+                            dispatch(setFavoritesData([]))
+                            dispatch(setUserDataSet(false))
+                            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                            setTimeout(() => {
+                                dispatch(setGlobalUnauthorizedError(false))
+                            }, 5000)
+                        })
                     })
                     .catch((error) => {
                         setError("Unauthorized")    
@@ -149,7 +159,7 @@ const FavouriteScreen = (props) => {
     }, [favoritesData])
 
     return (
-        <SafeAreaView className={`w-full h-full ${props.theme === "dark" ? "bg-dark-primary" : ""} relative`}>
+        <SafeAreaView style={{ paddingBottom: tabBarHeight}} className={`w-full h-full ${props.theme === "dark" ? "bg-dark-primary" : ""} relative`}>
             {favAddressUpdated &&
                 <View className={`w-full h-[6%] absolute z-20 top-28 flex items-center justify-center`}>
                     <View className={`w-fit px-6 h-[90%] bg-black rounded-[50px] flex items-center justify-center`}>
@@ -170,7 +180,7 @@ const FavouriteScreen = (props) => {
             <View className={`w-full px-5 h-[6%]`}>
                 <Text style={{ fontSize: fontSize * 0.7 }} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-medium tracking-tighter`}>Add your frequent destinations to easily access them when booking</Text>
             </View>
-            <View className={`h-[60%] w-full`} style={{ overflow: "visible"}}>
+            <View className={`h-[66%] w-full`} style={{ overflow: "visible"}}>
                 <View className={`w-full p-3`}>
                     <Text style={{ fontSize: fontSize * 0.9}} className={`${props.theme === "dark" ? "text-white" : "text-black"} font-black tracking-tighter text-center`}>Saved Places</Text>
                 </View>

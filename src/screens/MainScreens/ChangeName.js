@@ -8,8 +8,10 @@ import * as SecureStore from "expo-secure-store";
 import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 
 import ModalLoader from '../../components/atoms/ModalLoader';
-import { setItem } from '../../components/lib/asyncStorage';
-import { setDeliveryType, setDestination, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
+import { removeItem, setItem } from '../../components/lib/asyncStorage';
+import { setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
+import { clearAllNotifications } from '../../../slices/notificationSlice';
+import ShortModalNavBar from '../../components/atoms/ShortModalNavBar';
 
 const width = Dimensions.get("window").width;
 
@@ -119,25 +121,30 @@ const ChangeName = (props) => {
 
         if(errorField === "Unauthorized"){
           await SecureStore.deleteItemAsync("tokens")
-          .then(() => {
-              dispatch(setDestination(null))
-              dispatch(setOrigin(null))
-              dispatch(setPassThrough(null))
-              dispatch(setPrice(null))
-              dispatch(setTravelTimeInformation(null))
-              dispatch(setTripDetails(null))
-              dispatch(setDeliveryType(null))
-              dispatch(setRecipient(null))
-              dispatch(setUserInfo(null))
-              dispatch(setToken(null))
-              dispatch(setIsSignedIn(!isSignedIn))
-              dispatch(setTokenFetched(false))
-              dispatch(setUserDataFetched(false))
-              dispatch(setUserDataSet(false))
-              dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-              setTimeout(() => {
-                  dispatch(setGlobalUnauthorizedError(false))
-              }, 5000)
+          .then( async () => {
+            await removeItem("userInfo")
+            .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(clearAllNotifications())
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setFavoritesData([]))
+                dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                    dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+            })
           })
           .catch((error) => {
               setLoading(false)
@@ -161,7 +168,7 @@ const ChangeName = (props) => {
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
     >
-      <Animated.View style={{height: height, transform: [{ translateY: translateYClamped}]}} className="w-full flex-col justify-end relative">
+      <Animated.View style={{transform: [{ translateY: translateYClamped}]}} className="w-full h-full flex-col justify-end relative">
 
         <Modal transparent={true} animationType="fade" visible={loading} onRequestClose={() => {
           if(loading === true){
@@ -183,7 +190,7 @@ const ChangeName = (props) => {
             </View>
         }
 
-        <View className={`w-full h-[50%] ${props.theme === "dark" ? "bg-[#1e252d]" : "bg-gray-50"} rounded-t-[22px] flex items-center justify-center gap-y-4 relative`}>
+        <View style={{height: 0.5 * height}} className={`w-full ${props.theme === "dark" ? "bg-dark-middle" : "bg-gray-50"} rounded-t-[40px] flex items-center justify-center gap-y-4 relative`}>
           <Text style={{fontSize: fontSize}} className={`absolute top-3 font-bold tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>Edit Full Name</Text> 
           <TextInput 
               value={firstName}

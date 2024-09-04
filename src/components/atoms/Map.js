@@ -55,7 +55,7 @@ const Map = (props) => {
           }
 
           {
-            booking?.status === "pending" && booking?.hasThirdStop &&
+            booking?.status === "pending" && booking?.hasThirdStop && passThrough?.locationn &&
             (
               <Marker 
                 coordinate={{
@@ -103,7 +103,6 @@ const Map = (props) => {
                   latitude: destination.location.lat,
                   longitude: destination.location.lng
                 }}
-                // waypoints={passThrough ? [{ latitude: passThrough.location.lat, longitude: passThrough.location.lng }] : []}
                 apikey={api}
                 strokeWidth={3}
                 strokeColor= {props.theme === "dark" ? "white" : "black"}
@@ -122,10 +121,10 @@ const Map = (props) => {
                   latitude: destination.location.lat,
                   longitude: destination.location.lng
                 }}
-                waypoints={{ 
+                waypoints={[{ 
                   latitude: passThrough.location.lat, 
                   longitude: passThrough.location.lng 
-                }}
+                }]}
                 apikey={api}
                 strokeWidth={3}
                 strokeColor= {props.theme === "dark" ? "white" : "black"}
@@ -265,10 +264,10 @@ const Map = (props) => {
                   latitude: destination.location.lat,
                   longitude: destination.location.lng
                 }}
-                waypoints={{ 
+                waypoints={[{ 
                   latitude: passThrough.location.lat, 
                   longitude: passThrough.location.lng 
-                }}
+                }]}
                 apikey={api}
                 strokeWidth={3}
                 strokeColor= {props.theme === "dark" ? "white" : "black"}

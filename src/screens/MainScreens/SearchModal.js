@@ -125,7 +125,7 @@ const SearchModal = (props) => {
             <KeyboardAvoidingView
                 style={containerStyles.container}
                 behavior={Platform.OS === "ios" ? "padding" : "height"} 
-                keyboardVerticalOffset={fontSize * 0.45}
+                keyboardVerticalOffset={0}
             >
             <TouchableWithoutFeedback style={{ backgroundColor: "transparent"}} className="w-full h-full" onPress={Keyboard.dismiss}>
                 <PanGestureHandler
@@ -133,7 +133,7 @@ const SearchModal = (props) => {
                     onHandlerStateChange={onHandlerStateChange}
                     className="bg-transparent"
                 >
-                    <Animated.View style={{height: toggle === "ride" ? 0.53 * height : 0.6 * height, transform: [{ translateY: translateYClamped }] }} className={`w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"} items-center overflow-hidden rounded-t-[40px]`}>
+                    <Animated.View style={{height: toggle === "ride" ? 0.53 * height : 0.6 * height, transform: [{ translateY: translateYClamped }] }} className={`w-full ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"} items-center overflow-hidden shadow rounded-t-[40px]`}>
                         <View className={`h-[3%] w-full items-center justify-center`}>
                             <ShortModalNavBar theme={props.theme} />
                         </View>
@@ -402,14 +402,14 @@ const SearchModal = (props) => {
                                             top: -1,
                                             left: 8,
                                             objectFit: "contain",
-                                            width : 70,
-                                            height: 70,
+                                            width : fontSize * 3,
+                                            height: fontSize * 3,
                                             opacity: 0.85
                                         }}
                                     />
                                     <View></View>
                                     <View className="translate-y-2 translate-x-1">
-                                        <Text style={{fontSize : fontSize * 0.5}} className={`font-black tracking-tighter ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.title}</Text>
+                                        <Text style={{fontSize : fontSize * 0.5}} className={`font-black tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.title}</Text>
                                         <Text style={{fontSize : fontSize * 0.4}} className={`font-light tracking-tight ${props.theme === "dark" ? "text-white" : "text-black"}`}>{item.description}</Text>
                                         <Text style={{fontSize : fontSize * 0.45}} className={`mt-1 font-bold ${props.theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>{item.example}</Text>
                                     </View>

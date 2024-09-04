@@ -5,10 +5,12 @@ import { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as SecureStore from "expo-secure-store";
 
 import { selectIsSignedIn, selectToken, selectUserInfo, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from "../../../slices/authSlice";
-import { setItem } from "../../components/lib/asyncStorage";
-import { setDeliveryType, setDestination, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { removeItem, setItem } from "../../components/lib/asyncStorage";
+import { setDeliveryType, setDestination, setFavoritesData, setOrigin, setPassThrough, setPrice, setRecipient, setTravelTimeInformation, setTripDetails } from "../../../slices/navSlice";
+import { clearAllNotifications } from "../../../slices/notificationSlice";
 
 const { width } = Dimensions.get("window");
 
@@ -95,25 +97,30 @@ const ProfileScreen = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                dispatch(setDestination(null))
-                dispatch(setOrigin(null))
-                dispatch(setPassThrough(null))
-                dispatch(setPrice(null))
-                dispatch(setTravelTimeInformation(null))
-                dispatch(setTripDetails(null))
-                dispatch(setDeliveryType(null))
-                dispatch(setRecipient(null))
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
-                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                setTimeout(() => {
-                    dispatch(setGlobalUnauthorizedError(false))
-                }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setNotificationToggle(previousState)
@@ -171,25 +178,30 @@ const ProfileScreen = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                dispatch(setDestination(null))
-                dispatch(setOrigin(null))
-                dispatch(setPassThrough(null))
-                dispatch(setPrice(null))
-                dispatch(setTravelTimeInformation(null))
-                dispatch(setTripDetails(null))
-                dispatch(setDeliveryType(null))
-                dispatch(setRecipient(null))
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
-                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                setTimeout(() => {
-                    dispatch(setGlobalUnauthorizedError(false))
-                }, 5000)
+                .then(async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setFavoritesData([]))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
                     setCallDriverToggle(previousState);

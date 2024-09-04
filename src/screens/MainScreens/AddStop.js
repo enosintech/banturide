@@ -86,7 +86,7 @@ const AddStop = (props) => {
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}
             >
-                <Animated.View style={{height: 0.3 * height, transform : [{ translateY: translateYClamped}]}} className={`w-full ${props.theme === "dark" ? "bg-[#222831]" : "bg-white"} rounded-t-[40px] flex px-3`}>
+                <Animated.View style={{height: 0.3 * height, transform : [{ translateY: translateYClamped}]}} className={`w-full ${props.theme === "dark" ? "bg-dark-middle" : "bg-white"} rounded-t-[40px] flex px-3`}>
                     <View className="w-full h-[100px] flex flex-row items-center justify-center relative">
                         <View className={`w-full h-[20%] absolute top-0 left-0 flex items-center justify-center`}>
                             <ShortModalNavBar theme={props.theme} />

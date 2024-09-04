@@ -120,6 +120,10 @@ export const SocketProvider = ({children}) => {
             case "locationUpdated":
                 dispatch(setBooking(JSON.parse(data.booking)));
                 break;   
+
+            case "arrivedFirstStop":
+                dispatch(setBooking(JSON.parse(data.booking)));
+                break;      
         
             default:
                 console.log("Unknown message type received:", data.type);
@@ -171,7 +175,7 @@ export const SocketProvider = ({children}) => {
             socketInstance.close();
         };
       
-    }, [connected ])
+    }, [])
 
     return (
         <SocketContext.Provider value={{ socket, connected }}>

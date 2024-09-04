@@ -5,11 +5,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SecureStore from "expo-secure-store";
 
-import { clearChatMessages, selectBooking, selectDeliveryType, selectDriver, selectTripDetails, setBooking, setBookingRequested, setBookingRequestLoading, setDeliveryType, setDestination, setDriver, setLocationUpdatedRan, setOrigin, setPassThrough, setPrice, setRecipient, setSearchComplete, setSearchPerformed, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
+import { clearChatMessages, selectBooking, selectDeliveryType, selectDriver, selectTripDetails, setBooking, setBookingRequested, setBookingRequestLoading, setDeliveryType, setDestination, setDriver, setFavoritesData, setLocationUpdatedRan, setOrigin, setPassThrough, setPrice, setRecipient, setSearchComplete, setSearchPerformed, setTravelTimeInformation, setTripDetails } from '../../../slices/navSlice';
 import { useState } from 'react';
 import { deliveryRatingPerks, ratingPerks } from '../../constants';
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
 import LoadingBlur from '../../components/atoms/LoadingBlur';
+import { removeItem } from '../../components/lib/asyncStorage';
+import { clearAllNotifications } from '../../../slices/notificationSlice';
 
 const { width } = Dimensions.get("window");
 
@@ -104,33 +106,38 @@ const RateDriver = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                setLoading(false)
-                dispatch(setDestination(null))
-                dispatch(setOrigin(null))
-                dispatch(setPassThrough(null))
-                dispatch(setPrice(null))
-                dispatch(setTravelTimeInformation(null))
-                dispatch(setTripDetails(null))
-                dispatch(setDeliveryType(null))
-                dispatch(setRecipient(null))
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
-                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                setTimeout(() => {
-                    dispatch(setGlobalUnauthorizedError(false))
-                }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        setLoading(false)
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setFavoritesData([]))
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
-                setLoading(false)
-                setError("Error adding review. Unauthorized.") 
-                setTimeout(() => {
-                    setError(false)
-                }, 3000)        
+                    setLoading(false)
+                    setError("Error adding review. Unauthorized.") 
+                    setTimeout(() => {
+                        setError(false)
+                    }, 3000)        
                 })     
             } else {
                 setLoading(false)
@@ -189,33 +196,38 @@ const RateDriver = (props) => {
 
             if(errorField === "Unauthorized"){
                 await SecureStore.deleteItemAsync("tokens")
-                .then(() => {
-                setLoading(false)
-                dispatch(setDestination(null))
-                dispatch(setOrigin(null))
-                dispatch(setPassThrough(null))
-                dispatch(setPrice(null))
-                dispatch(setTravelTimeInformation(null))
-                dispatch(setTripDetails(null))
-                dispatch(setDeliveryType(null))
-                dispatch(setRecipient(null))
-                dispatch(setUserInfo(null))
-                dispatch(setToken(null))
-                dispatch(setIsSignedIn(!isSignedIn))
-                dispatch(setTokenFetched(false))
-                dispatch(setUserDataFetched(false))
-                dispatch(setUserDataSet(false))
-                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-                setTimeout(() => {
-                    dispatch(setGlobalUnauthorizedError(false))
-                }, 5000)
+                .then( async () => {
+                    await removeItem("userInfo")
+                    .then(() => {
+                        setLoading(false)
+                        dispatch(setDestination(null))
+                        dispatch(setOrigin(null))
+                        dispatch(setPassThrough(null))
+                        dispatch(setPrice(null))
+                        dispatch(setTravelTimeInformation(null))
+                        dispatch(setTripDetails(null))
+                        dispatch(setDeliveryType(null))
+                        dispatch(setRecipient(null))
+                        dispatch(setUserInfo(null))
+                        dispatch(setToken(null))
+                        dispatch(setIsSignedIn(!isSignedIn))
+                        dispatch(clearAllNotifications())
+                        dispatch(setFavoritesData([]))
+                        dispatch(setTokenFetched(false))
+                        dispatch(setUserDataFetched(false))
+                        dispatch(setUserDataSet(false))
+                        dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                        setTimeout(() => {
+                            dispatch(setGlobalUnauthorizedError(false))
+                        }, 5000)
+                    })
                 })
                 .catch((error) => {
-                setLoading(false)
-                setError("Error adding review. Unauthorized.") 
-                setTimeout(() => {
-                    setError(false)
-                }, 3000)        
+                    setLoading(false)
+                    setError("Error adding review. Unauthorized.") 
+                    setTimeout(() => {
+                        setError(false)
+                    }, 3000)        
                 })     
             } else {
                 setLoading(false)

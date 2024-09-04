@@ -7,8 +7,10 @@ import * as SecureStore from "expo-secure-store";
 
 import ModalLoader from "../../components/atoms/ModalLoader.js";
 
-import { selectBooking, setBooking, setDestination, setDriver, setHasArrived, setOnTheWay, setOrigin, setPassThrough, setPrice, setSchoolPickup, setToggle, setTravelTimeInformation, setTripDetails, setTripType, setSearchComplete, setBookingRequested, setSearchPerformed, resetSearch, setDriverArray, setFindNewDriver, setLocationUpdatedRan, setDeliveryType, setRecipient, clearChatMessages } from '../../../slices/navSlice';
+import { selectBooking, setBooking, setDestination, setDriver, setHasArrived, setOnTheWay, setOrigin, setPassThrough, setPrice, setSchoolPickup, setToggle, setTravelTimeInformation, setTripDetails, setTripType, setSearchComplete, setBookingRequested, setSearchPerformed, resetSearch, setDriverArray, setFindNewDriver, setLocationUpdatedRan, setDeliveryType, setRecipient, clearChatMessages, setFavoritesData } from '../../../slices/navSlice';
 import { selectIsSignedIn, selectToken, setGlobalUnauthorizedError, setIsSignedIn, setToken, setTokenFetched, setUserDataFetched, setUserDataSet, setUserInfo } from '../../../slices/authSlice';
+import { removeItem } from '../../components/lib/asyncStorage.js';
+import { clearAllNotifications } from '../../../slices/notificationSlice.js';
 
 const { width } = Dimensions.get("window");
 
@@ -32,6 +34,8 @@ const CancelScreen = (props) => {
     const tokens = useSelector(selectToken);
     const booking = useSelector(selectBooking);
     const isSignedIn = useSelector(selectIsSignedIn);
+
+    const height = Dimensions.get("window").height;
 
     const { goBack } = useNavigation();
     const translateY = useRef(new Animated.Value(0)).current;
@@ -101,26 +105,31 @@ const CancelScreen = (props) => {
 
           if(errorField === "Unauthorized"){
             await SecureStore.deleteItemAsync("tokens")
-            .then(() => {
-              dispatch(setDestination(null))
-              dispatch(setOrigin(null))
-              dispatch(setPassThrough(null))
-              dispatch(setPrice(null))
-              dispatch(setTravelTimeInformation(null))
-              dispatch(setTripDetails(null))
-              dispatch(setDeliveryType(null))
-              dispatch(setRecipient(null))
-              dispatch(clearChatMessages())
-              dispatch(setUserInfo(null))
-              dispatch(setToken(null))
-              dispatch(setIsSignedIn(!isSignedIn))
-              dispatch(setTokenFetched(false))
-              dispatch(setUserDataFetched(false))
-              dispatch(setUserDataSet(false))
-              dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-              setTimeout(() => {
-                dispatch(setGlobalUnauthorizedError(false))
-              }, 5000)
+            .then(async () => {
+              await removeItem("userInfo")
+              .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
+                dispatch(clearChatMessages())
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(clearAllNotifications())
+                dispatch(setFavoritesData([]))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                  dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+              })
             })
             .catch(() => {
               setError("Something went wrong. Unauthorized")
@@ -181,26 +190,31 @@ const CancelScreen = (props) => {
 
         if(errorField === "Unauthorized"){
           await SecureStore.deleteItemAsync("tokens")
-          .then(() => {
-            dispatch(setDestination(null))
-            dispatch(setOrigin(null))
-            dispatch(setPassThrough(null))
-            dispatch(setPrice(null))
-            dispatch(setTravelTimeInformation(null))
-            dispatch(setTripDetails(null))
-            dispatch(setDeliveryType(null))
-            dispatch(setRecipient(null))
-            dispatch(clearChatMessages())
-            dispatch(setUserInfo(null))
-            dispatch(setToken(null))
-            dispatch(setIsSignedIn(!isSignedIn))
-            dispatch(setTokenFetched(false))
-            dispatch(setUserDataFetched(false))
-            dispatch(setUserDataSet(false))
-            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-            setTimeout(() => {
-              dispatch(setGlobalUnauthorizedError(false))
-            }, 5000)
+          .then( async () => {
+            await removeItem("userInfo")
+              .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
+                dispatch(clearChatMessages())
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(clearAllNotifications())
+                dispatch(setFavoritesData([]))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                  dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+              })
           })
           .catch(() => {
             setError("Something went wrong. Unauthorized")
@@ -259,26 +273,31 @@ const CancelScreen = (props) => {
 
         if(errorField === "Unauthorized"){
           await SecureStore.deleteItemAsync("tokens")
-          .then(() => {
-            dispatch(setDestination(null))
-            dispatch(setOrigin(null))
-            dispatch(setPassThrough(null))
-            dispatch(setPrice(null))
-            dispatch(setTravelTimeInformation(null))
-            dispatch(setTripDetails(null))
-            dispatch(setDeliveryType(null))
-            dispatch(setRecipient(null))
-            dispatch(setUserInfo(null))
-            dispatch(clearChatMessages())
-            dispatch(setToken(null))
-            dispatch(setIsSignedIn(!isSignedIn))
-            dispatch(setTokenFetched(false))
-            dispatch(setUserDataFetched(false))
-            dispatch(setUserDataSet(false))
-            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-            setTimeout(() => {
-              dispatch(setGlobalUnauthorizedError(false))
-            }, 5000)
+          .then( async () => {
+            await removeItem("userInfo")
+              .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
+                dispatch(clearChatMessages())
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(clearAllNotifications())
+                dispatch(setFavoritesData([]))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                  dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+              })
           })
           .catch(() => {
             setError("Something went wrong. Unauthorized")
@@ -335,26 +354,31 @@ const CancelScreen = (props) => {
 
         if(errorField === "Unauthorized"){
           await SecureStore.deleteItemAsync("tokens")
-          .then(() => {
-            dispatch(setDestination(null))
-            dispatch(setOrigin(null))
-            dispatch(setPassThrough(null))
-            dispatch(setPrice(null))
-            dispatch(setTravelTimeInformation(null))
-            dispatch(setTripDetails(null))
-            dispatch(setDeliveryType(null))
-            dispatch(setRecipient(null))
-            dispatch(clearChatMessages())
-            dispatch(setUserInfo(null))
-            dispatch(setToken(null))
-            dispatch(setIsSignedIn(!isSignedIn))
-            dispatch(setTokenFetched(false))
-            dispatch(setUserDataFetched(false))
-            dispatch(setUserDataSet(false))
-            dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
-            setTimeout(() => {
-              dispatch(setGlobalUnauthorizedError(false))
-            }, 5000)
+          .then( async () => {
+            await removeItem("userInfo")
+              .then(() => {
+                dispatch(setDestination(null))
+                dispatch(setOrigin(null))
+                dispatch(setPassThrough(null))
+                dispatch(setPrice(null))
+                dispatch(setTravelTimeInformation(null))
+                dispatch(setTripDetails(null))
+                dispatch(setDeliveryType(null))
+                dispatch(setRecipient(null))
+                dispatch(clearChatMessages())
+                dispatch(setUserInfo(null))
+                dispatch(setToken(null))
+                dispatch(setIsSignedIn(!isSignedIn))
+                dispatch(clearAllNotifications())
+                dispatch(setFavoritesData([]))
+                dispatch(setTokenFetched(false))
+                dispatch(setUserDataFetched(false))
+                dispatch(setUserDataSet(false))
+                dispatch(setGlobalUnauthorizedError("Please Sign in Again"))
+                setTimeout(() => {
+                  dispatch(setGlobalUnauthorizedError(false))
+                }, 5000)
+              })
           })
           .catch(() => {
             setError("Something went wrong. Unauthorized")
@@ -386,7 +410,7 @@ const CancelScreen = (props) => {
             </View>
         }
 
-        <View className={`w-full h-[70%] rounded-t-[16px] flex ${props.theme === "dark" ? "bg-dark-primary" : "bg-gray-100"}`}>
+        <View style={{height: 0.7 * height}} className={`w-full rounded-t-[40px] flex ${props.theme === "dark" ? "bg-dark-middle" : "bg-gray-100"}`}>
 
           <Modal transparent={true} animationType="fade" visible={loading} presentationStyle={"overFullScreen"} onRequestClose={() => {
                   if(loading === true){
